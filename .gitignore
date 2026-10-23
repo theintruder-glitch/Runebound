@@ -1,0 +1,25 @@
+# Godot engine cache and generated exports
+.godot/
+builds/
+*.apk
+*.aab
+*.exe
+*.msi
+
+# Signing keys and credentials - NEVER publish
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+export_credentials.cfg
+.env
+.env.*
+!*.env.example
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
