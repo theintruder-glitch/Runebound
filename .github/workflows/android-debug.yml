@@ -1,0 +1,281 @@
+name: Runebound Android debug APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      godot_version:
+        description: Exact stable Godot 4 version used by the existing game (for example 4.6.3)
+        required: true
+        type: string
+      project_dir:
+        description: Repository directory containing the existing project.godot
+        required: true
+        default: .
+        type: string
+      android_preset:
+        description: Existing Android export preset name
+        required: true
+        default: Android
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash
+    env:
+      GODOT_VERSION: ${{ inputs.godot_version }}
+      PROJECT_DIR_INPUT: ${{ inputs.project_dir }}
+      ANDROID_PRESET: ${{ inputs.android_preset }}
+      XDG_CONFIG_HOME: ${{ runner.temp }}/runebound/config
+      XDG_DATA_HOME: ${{ runner.temp }}/runebound/data
+      XDG_CACHE_HOME: ${{ runner.temp }}/runebound/cache
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          lfs: true
+
+      - name: Check original project and export configuration
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/runebound/logs" "$RUNNER_TEMP/runebound/output"
+          python3 - <<'PY'
+          import configparser, hashlib, json, os, pathlib, re
+          root = pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          project = (root / os.environ['PROJECT_DIR_INPUT']).resolve()
+          if not project.is_relative_to(root):
+              raise SystemExit('Project directory must be inside this checkout.')
+          version = os.environ['GODOT_VERSION']
+          if not re.fullmatch(r'4\.[2-9]\.[0-9]+', version):
+              raise SystemExit('Supply the exact stable Godot 4.2+ x.y.z version used by this game.')
+          if not (project / 'project.godot').is_file():
+              raise SystemExit(f'Missing existing project.godot: {project}. Restore the complete game source first.')
+          presets = project / 'export_presets.cfg'
+          if not presets.is_file():
+              raise SystemExit('Missing original export_presets.cfg. Restore it; the existing package identifier must not be guessed.')
+          config = configparser.ConfigParser(interpolation=None, strict=False)
+          config.optionxform = str
+          config.read(presets)
+          name = json.dumps(os.environ['ANDROID_PRESET'], ensure_ascii=False)
+          matches = [s for s in config.sections() if re.fullmatch(r'preset\.\d+', s)
+                     and config[s].get('name') == name and config[s].get('platform') == '"Android"']
+          if len(matches) != 1:
+              raise SystemExit('The requested existing Android preset was not found uniquely. Restore the original Android preset.')
+          options = matches[0] + '.options'
+          if not config.has_option(options, 'package/unique_name'):
+              raise SystemExit('Original Android package/unique_name is missing; recover it before exporting.')
+          if config[options].get('package/signed', 'true') != 'true':
+              raise SystemExit('The existing preset disables APK signing; repair that setting after reviewing the original configuration.')
+          text = (project / 'project.godot').read_text()
+          features = re.search(r'^config/features\s*=\s*(.+)$', text, re.M)
+          if features:
+              declared = re.search(r'"(4\.\d+)(?:\.\d+)?"', features[1])
+              if declared and declared[1] != '.'.join(version.split('.')[:2]):
+                  raise SystemExit('Requested engine minor differs from project config/features. Use the original engine version.')
+          if (features and '"C#"' in features[1]) or list(project.glob('*.csproj')):
+              raise SystemExit('C# project detected. Configure the matching Godot .NET editor and Android .NET workload before building; no feature will be removed.')
+          state = {'project': str(project), 'preset_section': matches[0],
+                   'presets_sha256': hashlib.sha256(presets.read_bytes()).hexdigest(),
+                   'project_sha256': hashlib.sha256((project / 'project.godot').read_bytes()).hexdigest()}
+          (pathlib.Path(os.environ['RUNNER_TEMP']) / 'runebound/state.json').write_text(json.dumps(state))
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'PROJECT_DIR={project}\n')
+          print('Original project, Android preset, and package identifier found; configuration will remain unchanged.')
+          PY
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages required by the matching Godot documentation
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import os, pathlib, re, subprocess, urllib.request
+          minor = '.'.join(os.environ['GODOT_VERSION'].split('.')[:2])
+          url = f'https://raw.githubusercontent.com/godotengine/godot-docs/{minor}/tutorials/export/exporting_for_android.rst'
+          text = urllib.request.urlopen(url, timeout=60).read().decode()
+          line = next((s for s in text.splitlines() if 'sdkmanager --sdk_root=' in s), '')
+          packages = re.findall(r'"(platform-tools|(?:build-tools|platforms|cmdline-tools|cmake|ndk);[A-Za-z0-9._;-]+)"', line)
+          builds = [s.split(';', 1)[1] for s in packages if s.startswith('build-tools;')]
+          if not builds or not any(s.startswith('platforms;') for s in packages):
+              raise SystemExit(f'Cannot identify matching SDK dependencies from {url}; do not guess tool versions.')
+          sdk = os.environ.get('ANDROID_HOME') or os.environ.get('ANDROID_SDK_ROOT')
+          if not sdk:
+              raise SystemExit('Android SDK setup did not expose its installation path.')
+          subprocess.run(['sdkmanager', f'--sdk_root={sdk}', *packages], check=True)
+          for binary in ['platform-tools/adb', f'build-tools/{builds[0]}/apksigner']:
+              if not (pathlib.Path(sdk) / binary).is_file():
+                  raise SystemExit(f'Required Android tool is missing: {binary}')
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'ANDROID_HOME={sdk}\nANDROID_SDK_ROOT={sdk}\nBUILD_TOOLS={builds[0]}\n')
+          PY
+
+      - name: Install exactly matching Godot editor and Android export templates
+        run: |
+          set -euo pipefail
+          install_dir="$RUNNER_TEMP/runebound/godot"
+          mkdir -p "$install_dir" "$XDG_DATA_HOME/godot/export_templates/$GODOT_VERSION.stable"
+          base="https://github.com/godotengine/godot-builds/releases/download/$GODOT_VERSION-stable"
+          curl --fail --location --retry 3 "$base/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip" -o "$install_dir/editor.zip"
+          curl --fail --location --retry 3 "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz" -o "$install_dir/templates.tpz"
+          unzip -q "$install_dir/editor.zip" -d "$install_dir"
+          unzip -q "$install_dir/templates.tpz" -d "$install_dir/templates"
+          cp -a "$install_dir/templates/templates/." "$XDG_DATA_HOME/godot/export_templates/$GODOT_VERSION.stable/"
+          editor="$install_dir/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          chmod +x "$editor"
+          "$editor" --version
+          test -s "$XDG_DATA_HOME/godot/export_templates/$GODOT_VERSION.stable/android_debug.apk"
+          printf 'GODOT_BIN=%s\n' "$editor" >> "$GITHUB_ENV"
+
+      - name: Restore original private export credentials when supplied
+        env:
+          ORIGINAL_EXPORT_CREDENTIALS_B64: ${{ secrets.GODOT_EXPORT_CREDENTIALS_BASE64 }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, os, pathlib
+          if os.environ.get('ORIGINAL_EXPORT_CREDENTIALS_B64'):
+              path = pathlib.Path(os.environ['PROJECT_DIR']) / '.godot/export_credentials.cfg'
+              original = base64.b64decode(os.environ['ORIGINAL_EXPORT_CREDENTIALS_B64'], validate=True)
+              if path.exists() and path.read_bytes() != original:
+                  raise SystemExit('Different export credentials already exist; refusing to overwrite them.')
+              path.parent.mkdir(parents=True, exist_ok=True)
+              path.write_bytes(original)
+              path.chmod(0o600)
+          PY
+
+      - name: Import original game and inspect errors
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path "$PROJECT_DIR" --editor --import 2>&1 | tee "$RUNNER_TEMP/runebound/logs/import.log"
+          if grep -Eq '(^|[[:space:]])(SCRIPT ERROR:|ERROR:)' "$RUNNER_TEMP/runebound/logs/import.log"; then
+            echo 'Godot reported import errors. Repair the existing game source without removing features.' >&2
+            exit 1
+          fi
+
+      - name: Set Godot Java and Android SDK paths and restore original debug signing identity
+        env:
+          ORIGINAL_KEYSTORE_B64: ${{ secrets.ANDROID_DEBUG_KEYSTORE_BASE64 }}
+          ORIGINAL_KEY_ALIAS: ${{ secrets.ANDROID_DEBUG_KEY_ALIAS }}
+          ORIGINAL_KEY_PASSWORD: ${{ secrets.ANDROID_DEBUG_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import base64, configparser, json, os, pathlib, re
+          config_dir = pathlib.Path(os.environ['XDG_CONFIG_HOME']) / 'godot'
+          settings = list(config_dir.glob('editor_settings*.tres'))
+          if len(settings) != 1:
+              raise SystemExit('Expected one Godot editor settings file after import.')
+          text = settings[0].read_text()
+          for key, value in {'export/android/java_sdk_path': os.environ['JAVA_HOME'],
+                             'export/android/android_sdk_path': os.environ['ANDROID_HOME']}.items():
+              text = re.sub(r'^' + re.escape(key) + r'\s*=.*\n?', '', text, flags=re.M)
+              text += '\n' + key + ' = ' + json.dumps(value) + '\n'
+          settings[0].write_text(text)
+          project = pathlib.Path(os.environ['PROJECT_DIR'])
+          credentials = project / '.godot/export_credentials.cfg'
+          cfg = configparser.ConfigParser(interpolation=None, strict=False)
+          cfg.optionxform = str
+          cfg.read([project / 'export_presets.cfg', credentials])
+          state = json.loads((pathlib.Path(os.environ['RUNNER_TEMP']) / 'runebound/state.json').read_text())
+          section = state['preset_section'] + '.options'
+          def value(key):
+              raw = cfg.get(section, key, fallback='""')
+              return json.loads(raw)
+          keystore = value('keystore/debug')
+          alias = os.environ.get('ORIGINAL_KEY_ALIAS') or value('keystore/debug_user') or 'androiddebugkey'
+          password = os.environ.get('ORIGINAL_KEY_PASSWORD') or value('keystore/debug_password') or 'android'
+          if os.environ.get('ORIGINAL_KEYSTORE_B64'):
+              key_path = pathlib.Path(os.environ['RUNNER_TEMP']) / 'runebound/original-debug.keystore'
+              key_path.write_bytes(base64.b64decode(os.environ['ORIGINAL_KEYSTORE_B64'], validate=True))
+              key_path.chmod(0o600)
+          elif keystore:
+              key_path = pathlib.Path(keystore.removeprefix('res://'))
+              if not key_path.is_absolute():
+                  key_path = project / key_path
+          else:
+              raise SystemExit('Original debug key unavailable. Supply ANDROID_DEBUG_KEYSTORE_BASE64 containing the existing key. A replacement key would break update compatibility.')
+          if not key_path.is_file():
+              raise SystemExit('Configured original debug keystore is missing; supply it through ANDROID_DEBUG_KEYSTORE_BASE64.')
+          if '\n' in alias or '\n' in password:
+              raise SystemExit('Multiline keystore credentials require environment-file delimiter encoding.')
+          for secret in [alias, password]:
+              print('::add-mask::' + secret.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          with open(os.environ['GITHUB_ENV'], 'a') as out:
+              out.write(f'GODOT_ANDROID_KEYSTORE_DEBUG_PATH={key_path}\n')
+              out.write(f'GODOT_ANDROID_KEYSTORE_DEBUG_USER={alias}\n')
+              out.write(f'GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD={password}\n')
+          PY
+
+      - name: Export signed Android debug APK
+        run: |
+          set -euo pipefail
+          "$GODOT_BIN" --headless --path "$PROJECT_DIR" --export-debug "$ANDROID_PRESET" "$RUNNER_TEMP/runebound/output/Runebound-Android.apk" 2>&1 | tee "$RUNNER_TEMP/runebound/logs/export.log"
+          if grep -Eq '(^|[[:space:]])(SCRIPT ERROR:|ERROR:)' "$RUNNER_TEMP/runebound/logs/export.log"; then
+            echo 'Godot reported export errors; APK will not be published.' >&2
+            exit 1
+          fi
+
+      - name: Verify APK integrity, signing identity, and unchanged game configuration
+        run: |
+          set -euo pipefail
+          apk="$RUNNER_TEMP/runebound/output/Runebound-Android.apk"
+          test -s "$apk"
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, zipfile
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'runebound'
+          apk = root / 'output/Runebound-Android.apk'
+          with zipfile.ZipFile(apk) as archive:
+              if archive.testzip() is not None:
+                  raise SystemExit('APK ZIP integrity check failed.')
+              if 'AndroidManifest.xml' not in archive.namelist():
+                  raise SystemExit('ZIP is missing AndroidManifest.xml.')
+              if not any(n.startswith('lib/') and n.endswith('.so') for n in archive.namelist()):
+                  raise SystemExit('APK is missing native game libraries.')
+          state = json.loads((root / 'state.json').read_text())
+          for name, key in [('export_presets.cfg', 'presets_sha256'), ('project.godot', 'project_sha256')]:
+              if hashlib.sha256((pathlib.Path(state['project']) / name).read_bytes()).hexdigest() != state[key]:
+                  raise SystemExit(f'Original {name} was modified; refusing to upload.')
+          (root / 'output/Runebound-Android.apk.sha256').write_text(hashlib.sha256(apk.read_bytes()).hexdigest() + '  Runebound-Android.apk\n')
+          PY
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/apksigner" verify --verbose --print-certs "$apk" | tee "$RUNNER_TEMP/runebound/logs/signing.log"
+          keytool -exportcert -keystore "$GODOT_ANDROID_KEYSTORE_DEBUG_PATH" -alias "$GODOT_ANDROID_KEYSTORE_DEBUG_USER" -storepass:env GODOT_ANDROID_KEYSTORE_DEBUG_PASSWORD -file "$RUNNER_TEMP/runebound/original-cert.der"
+          python3 - <<'PY'
+          import hashlib, os, pathlib, re
+          root = pathlib.Path(os.environ['RUNNER_TEMP']) / 'runebound'
+          expected = hashlib.sha256((root / 'original-cert.der').read_bytes()).hexdigest()
+          digests = re.findall(r'Signer #\d+ certificate SHA-256 digest: ([0-9a-fA-F]+)', (root / 'logs/signing.log').read_text())
+          if expected not in [d.lower() for d in digests]:
+              raise SystemExit('APK signing certificate differs from the original keystore.')
+          PY
+          "$ANDROID_HOME/build-tools/$BUILD_TOOLS/aapt" dump badging "$apk" > "$RUNNER_TEMP/runebound/logs/apk-badging.log"
+          grep '^package:' "$RUNNER_TEMP/runebound/logs/apk-badging.log"
+
+      - name: Upload verified APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runebound-Android
+          path: |
+            ${{ runner.temp }}/runebound/output/Runebound-Android.apk
+            ${{ runner.temp }}/runebound/output/Runebound-Android.apk.sha256
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runebound-Android-build-logs
+          path: ${{ runner.temp }}/runebound/logs/
+          if-no-files-found: ignore
+          retention-days: 7
