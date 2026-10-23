@@ -1,0 +1,90 @@
+extends SceneTree
+const Data=preload("res://scripts/data.gd")
+var checks=0
+func _initialize(): call_deferred("run")
+func check(ok:bool,message:String):
+ if not ok:
+  push_error("FAIL: "+message); quit(1); assert(ok,message)
+ checks+=1; print("PASS: "+message)
+func run():
+ var game=load("res://scenes/main.tscn").instantiate()
+ root.add_child(game)
+ await process_frame
+ game.start_character(Data.fresh("Warrior"))
+ game.set_physics_process(false)
+ game.enemies.clear(); game.hero.auto=false
+ var camp=game.survival
+ check(camp.count("Wood")==0,"New character starts with an empty materials bag")
+ check(not camp.craft("Shelter"),"Cannot build without gathering materials")
+ var node=camp.nodes[0].duplicate()
+ game.set_player_position(node.pos)
+ check(camp.gather(),"Nearby resource can be gathered")
+ check(camp.count(node.kind)>0,"Gathering awards the matching material")
+ check(not camp.gather(),"Depleted resource cannot be gathered repeatedly")
+ game.hero.worldTime+=181; camp.tick(1)
+ check(camp.gather(),"Resources regenerate after three minutes of play")
+ game.set_player_position(Vector2.ZERO)
+ for kind in ["Wood","Stone","Fiber","Berries","Herbs","Iron"]: camp.add(kind,100)
+ check(camp.craft("Plank") and camp.count("Plank")==1,"Wood crafts into planks")
+ check(camp.craft("Rope") and camp.count("Rope")==1,"Fiber crafts into rope")
+ camp.add("Plank",20); camp.add("Rope",20)
+ check(camp.craft("Campfire"),"Campfire can be built in front of the player")
+ var fire=camp.near("Campfire")
+ check(not fire.is_empty() and fire.fuel==90,"New fire starts lit and in cooking range")
+ check(not camp.craft("Campfire"),"Buildings cannot overlap")
+ var berries=camp.count("Berries")
+ check(camp.craft("Roasted berries") and camp.count("Berries")==berries-3,"Cooking consumes raw ingredients")
+ game.hero.hp=10
+ check(camp.eat("Roasted berries") and game.hero.hp==45,"Cooked food restores health and is consumed")
+ check(not camp.eat("Roasted berries"),"Cannot eat missing food")
+ fire.fuel=0
+ check(not camp.craft("Herbal stew"),"Cooking requires a lit fire")
+ var wood=camp.count("Wood")
+ check(camp.fuel_fire() and camp.count("Wood")==wood-1 and fire.fuel==90,"One wood relights the fire for ninety seconds")
+ camp.tick(10)
+ check(fire.fuel==80,"Fire burns fuel during play")
+ game.pause_game()
+ await process_frame
+ await process_frame
+ check(fire.fuel==80,"Menus pause fuel consumption")
+ game.playing=true
+ game.set_player_position(Vector2(500,0))
+ check(not camp.craft("Herbal stew"),"A distant fire cannot be used for cooking")
+ check(camp.craft("Shelter"),"Planks and rope build a shelter")
+ var shelter=game.hero.survival.structures[-1]
+ game.set_player_position(camp.at(shelter))
+ check(camp.sheltered(),"Entering shelter circle grants protection")
+ game.hero.hp=20; camp.tick(1)
+ check(game.hero.hp==26,"Resting in a shelter restores health over time")
+ var foe=game.create_enemy(game.player_position()+Vector2(10,0),1,"goblin",false)
+ game.enemies=[foe]; game.hero.hp=60; game.spawn_timer=10000
+ game.tick(.1)
+ check(game.hero.hp>=60,"Enemies cannot damage a sheltered player")
+ check(not game.attack() and not game.cast("fire"),"Shelter blocks outgoing attacks too")
+ game.enemies.clear()
+ game.set_player_position(Vector2(1000,0))
+ check(not camp.craft("Crafted bow"),"Weapons require a nearby workbench")
+ check(camp.craft("Workbench"),"Wood and stone build a workbench")
+ var size=game.hero.inventory.size()
+ check(camp.craft("Crafted bow") and game.hero.inventory.size()==size+1,"Crafted bow enters equipment inventory")
+ check(game.hero.inventory[-1].kind=="bow","Crafted bow works with existing weapon slots")
+ game.set_player_position(Vector2.ZERO)
+ foe=game.create_enemy(Vector2(250,0),1,"goblin",false)
+ camp.enemy_direction(foe,.1)
+ check(foe.aggro==0,"Enemies outside detection range remain unalerted")
+ foe.pos=Vector2(100,0)
+ check(camp.enemy_direction(foe,.1).x<0 and foe.aggro>0,"Nearby enemy detects and approaches the player")
+ game.set_player_position(Vector2(-500,0))
+ check(camp.enemy_direction(foe,.1).x>0 and foe.aggro==0,"Escaping makes enemy return home instead of chasing forever")
+ game.save_game()
+ var saved=Data.read_save()
+ check(saved.survival.structures.size()==3 and saved.survival.materials==game.hero.survival.materials,"Buildings and materials survive save/reload")
+ var legacy=Data.fresh("Mage"); legacy.erase("survival")
+ check(Data.migrate(legacy).survival.structures.is_empty(),"Older characters receive survival data without losing progression")
+ var bad=Data.fresh("Mage"); bad.survival.structures=[{"kind":"Shelter","x":"bad","y":0,"fuel":0}]
+ check(Data.migrate(bad).is_empty(),"Malformed structure saves are rejected")
+ game.hud.show_character("camp")
+ await process_frame
+ check(game.hud.current_page=="camp" and game.hud.overlay.visible,"Camp menu opens with crafting controls")
+ print(str(checks)+" SURVIVAL CHECKS PASSED")
+ quit()

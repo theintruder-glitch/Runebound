@@ -1,0 +1,136 @@
+AUTO PICKUP UPDATE — 0.11.1
+Install Runebound-Godot-v0.11.1.apk over your existing Runebound Godot app. Keep the app installed to retain your character.
+Walk near wild resources to pick them up. Pause > Auto pickup turns this on or off. Enemy rewards are already automatic. Chests and gardens keep their normal buttons.
+
+PLAY:
+Install Runebound-Godot-v0.12.0.apk and open Runebound Godot.
+No editor or Termux is needed to play.
+
+EDIT:
+Extract this ZIP, open Godot's Android editor, Import project.godot,
+then open the project and press Play.
+
+TRANSFER YOUR OLD CHARACTER:
+1. Install migration/Runebound-v0.2.1-Save-Transfer.apk over old Runebound.
+2. Continue old character > Pause > Export character for Godot.
+3. Save the JSON file to Downloads.
+4. Open Runebound Godot > Import a character save > select the JSON.
+
+Do not uninstall the old app to apply the Save Transfer update.
+Read README.md for source details and Android export instructions.
+
+UPDATE: Install over Runebound Godot without uninstalling.
+Hold the joystick to walk continuously; release it to stop.
+Character drawing and walking animation now update every frame.
+The camera scrolls continuously at the view boundary, without area jumps.
+Pause shows Version 0.12.0 / Laptop Edition.
+Pause > Low power selects 30 FPS (on) or 60 FPS (off).
+
+CAMP AND CRAFTING:
+1. Walk to labeled resources and tap GATHER.
+2. Tap Camp at the top of the screen.
+3. Make Planks and Rope, then build a Shelter.
+4. Build a Campfire using Wood and Stone.
+5. Stay near the fire to cook berries or herbal stew.
+6. Eat cooked food from Camp; add Wood to refuel the fire.
+7. Build a Workbench to craft bows and swords.
+Walk inside your shelter's green circle to rest safely.
+
+ROTATION AND CONTROLS:
+Turn the phone sideways for landscape.
+Or open Pause > Landscape view.
+Pause > Auto-rotate view restores automatic portrait/landscape rotation.
+The joystick, attack, spell, and dash buttons are larger.
+
+HEART OF MOSSVEIL:
+Follow the objective below the health bars: gather wood, build a fire,
+cook berries, then build a shelter. The shrine is northeast of the start.
+Avoid red circles when fighting the Root Warden.
+Win to unlock Arcane Archer; claim your unique weapon at the shrine.
+
+BUILDING:
+Camp > Place a structure > move to position its ghost > ROTATE > PLACE.
+CANCEL spends nothing. Open Camp nearby to move or dismantle a structure.
+Beds set your return point; storage chests hold gathered materials.
+Pause > Sound and music lets you mute the original music and effects.
+
+0.7.0 THUMB LAYOUT:
+Landscape joystick sits farther inward from the left edge.
+Portrait spells are along the bottom, with combat controls above them.
+
+FOUR REALMS (0.7.0):
+Follow the opening guide through Mossveil Ruins and your first dungeon floor.
+Camp > Explore the regions lets you track regional landmarks.
+Caves are east, swamp west, and snow north.
+Discover landmarks to learn unique recipes and attempt hidden-class trials.
+Your class skill button is above the joystick; Q works on a keyboard.
+Wolves hunt in packs. Archers keep distance. Deer flee and can be hunted.
+
+WAYFINDER (0.7.0):
+Gear: tap an item card to inspect, equip, upgrade, enchant, or salvage.
+Camp > Build places structures.
+Camp > Craft > Parts makes planks and rope.
+Camp > Craft > Food cooks meals; Supplies lets you eat carried food.
+Camp > Journal lists discoveries and challenges.
+World map is in Camp and Pause (M on keyboard).
+Tap a marker, then Track selected. Home and ruins can be tracked too.
+
+TURNING SEASONS (0.8.0):
+The world now cycles through Spring, Summer, Autumn and Winter.
+Each season lasts 20 minutes of active play. Time pauses in menus and away.
+Weather varies by region; the northern region keeps its snowy ground.
+Camp > Journal shows your season, day and bonus gathering materials.
+Stand under a Roof or inside a Shelter near a lit Campfire for bonus recovery.
+Cook Warm tea at a lit fire; drink it under Camp > Supplies.
+Pause > Weather effects turns particles and fog off if desired.
+Install this APK over your current Runebound Godot app; do not uninstall.
+
+FRONTIER JOBS (0.9.0):
+Open Camp > Quest board and active jobs > Track quest board.
+A wooden board stands northwest of your original starting camp.
+Walk close to accept up to three jobs from Posted.
+Review progress under Active and track one on the HUD.
+Return to the board to turn in; deliveries consume carried supplies.
+Every third completed job adds Rare enchanted gear; every ninth is Epic.
+Keep a free Gear slot for the completion bonus.
+Jobs repost after ten active-play minutes. Progress is saved.
+
+TOUCH SCROLL PATCH (0.9.1):
+Swipe up or down over the inventory cards, upgrade buttons or descriptions.
+You no longer need to grab the scrollbar or find empty background.
+Tap normally to select or upgrade. Swipes do not spend gold or stat points.
+Install over the current Runebound Godot app without uninstalling.
+
+CAMP TRADER (0.10.0):
+Open Camp > Trader Mara > Track Mara.
+Her stall is northeast of your original starting camp.
+Walk close to buy, sell or recover equipment under Buyback.
+Supplies, meals, Rare enchanted weapons and an Epic relic are available.
+Stock refreshes each active game day; opening menus does not reroll it.
+Your last eight sold equipment pieces can be bought back with a small fee.
+Six completed board jobs earn 10% off; eighteen earn 15% off.
+Normal swipe scrolling is retained. Install over the current app.
+
+CAMP FARMING (0.11.0):
+Open Camp > Garden plots > Place a Garden.
+Each plot needs 4 Wood, 2 Stone and 2 Fiber. The limit is 12 gardens.
+Walk near your plot and tap TEND GARDEN.
+Plant 2 Berries for 6, or 2 Herbs for 5.
+Discover the Veil Altar to plant 2 Glowcap for 5.
+Crops take about 3-4 active minutes in summer or autumn.
+Spring grows 25% faster; winter grows 25% slower.
+Explore while crops grow. Menus and time away pause progress.
+Ready crops stay ready: return and tap Harvest to collect ingredients.
+Move plots without losing crops. Clear returns the planting ingredients.
+Harvest or clear a crop before dismantling its plot.
+Swipe normally over planting and harvesting buttons to scroll.
+Install over the current Runebound Godot app without uninstalling.
+
+LAPTOP AND CHARACTER TRANSFER (0.12.0):
+The phone controls and existing character stay in place after updating.
+To bring your character to Windows:
+1. Pause > Export character save > choose Downloads.
+2. Move Runebound-Character.json to the laptop.
+3. Laptop title > Import a character save > select that JSON.
+Devices keep separate local saves after transfer; there is no automatic sync.
+Export the receiving device's old character first if you want to keep it.

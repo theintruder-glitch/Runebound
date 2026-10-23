@@ -1,0 +1,56 @@
+RUNEBOUND 0.12.0 - WINDOWS LAPTOP
+
+PLAY:
+1. Right-click the downloaded ZIP and choose Extract all.
+2. Open the extracted folder.
+3. Double-click Runebound.exe.
+Keep Runebound.pck in the same folder as Runebound.exe.
+No editor, Python, Termux, emulator or administrator install is needed.
+This build is for Windows 10/11 on a 64-bit Intel/AMD laptop.
+
+CONTROLS:
+WASD / arrows: move
+Mouse: aim
+Left click / Space: attack (hold to repeat)
+Right click / Shift: dodge
+E: interact or place a structure
+R: rotate building ghost
+Esc: cancel building / pause
+1 / 2 / 3: Fire / Frost / Heal
+Q: class skill
+T: automatic combat on/off
+C: camp
+I: equipment
+M: world map
+F11: fullscreen on/off
+
+LAPTOP SETTINGS:
+Pause > Laptop settings and controls.
+Close: larger characters. Balanced: default. Wide: more world.
+Choose a 30 or 60 FPS cap; turn weather effects off if needed.
+Mouse aim can be disabled for the original assisted targeting.
+The default graphics path uses Direct3D 11 through ANGLE.
+Start-Low-Power.bat uses Close view, 30 FPS, particles off, windowed mode.
+Start-OpenGL.bat tries native OpenGL if the default graphics path fails.
+This is an unsigned development build; Windows may show an unknown publisher.
+Actual graphics-driver behavior and laptop FPS still need device playtesting.
+
+BRING YOUR PHONE CHARACTER:
+1. Install Runebound-Godot-v0.12.0.apk over the existing phone app.
+2. On the phone: Pause > Export character save > Downloads.
+3. Move that JSON file to the laptop with USB or your usual file transfer.
+4. Laptop title: Import a character save > select the JSON.
+This transfers your character, inventory, buildings, crops and quest progress.
+The devices keep separate local saves afterward; there is no automatic sync.
+Import replaces the receiving device's current character. Export it first
+if you want to keep it. You can export from the laptop to move back later.
+The phone's existing Copy save to clipboard remains a backup option.
+
+SAVES:
+Saved automatically, on pause, and when closing the game.
+Windows save folder: %APPDATA%\Godot\app_userdata\Runebound Godot
+Export character save makes an easy transferable JSON backup.
+
+AUTOMATIC PICKUP:
+Walk near wild materials to collect them automatically.
+Pause > Auto pickup switches it on or off. Chests and gardens stay manual.
