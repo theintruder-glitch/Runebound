@@ -5,11 +5,11 @@ on:
   workflow_dispatch:
     inputs:
       signing_mode:
-        description: Fresh-install test or original historical signing certificate
+        description: Original installed signing identity or pinned persistent update identity
         type: choice
-        default: fresh-install-only
+        default: original
         options:
-          - fresh-install-only
+          - updates
           - original
 
 permissions:
@@ -67,19 +67,27 @@ jobs:
           chmod +x "Godot_v${GODOT_VERSION}-stable_linux.x86_64"
           printf 'GODOT_BIN=%s/Godot_v%s-stable_linux.x86_64\n' "$install_dir" "$GODOT_VERSION" >> "$GITHUB_ENV"
 
+      - name: Check signing and update policy
+        run: python3 -m unittest discover -s tools -p 'test_signing_policy.py'
+
       - name: Import, run Android suites, build and verify APK
         env:
-          SIGNING_MODE: ${{ inputs.signing_mode || 'fresh-install-only' }}
+          SIGNING_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode || 'check' }}
           # PR builds never receive signing secrets. Original mode fails closed.
           ORIGINAL_KEYSTORE_B64: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'original' && secrets.ANDROID_DEBUG_KEYSTORE_BASE64 || '' }}
           ORIGINAL_KEY_ALIAS: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'original' && secrets.ANDROID_DEBUG_KEY_ALIAS || '' }}
           ORIGINAL_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'original' && secrets.ANDROID_DEBUG_KEY_PASSWORD || '' }}
-        run: python3 tools/build_android.py --mode "$SIGNING_MODE"
+          UPDATE_KEYSTORE_B64: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'updates' && secrets.ANDROID_UPDATE_KEYSTORE_BASE64 || '' }}
+          UPDATE_KEY_ALIAS: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'updates' && secrets.ANDROID_UPDATE_KEY_ALIAS || '' }}
+          UPDATE_KEY_PASSWORD: ${{ github.event_name == 'workflow_dispatch' && inputs.signing_mode == 'updates' && secrets.ANDROID_UPDATE_KEY_PASSWORD || '' }}
+          UPDATE_CERT_SHA256: ${{ vars.ANDROID_UPDATE_CERT_SHA256 }}
+        run: python3 tools/build_android.py --mode "$SIGNING_MODE" --version-code "$((1000 + GITHUB_RUN_NUMBER))"
 
       - name: Upload verified APK and installation warning
+        if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v4
         with:
-          name: Runebound-Android-${{ inputs.signing_mode || 'fresh-install-only' }}
+          name: Runebound-Android-update-${{ github.run_number }}
           path: |
             builds/*/*.apk
             builds/*/*.sha256

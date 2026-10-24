@@ -10,7 +10,7 @@
 - [x] Audit `.github/workflows/android-debug.yml` and make it successfully publish **verified Android test APKs** on GitHub Actions. [Run 40049962398](https://github.com/theintruder-glitch/Runebound/actions/runs/40049962398) passed import, Android suites, export, verification and upload at commit `b6c750c`. This is a fresh-install-only test APK; original-key upgrade compatibility is unverified.
 - [x] Verify APK manifest: ARM64, `app.runebound.godot`, appropriate Android compatibility, versionCode, package identity, and signature. Disposable certificate only; API 24/35, version 19, v2/v3 signature and 16 KB ZIP alignment checked.
 - [x] Prepare a physical-phone test checklist for Motorola Edge 2025 / Android 16. See ANDROID_BUILD.md. Execution of installation, boot, joystick/combat, rotation, scrolling, resume and save/load checks is still pending.
-- [ ] Preserve existing data during updates: require the exact old signing certificate for install-over-previous-build testing; if unavailable, use a fresh-install-only test flow and explain the limitation.
+- [ ] Persistent update pipeline prepared: PRs only check, update builds require a retained matching signing key and increasing version code. Secure key setup and installed-app certificate matching remain blocked/pending; see UPDATE_SETUP.md. Preserve existing data during updates: require the exact old signing certificate for install-over-previous-build testing; if unavailable, use a fresh-install-only test flow and explain the limitation.
 
 ## Priority 1: Finish the Android experience
 - [ ] Fix joystick lag, drift and rotation-position errors; controls must respond continuously.

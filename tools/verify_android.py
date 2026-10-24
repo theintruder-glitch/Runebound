@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ORIGINAL_CERT = "79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37"
 
 
-def verify(apk, sdk, expected_cert, mode):
+def verify(apk, sdk, expected_cert, mode, version_code=None):
     def run(binary, *args):
         return subprocess.check_output([str(sdk / "build-tools/35.0.0" / binary),
                                         *args, str(apk)], text=True)
@@ -39,7 +39,7 @@ def verify(apk, sdk, expected_cert, mode):
             raise RuntimeError("Development files leaked into APK")
     badging = run("aapt", "dump", "badging")
     package = re.search(r"^package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", badging, re.M)
-    expected = ("app.runebound.godot", options["version/code"], json.loads(options["version/name"]))
+    expected = ("app.runebound.godot", str(version_code) if version_code is not None else options["version/code"], json.loads(options["version/name"]))
     if not package or package.groups() != expected:
         raise RuntimeError(f"Package/version mismatch: expected {expected}")
     if "sdkVersion:'24'" not in badging or "targetSdkVersion:'35'" not in badging:
@@ -60,7 +60,7 @@ def verify(apk, sdk, expected_cert, mode):
               "certificate_sha256": certificates[0], "signing_mode": mode,
               "zip_integrity": True, "signature_verified": True, "alignment_16kb": True,
               "physical_device_tested": False,
-              "installation": "Original certificate verified; device upgrade still untested" if mode == "original"
+              "installation": "Pinned certificate verified; install over existing only if its certificate matches. Device upgrade still untested" if mode in ["original", "updates"]
               else "FRESH INSTALL ONLY on a separate test device/profile; never uninstall an existing game"}
     apk.with_suffix(".verification.json").write_text(json.dumps(report, indent=2) + "\n")
     apk.with_suffix(".apk.sha256").write_text(f"{checksum}  {apk.name}\n")
@@ -74,6 +74,6 @@ if __name__ == "__main__":
     parser.add_argument("apk", type=Path)
     parser.add_argument("--sdk", type=Path, default=os.environ.get("ANDROID_HOME"), required=not os.environ.get("ANDROID_HOME"))
     parser.add_argument("--certificate", required=True)
-    parser.add_argument("--mode", choices=["fresh-install-only", "original"], required=True)
+    parser.add_argument("--mode", choices=["fresh-install-only", "original", "updates"], required=True)
     args = parser.parse_args()
     verify(args.apk, args.sdk, args.certificate, args.mode)

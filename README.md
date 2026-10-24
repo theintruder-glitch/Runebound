@@ -39,7 +39,7 @@ The release export needs a correctly configured **private signing key**. The cur
 
 The Android GitHub Actions workflow runs on pull requests and manual dispatch. It pins Godot **4.5.1**, Java **17**, SDK/build-tools **35**, imports the project, runs the Android regression suites with isolated saves, and verifies APK identity, signature, integrity and alignment before uploading an artifact. See [ANDROID_BUILD.md](ANDROID_BUILD.md) for local commands and signing restrictions.
 
-The default artifact is **FRESH INSTALL ONLY**, signed with a disposable test key, for a separate test device/profile without Runebound. **Never uninstall your existing game or clear its data to install this artifact.** Manual `original` mode requires the existing private key through GitHub Secrets and rejects any certificate other than the historical Runebound certificate. Physical-device upgrades remain untested.
+Installable builds now require a **persistent private signing key** and increasing Android version codes. Pull requests run checks only; they no longer publish disposable APKs. Manual update builds fail if the required key or pinned certificate is missing. See [UPDATE_SETUP.md](UPDATE_SETUP.md) for the one-time secure setup. Earlier disposable test APKs cannot update each other; keep your installed game and save data.
 
 ## Current source status
 

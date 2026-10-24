@@ -9,7 +9,7 @@ Use Godot **4.5.1 stable** (`f62fdbde1`) and its matching Android debug template
 Set `GODOT_BIN`, `JAVA_HOME`, `ANDROID_HOME` and, if needed, `XDG_DATA_HOME` to the location containing `godot/export_templates/4.5.1.stable/android_debug.apk`.
 
 ```bash
-python3 tools/build_android.py --mode fresh-install-only
+python3 tools/build_android.py --mode check
 ```
 
 The script isolates editor settings, caches, test profiles and signing files in temporary directories. Tests never use the normal local save profile. Each test suite gets its own disposable profile. The script rejects engine errors and nonzero exits, verifies that source project/export settings have not changed, and independently checks ZIP integrity, compiled game resources, package/version, ARM64 libraries, API 24/35, offline permissions, signature certificate and 16 KB ZIP alignment. An APK is uploaded by CI only after these checks pass. Tooling is excluded from game imports using `tools/.gdignore`.
@@ -89,3 +89,7 @@ Survival has explicit title-screen guidance, a SURVIVAL / ADVENTURE entry in Pau
 Scenery gains deterministic biome-colored terraces, rock faces, shadows and ruin columns, retained in the existing scenery cache. Camp origin, region objectives, ruins and saved structures get clearance. These are visual landforms: this milestone does not add physical cliffs, height traversal or new collision rules to saved locations. Original sprites remain with added horns, fangs, eye accents and spirit tendrils; neutral deer are unchanged. Primitive detail remains available in low-power mode without new particles or nodes.
 
 Automated checks exercise calm simulation, provocation, retreat, boss/dungeon exclusions, preference persistence, Survival discoverability, deterministic bounded scenery, saved-camp clearance and real draw callbacks in both orientations. Local regressions passed 1,390 assertions across 22 Android runs. Current CI run/artifact evidence is recorded in PR #1. Physical-device appearance, frame rate and player comfort are untested. Next: phone art feedback and interactive terrain/encounter landmarks, then further spell/content progression. Existing signing and save restrictions still apply.
+
+## Persistent update signing policy
+
+The earlier fresh-install-only commands and artifacts above are historical. PR builds now run checks without producing an APK. Manual builds require `original` or `updates` signing with a retained private key, pinned public certificate and increasing version code; there is no generated-key fallback. GitHub uses 1000 + run_number. The version override is restored on failure. Five signing/version policy tests pass locally; Python compilation and workflow YAML parsing passed. No update-compatible APK or device update is claimed until the secure key is configured and its match to the installed app is established. See UPDATE_SETUP.md. The GitHub connection here cannot set Actions secrets.
