@@ -1,10 +1,10 @@
-# Final playtest checklist — 0.17.0
+# Final playtest checklist — 0.18.0
 
 Record device, OS, prior app version, test date, outcome and any exact error. These are pending hardware checks, not completed tests.
 
 ## Motorola Edge 2025 / Android 16
 
-1. Export a character backup from the installed v0.15.0 app. Install v0.17.0 over it without uninstalling. Continue and compare level, gear, gold, camp, discoveries and fishing records.
+1. Export a character backup from the installed v0.15.0 app. Install v0.18.0 over it without uninstalling. Continue and compare level, gear, gold, camp, discoveries and fishing records.
 2. Hold movement, use a second finger for attacks/spells, release each finger independently, then rotate while moving. Test both landscape directions, portrait and orientation lock.
 3. Swipe inventory cards, upgrade buttons, supplies, crafting and fishing pages. Swipes must scroll without spending anything; taps must act once.
 4. Switch apps, turn the screen off and resume while moving or holding attack. Movement and attacks must stop; needs/world time must pause while away.
@@ -21,3 +21,9 @@ Extract the entire ZIP. Check normal, low-power and OpenGL launchers; startup, a
 ## Commercial-release work
 
 Complete hardware bug fixes and balance/pacing passes; expand main quest/dungeon content; review visual/audio consistency, accessibility and controller needs; review asset rights/credits and the original shared prototype signing identity before choosing a store/distribution signing plan. Do not replace the existing personal-update key without an explicit migration plan.
+
+## New chapter playtest
+
+Visit Mara, accept the missing-camps story, recover all three clues in any order, translate, and enter the story option at the ruins. Check journal bearings, optional caches, purple-rune warning timing, boss phase readability, final stairs, return to Mara and one-time rewards. Reload mid-investigation and mid-dungeon; verify progress. Test Hearthcall after cooldown and near enemies. Report actual completion time and difficulty; no target duration has been established.
+
+User previously reported v0.17 installs and is playable, including controls. This is user-reported basic playability, not measured FPS, upgrade-save validation or testing of v0.18.

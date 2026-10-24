@@ -1,6 +1,8 @@
 extends Node2D
 
 const Data = preload("res://scripts/data.gd")
+const ChapterScript=preload("res://scripts/chapter.gd")
+var chapter
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
@@ -72,6 +74,7 @@ var is_walking = false
 var screen_landscape = false
 
 func _ready() -> void:
+	chapter=ChapterScript.new();chapter.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
@@ -362,6 +365,7 @@ func tick(dt: float) -> void:
 	if effects.size()>effect_limit:
 		effects = effects.slice(effects.size()-effect_limit)
 	expedition.tick(dt)
+	chapter.tick(dt)
 	if hero.hp<=0:
 		defeated()
 		return
@@ -702,13 +706,16 @@ func salvage(item: Dictionary) -> bool:
 	save_game()
 	return true
 
-func enter_dungeon() -> void:
+func enter_dungeon(story:bool=false) -> void:
 	if hero.dungeon!=null:
 		return
+	if story and (chapter.stage()!=3 or player_position().distance_to(exploration.RUINS)>=80): return
 	hero.journey.dungeon_entered=true
 	hero.dungeon = {"floor":1,"seed":randi_range(1,2147483640),"run":str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":hero.x,"returnY":hero.y}
+	hero.dungeon["story"]=story
 	build_floor(true)
 	save_game()
+	if story: notify("THE HOLLOW ROOT · Three floors. Purple runes warn before striking. Seek the Hollow Heart.",7);return
 	notify("SURVIVAL EXPEDITION · Five floors. Defeat the final lord and return home." if expedition.enabled() else "ENDLESS DUNGEON · Defeat enemies to unlock the gold stairs.",5)
 
 func cell_center(cell: Vector2i) -> Vector2:
@@ -755,6 +762,7 @@ func build_floor(reset_position: bool=true) -> void:
 		enemies.append(enemy)
 	for i in range(mini(3,places.size())):
 		chests.append({"id":"gd:%s:%d:%d" % [dungeon.run,dungeon.floor,i],"pos":cell_center(places[places.size()-1-i]),"level":dungeon.floor})
+	chapter.floor_setup()
 	camera.position = player_position()
 	camera.reset_smoothing()
 	world.refresh(true)
@@ -767,6 +775,7 @@ func check_floor_clear() -> bool:
 	if hero.dungeon==null or not floor_clear():
 		return false
 	if not hero.dungeon.rewarded:
+		chapter.floor_cleared()
 		hero.dungeon.rewarded = true
 		hero.floorsCleared += 1
 		contracts.advance("delve")
@@ -774,7 +783,9 @@ func check_floor_clear() -> bool:
 		forest.check_opening_reward()
 		add_renown(15+mini(100,hero.dungeon.floor*2))
 		hero.gold += 10+hero.dungeon.floor*5
-		if expedition.enabled() and hero.dungeon.floor>=5:
+		if chapter.story_run() and hero.dungeon.floor==3:
+			notify("THE HOLLOW ROOT COMPLETE · Gold stairs return you to Mara.",6)
+		elif expedition.enabled() and hero.dungeon.floor>=5:
 			hero.needs.ruins=true
 			notify("EXPEDITION COMPLETE · Use the gold stairs to return home.",5)
 		else: notify("FLOOR CLEARED · Find the gold staircase to descend.",5)
@@ -784,7 +795,7 @@ func check_floor_clear() -> bool:
 func advance_floor() -> bool:
 	if hero.dungeon==null or not floor_clear():
 		return false
-	if expedition.enabled() and hero.dungeon.floor>=5:
+	if (chapter.story_run() and hero.dungeon.floor>=3) or (expedition.enabled() and hero.dungeon.floor>=5):
 		leave_dungeon();return true
 	hero.dungeon.floor += 1
 	hero.dungeon.seed = posmod(int(hero.dungeon.seed)*1664525+1013904223,2147483647)
@@ -867,7 +878,7 @@ func update_interaction() -> void:
 		if player_position().distance_to(cell_center(dungeon_map.start))<38:
 			label_value = "LEAVE DUNGEON"
 		elif player_position().distance_to(cell_center(dungeon_map.exit))<38:
-			label_value = ("RETURN HOME · EXPEDITION COMPLETE" if expedition.enabled() and hero.dungeon.floor>=5 else "DESCEND · FLOOR %d" % (hero.dungeon.floor+1)) if floor_clear() else "STAIRS LOCKED"
+			label_value = ("RETURN HOME · EXPEDITION COMPLETE" if (chapter.story_run() and hero.dungeon.floor>=3) or (expedition.enabled() and hero.dungeon.floor>=5) else "DESCEND · FLOOR %d" % (hero.dungeon.floor+1)) if floor_clear() else "STAIRS LOCKED"
 	if hero.dungeon==null:
 		var door=survival.near("Door",65)
 		if not door.is_empty(): label_value="CLOSE DOOR" if door.open else "OPEN DOOR"
@@ -879,6 +890,7 @@ func update_interaction() -> void:
 	if contracts.near_board(): label_value="QUEST BOARD"
 	if trader.near(): label_value="TRADE WITH MARA"
 	if not fishing.interaction().is_empty(): label_value=fishing.interaction()
+	if not chapter.interaction().is_empty(): label_value=chapter.interaction()
 	if not build_recipe.is_empty(): label_value="PLACE "+build_recipe.to_upper()
 	hud.set_interaction(label_value)
 
@@ -889,6 +901,7 @@ func interact() -> void:
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
+	if not chapter.interaction().is_empty(): chapter.interact();return
 	if not fishing.interaction().is_empty():
 		fishing.interact();return
 	if expedition.enabled() and expedition.near_spring():
@@ -1028,6 +1041,9 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 		enemy.windup=1.1 if named else .85 if ranged else .65
 		enemy.strike=pos if named or ranged else enemy.pos+enemy.pos.direction_to(pos)*22
 		enemy.strike_radius=(95.0 if enemy.hp<enemy.max_hp*.5 else 72.0) if named else 30.0 if ranged else 38.0
+		if enemy.get("chapter_boss",false):
+			enemy.windup=.8 if enemy.hp<enemy.max_hp*.5 else 1.2
+			enemy.strike_radius=100.0 if enemy.hp<enemy.max_hp*.5 else 55.0
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 

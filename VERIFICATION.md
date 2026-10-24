@@ -1,3 +1,25 @@
+# 0.18.0 The Hollow Root verification
+
+This update adds a first playable Mossveil story chapter to v0.17.0. It preserves app.runebound.godot, the original signing certificate and save location. Android version code is 25.
+
+## Confirmed locally
+
+- The 26-suite source regression run passes (1,684 checks with the first 56 chapter checks). The chapter suite was subsequently expanded to **59 passing checks**, including reload during investigation, reload inside the story expedition, and no boss/reward duplication after reloading a defeated boss. The full updated suite contains 1,687 checks.
+- Signed Android export succeeds. Seven focused suites pass against the actual APK resources (597 checks with the initial chapter suite). The final 59-check chapter suite, 266 gameplay/save checks and 71 touch/combat checks also pass separately against the exported resources.
+- Windows x64 export succeeds. Seven compiled-PCK suites pass (389 checks with the initial chapter suite); the final 59-check chapter suite passes again against that same exported PCK. These are Linux-engine pack checks, not native Windows startup tests.
+- APK integrity, manifest, ARM64, 16 KB ELF/ZIP alignment, actual v2/v3 signing blocks, original certificate and unchanged artifact checksum through resource testing pass. No key, test save or migration secret is included in the APK or public source.
+- Actual rendered portrait Mara dialogue and Heart Chamber gameplay, plus landscape chapter journal, were inspected with Linux/Mesa software rendering. Buttons and text fit; the native journal scrolls. Audio was disabled for capture. Phone performance is not inferred from these captures.
+
+## Chapter behavior exercised
+
+Legacy saves gain an unstarted chapter without losing progress. Invalid field types, missing fields and unearned reward states are rejected. Mara proximity, acceptance, physical camp investigation, duplicate clue XP protection, clue persistence, rune translation and one-time preparation reward are checked. Story entry requires the ruins. Rune pulses damage the player, allow dodge protection and pause in menus. Optional caches pay once per floor/run. Actual enemy kills unlock three floors; the final boss changes its warning radius/windup below half health. Killing only the boss does not complete a chamber with survivors; reload does not duplicate that boss. Final stairs return to the wilds. Mara grants the completion reward once. Hearthcall respects the bed return point, saved active-time cooldown and enemy proximity, and never heals, creates water or advances time. Classic floor six and regular Survival floor-five completion remain intact. Journal widths and pausing are checked in both orientations.
+
+## User-reported and remaining work
+
+The user confirmed v0.17.0 launches and is playable, and reported its controls were good. That is basic user-reported playability of v0.17, not hardware validation of this new chapter. v0.18 installation, chapter pacing/difficulty/completion time, long-session phone heat/FPS/RAM/battery, hardware audio, native Windows startup and actual save-upgrade behavior still require playtesting. No hour-long duration or commercial-release readiness is claimed. Current GitHub CI results must be inspected separately.
+
+## Historical verification
+
 # 0.17.0 Focused Combat verification — 2026-10-24
 
 Continues v0.16.0 and the supplied v0.15.0 Godot source. Android remains primary. No application ID, save path, signing identity or character schema change.

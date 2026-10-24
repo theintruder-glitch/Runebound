@@ -115,6 +115,23 @@ static func migrate(hero: Dictionary) -> Dictionary:
 			if not structure.crop is String or structure.crop not in ["","Berries","Herbs","Glowcap"]: return {}
 			if not (structure.growth is int or structure.growth is float) or not is_finite(float(structure.growth)): return {}
 			if structure.growth<0 or structure.growth>{"":0,"Berries":180,"Herbs":210,"Glowcap":240}[structure.crop]: return {}
+	hero.chapter=hero.get("chapter",{"accepted":false,"clues":{},"translated":false,"cleared":false,"claimed":false,"tracking":false,"return_until":0.0})
+	var chapter=hero.chapter
+	if not chapter is Dictionary or chapter.size()!=7: return {}
+	for key in ["accepted","translated","cleared","claimed","tracking"]:
+		if not chapter.get(key) is bool: return {}
+	if not chapter.get("clues") is Dictionary or chapter.clues.size()>3: return {}
+	for key in chapter.clues:
+		if key not in ["watch","cart","grove"] or not chapter.clues[key] is bool or not chapter.clues[key]: return {}
+	if not (chapter.get("return_until") is int or chapter.get("return_until") is float) or not is_finite(float(chapter.return_until)) or chapter.return_until<0 or chapter.return_until>hero.worldTime+120.01: return {}
+	if not chapter.accepted and (not chapter.clues.is_empty() or chapter.translated): return {}
+	if chapter.translated and chapter.clues.size()!=3: return {}
+	if chapter.cleared and not chapter.translated: return {}
+	if chapter.claimed and not chapter.cleared: return {}
+	if chapter.return_until>0 and not chapter.claimed: return {}
+	if hero.dungeon!=null:
+		if not hero.dungeon.get("story",false) is bool: return {}
+		if hero.dungeon.get("story",false) and (not chapter.translated or hero.dungeon.floor<1 or hero.dungeon.floor>3): return {}
 	hero.journey=hero.get("journey",{})
 	if not hero.journey is Dictionary: return {}
 	for key in ["wood","cooked","warden","reward","dungeon_entered","first_floor","opening_reward"]: hero.journey[key]=bool(hero.journey.get(key,false))

@@ -1,20 +1,24 @@
-# RUNEBOUND 0.17.0 — Focused Combat
+# RUNEBOUND 0.18.0 — The Hollow Root
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
 
-## This milestone
+## Chapter I — The Hollow Root
 
-- **Touch ground targeting:** learned Meteor Fall and Blizzard now preview a movable circle on Android. Select the hotbar spell, tap or drag the ground, then tap CAST. CANCEL or Back spends no mana. Red circles and disabled CAST mark wall-blocked ground. Moving and combat time continue while aiming.
-- **Independent fingers:** movement, aiming and confirmation use separate touch ownership. Lifting an aim finger over CAST never confirms accidentally. Menus, rotation, focus loss, dodge and class skills clear unfinished placement. Desktop keeps mouse placement and cancellation.
-- **Forward melee on both platforms:** basic attacks use the same frontal arc. Touch keeps nearby-target assistance for bows/staves. Missed manual attacks animate and respect cooldowns; automatic combat still ignores wildlife.
-- **Combat reactions:** weapon sweeps keep their strike direction, ranged weapons recoil, and successful spells show a short casting glow. Clean melee hits briefly stagger ordinary enemies, interrupting their windup; a guard prevents every hit from interrupting them. Bosses and named trial enemies resist basic stagger. Enemy strikes have a short visual lunge.
-- All v0.16 save recovery, wetness, crafting, exploration, progression, Android identity and original signing compatibility are retained. No new character/save schema is needed.
+Speak with Mara northeast of the original camp: **Camp → Chapter I** or **Mara’s market → Speak with Mara**. Investigate Silent Watch, the Broken Caravan and Ashen Grove, then bring their clues back for translation. Bearings and recovered dialogue appear in the scrolling chapter journal; Track chapter updates the HUD without deleting other quests.
+
+At Mossveil Ruins, choose the separate **three-floor story expedition**: Buried Gate, Rootworks and Heart Chamber. Purple ground runes give a one-second warning before pulsing. Dodge or move away. Optional runic caches give gold/mana once per floor/run. Defeat the Hollow Heart and all remaining enemies; its warning circles widen and its windup shortens below half health. The final gold stairs return to the wilds.
+
+Return to Mara for **250 gold, 5 essence, 2 stat points and Hearthcall**. Hearthcall returns to your bed’s saved return point or the starting camp, only outside dungeons/trials and away from hostiles. It recharges over 120 seconds of active play; it does not heal, refill needs or skip time. The next lead points toward the existing Emberforge adventure.
+
+The original tutorial, Elder Shrine/Root Warden, repeatable jobs, Classic endless dungeon and five-floor Survival expeditions remain available. Older characters gain an unstarted chapter while keeping their progress. New construction leaves clue camps approachable; existing structures remain saved.
+
+v0.17 combat/touch targeting and v0.16 wetness/save fixes are retained. This is a first playable story chapter; pacing and difficulty still need player feedback. No hour-long duration or commercial readiness is claimed.
 
 Existing content includes eight classes, four regions, quests and regional trials, five-floor Survival expeditions, Classic endless dungeons, building, gardens, crafting, trading, equipment, spell purchases and hotbar assignments, fishing, cooking, weather, hunger, thirst, sleep, warmth, waterskins, cloaks and bedrolls.
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.17.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **24**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.18.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **25**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

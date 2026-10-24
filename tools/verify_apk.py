@@ -17,7 +17,7 @@ text = badging.read_text()
 package = re.search(r"^package: name='([^']+)' versionCode='([^']+)' versionName='([^']+)'", text, re.M)
 assert package, 'aapt did not identify an APK package'
 assert package[1] == json.loads(options['package/unique_name']) == 'app.runebound.godot', 'Package changed'
-assert package[2] == options['version/code'] and int(package[2]) > 23, 'Version code must update v0.16.0'
+assert package[2] == options['version/code'] and int(package[2]) > 24, 'Version code must update v0.17.0'
 assert package[3] == json.loads(options['version/name']), 'Version name mismatch'
 assert "targetSdkVersion:'35'" in text and "sdkVersion:'24'" in text, 'Unexpected target/minimum SDK'
 with zipfile.ZipFile(apk) as archive:

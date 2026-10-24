@@ -27,7 +27,7 @@ func initialize() -> void:
 		view_name="Close";fullscreen=false
 	var window=game.get_window()
 	window.min_size=Vector2i(960,540)
-	window.title="Runebound · Focused Combat"
+	window.title="Runebound · The Hollow Root"
 	if DisplayServer.get_name()!="headless":
 		var usable=DisplayServer.screen_get_usable_rect()
 		window.size=Vector2i(mini(1152,maxi(960,usable.size.x-80)),mini(648,maxi(540,usable.size.y-100)))

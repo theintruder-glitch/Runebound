@@ -187,6 +187,7 @@ func _draw() -> void:
 		draw_rect(rect,Color("9cf7c2") if valid else Color("ff928e"),false,2)
 		draw_line(pos,pos+Vector2.UP.rotated(game.build_rotation*PI/2)*27,Color("f6e5b5"),3)
 		label(pos+Vector2(-25,-40),game.build_recipe,12,Color("f4e7c7"))
+	game.chapter.draw(self)
 	for enemy in game.enemies:
 		if not enemy.dead and enemy.get("windup",0.0)>0 and draw_bounds.has_point(enemy.strike):
 			draw_circle(enemy.strike,enemy.strike_radius,Color("e77a6844"))
@@ -342,6 +343,11 @@ func draw_enemy(enemy: Dictionary) -> void:
 			draw_arc(Vector2.ZERO,14,-1.2,1.2,12,Color("dfc48e"),2)
 			draw_line(Vector2(5,-13),Vector2(5,13),Color("dfc48e"),1)
 			draw_set_transform(Vector2.ZERO)
+	if enemy.get("chapter_boss",false):
+		for i in range(6):
+			var branch=Vector2.from_angle(i*TAU/6+clock*.25)*32
+			draw_line(at+Vector2(0,-25),at+Vector2(0,-25)+branch,Color("b783d2"),3)
+		draw_circle(at+Vector2(0,-25),10,Color("deb4ec"))
 	if enemy.get("named","")=="The Root Warden":
 		for side in [-1,1]:
 			draw_line(at+Vector2(side*10,-42),at+Vector2(side*30,-68),Color("a18a59"),5)

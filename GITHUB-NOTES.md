@@ -1,9 +1,7 @@
-# GitHub development handoff — 0.17.0
+# RUNEBOUND v0.18.0 — The Hollow Root
 
-This branch continues the supplied v0.15.0 source, v0.16.0 stabilization and the Focused Combat update. Android is primary; Windows shares combat and spell logic. The older repository main snapshot is v0.12.0 until the review branch is merged.
+Continues the supplied v0.15 source and v0.16/v0.17 development. The new chapter connects Mara, three investigation camps, a persistent journal and a separate three-floor expedition. Warning runes, optional caches and a two-phase Hollow Heart boss give the expedition distinct encounters. The one-time reward unlocks safe Hearthcall and points toward the existing Emberforge adventure.
 
-New work: touch selection/drag/CAST/CANCEL for learned ground spells; independent movement/aim fingers; shared forward melee; animated misses, sweeps, recoil and casting glow; guarded ordinary-enemy stagger; lifecycle and mana checks. Existing progression, Survival, fishing/crafting and save handling are retained.
+Original tutorial/shrine, other regions, regular Classic/Survival dungeons, crafting/building, fishing, combat and save recovery are retained. App ID and certificate remain unchanged, version code is 25. Existing saves receive default chapter state.
 
-Read README.md, VERIFICATION.md and PLAYTEST.md. Source and exact Android resources pass 1,628 checks; Windows PCK passes 333. Build verification checks actual signer blocks and final byte identity. The old v0.16 APK copy fails fresh signature verification; use the verified v0.17 output.
-
-No keys, passwords, player saves or binaries are committed. CI tests and Windows export run automatically; remote Android release exports require the original signing secrets. Do not generate a replacement identity.
+See VERIFICATION.md for exact checks and limits. This is the first playable chapter; actual pacing and difficulty require player feedback. No keys, passwords or player saves are committed.

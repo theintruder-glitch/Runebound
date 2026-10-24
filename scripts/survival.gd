@@ -160,6 +160,8 @@ func reason(recipe:String,check_place:bool=true) -> String:
    if footprint(recipe,pos,game.build_rotation).grow(25).has_point(game.contracts.BOARD): return "Keep the quest board approachable"
    for region_info in game.exploration.REGIONS.values():
     if pos.distance_to(region_info.point)<240: return "Keep landmark clearings open"
+   for clue in game.chapter.CLUES.values():
+    if footprint(recipe,pos,game.build_rotation).grow(30).has_point(clue.point): return "Keep investigation camps approachable"
    if pos.distance_to(game.exploration.RUINS)<100: return "Keep the ruins entrance open"
    for corner in [pos,footprint(recipe,pos,game.build_rotation).position,footprint(recipe,pos,game.build_rotation).end]:
     if game.exploration.cave_wall(corner): return "Build on open cave floor"
