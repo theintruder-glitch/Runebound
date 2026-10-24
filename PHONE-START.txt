@@ -1,35 +1,18 @@
-RUNEBOUND — ANDROID EDITION — GODOT 0.12.0
-===========================================
+RUNEBOUND 0.16.0 — ANDROID
 
-THIS GITHUB REPOSITORY IS FOR THE ANDROID GAME.
+1. In your current Runebound Godot app, use Pause > Export character save.
+2. Download Runebound-Godot-v0.16.0.apk and install it over the existing app.
+3. Keep the app installed; do not uninstall or clear its data.
+4. Continue your character. Older saves keep progression and start with dry clothing.
 
-PLAY (installed APK):
-- Keep the existing Runebound Godot app and its saved data.
-- To apply a newer APK, it must use the same app package and signing certificate.
-- Do not uninstall or clear data when updating.
-- This repository contains editable project source; cloning it does not install the game.
+MOVE: left joystick. ATTACK: weapon. DASH: dodge. Spells and class skill have their existing buttons.
+Gear/Camp menus: swipe the content to scroll; tap actions normally.
+Pause: orientation, battery saver, sound, weather effects and character export.
 
-EDIT THE GAME ON YOUR PHONE:
-1. Install the official Godot 4 Android editor, compatible with Godot 4.5.x.
-2. Download/clone the repository.
-3. Import project.godot.
-4. Open the project and use the editor's Play button.
-5. Edit scenes, scripts and touch controls; save/commit changes to GitHub.
+SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold worse.
+A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
+Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-PHONE CONTROLS:
-- Joystick: move; ATTACK: melee or weapon attack; DASH: dodge.
-- Fire / Frost / Heal: spells; class-skill button: unique ability.
-- Camp: building, crafting, cooking, gardens and trading.
-- Pause: orientation, low-power mode, sound, auto pickup and saves.
-- Auto pickup collects nearby resources; chests and gardens are interactive.
-
-THE ANDROID BUILD:
-- Android export preset only; package ID app.runebound.godot.
-- ARM64, version code 19, Godot 4.5.x matching templates + Android SDK + JDK 17.
-- Private signing key is NOT provided in the public GitHub repository.
-- New keys generally prevent installing over the original app while retaining its data.
-
-SOURCE SNAPSHOT:
-- v0.12.0 editable game; Android focused.
-- v0.13.0 has not been uploaded; hunger/thirst/sleep survival is a future addition.
-- No APK build was produced as part of switching the repository to Android.
+This update uses app.runebound.godot, version code 23 and the original prototype certificate.
+If Android rejects the update, keep the current app and save. Report the exact message.
+Physical installation and phone performance still need playtesting; automated engine checks are separate.

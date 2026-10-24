@@ -1,3 +1,66 @@
+# 0.16.0 Shelter & Steel verification — 2026-10-24
+
+Continues the supplied v0.15.0 Godot project. The GitHub base was v0.12.0; the branch incorporates existing 0.13–0.15 systems as well as this stabilization milestone.
+
+- **Source:** all 24 isolated suite runs pass, **1557 checks**, with Godot 4.5.1.stable.official.f62fdbde1. Includes both movement/live-frame orientations, native touch scrolling, rotation, existing combat/magic, progression, fishing, farming, quests, trading, Survival/kit and **39 new stability checks**.
+- **Signed APK resources:** all 24 suites pass again, **1557 checks**, using the exact compiled resources extracted from the final signed APK, external test scripts and isolated profiles. Tests do not load source scripts in place of the exported gameplay.
+- **Windows compiled PCK:** release, fishing, kit and new stability suites pass, **217 checks**. This executes the actual exported data pack with the matching Linux engine; it does not execute the Windows PE binary.
+- **Android export:** real ARM64 release APK produced with JDK 17, official matching templates, Android 35 and Build-Tools 35.0.1. Package app.runebound.godot; code 23; name 0.16.0-shelter-and-steel; minimum API 24; target API 35. ZIP CRC, v2/v3 signature, ARM64-only native libraries, ELF 16 KB LOAD alignment and zipalign -P 16 checks pass. Tests, migration files and keystores are absent from the APK.
+- **Signing:** original certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. No replacement signing key was generated. App name, package ID and user://character.json path remain unchanged. Save recovery/migration tests preserve progression and good backups; physical install-over-existing-app remains pending.
+- **Windows export:** actual x64 EXE/PCK and full output ZIP produced from the matching official template. Output pack passes the checks above.
+- **Visual QA:** real rendered Linux/Mesa captures inspected at phone portrait and landscape aspect ratios: live controls, inventory and Survival supplies. The screenshots use the mobile interface and show readable, bounded controls/menus. Software-rendered Linux screenshots do not establish phone FPS, touchscreen feel or native Windows behavior. Audio used the dummy driver; hardware audio was not evaluated.
+- **Build checks:** shell syntax and Python compilation pass. Test runner handles historical completion formats and requires successful completion, no script/assertion errors and a valid exit. It isolates saves/configuration per suite. Build helpers validate actual artifacts and include compiled-resource regression checks.
+
+## New checks
+
+Thumb jitter/dead zone; independent finger ownership; mouse/touch contention; hiding/focus-loss release; legacy wetness default; malformed wetness rejection; corrupt/structurally invalid save recovery without clobbering the last good backup; failed-write reporting; actual calendar rain, cover drying, wet cold exposure, fire drying, paused weather needs and bounds; wall-blocked warmth/bed access; stale/dead/disengaged/sheltered attack handling; peaceful-wildlife bed rest; stale bed rejection; shared save roundtrip.
+
+## Limits and next verification
+
+No physical Android install/upgrade, native Windows executable launch, phone RAM/FPS/thermal/battery measurement, hardware audio or long-session balance test occurred here. GitHub Actions configuration is prepared; remote CI success must be observed separately. The spellbook suite requires --desktop because it tests mouse placement; the runner now supplies that mode. This milestone is ready for device playtesting, not a claim of commercial completion. See PLAYTEST.md and ROADMAP_ANDROID.md.
+
+## Historical verification (earlier versions; retained as supplied)
+
+# 0.15.0 Wild Waters verification
+
+82 dedicated fishing integration checks pass against the source, the compiled Windows pack and the exact game resources extracted from the signed Android APK. They exercise old-save migration, malformed records, actual rod menu callbacks and costs, real world casting, immediately saved bait, duplicate/early/late reeling, native game-tick bites, one-catch rewards, movement/dodge/attack/spell/pause/dungeon interruptions, hostile proximity, full stacks, all regional species, rare Starfin, exact one-time collection reward, save/JSON transfer, cooking costs and food/water effects, reachable fires, reserved construction space, tracking priority, menu bounds in phone portrait/landscape and desktop, and native drawing callbacks.
+
+Ten additional native touch checks pass against source and shipped Android game resources. They dispatch screen-touch plus Android-style emulated mouse events directly over the enabled Craft fishing rod button. Swipes scroll or respect list bounds without crafting; taps consume each ingredient once. Portrait and landscape are covered. These checks use a separate isolated fixture to avoid inheriting the unrelated garden test's scroll state.
+
+Regression suites pass with isolated profiles: 266 gameplay/save, 35 camp survival/building, 25 auto pickup, 73 Survival mode, 76 Survival kit, 107 farming, 109 desktop, 45 spellbook and 87 native menu scrolling checks. The menu suite includes the fishing journal. The shipped Windows pack also passes 20 general release checks. Passing logs contain no script errors or failed checks. The release fishing prompt test accepts the desktop E prefix as well as the mobile wording.
+
+Android release export and ZIP integrity checks pass. apksigner verifies v2/v3 signatures using the existing certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. Manifest: app.runebound.godot, code 22 / 0.15.0-wild-waters, minimum API 24, target API 35, ARM64. The native template was recovered from the previous APK after removing its old game resources and signing metadata, then exported and signed anew. Windows export uses the matching Godot 4.5.1 x64 runtime and current version metadata. Both shipped packs execute the new fishing logic in the engine.
+
+Limits: Android installation and native Windows executable startup, rendered appearance, physical touch feel, audio and device FPS have not been tested on hardware here. The new artwork is code-drawn in the existing style. Engine checks do not establish physical-device performance or long-term fishing balance. No rendered screenshot QA is claimed.
+
+## Historical verification
+
+# 0.14.0 Trailcraft verification
+
+76 dedicated kit checks pass against the source and again against both the compiled Windows pack and the exact resources extracted from the signed Android APK. They cover old-save defaults, invalid ownership/cooldown rejection, six-charge save validation, exact crafting costs, reachable workbench requirements, duplicate prevention, no free water, real spring refill and drink consumption, winter/summer exposure and live Survival ticks, cloak toggling, unchanged gear, bedroll costs and limits, hostile/wildlife checks, dungeons/building/defeat guards, persistence, active-time cooldown, normal bed regression, menu/button bounds and phone-gauge separation from class controls.
+
+Regression suites pass: 266 gameplay/save checks, 35 camp survival/building, 25 auto pickup, 107 farming, 109 desktop, 73 Survival mode, 45 spellbook and 83 touch-menu scrolling checks. The scrolling suite includes the kit menu in portrait and landscape. The compiled Windows pack also passes its 20 general release checks. Passing logs contain no script errors or failed checks. Tests use isolated local profiles. Initial concurrent runs of three suites ended without check output, so those suites were rerun sequentially to obtain their actual passing results.
+
+Android export succeeds. ZIP integrity, compiled kit/game/data/UI scripts and native ARM64 library are checked. apksigner verifies v2/v3 signatures with the unchanged certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. Manifest: app.runebound.godot, code 21 / 0.14.0-trailcraft, minimum API 24, target API 35. The clean native template was recovered from the previous signed APK with old game assets and signing metadata removed, then exported and signed anew.
+
+Windows x64 export succeeds; its exact compiled pack is exercised above. The native Windows executable and Android APK were not run on physical devices. Headless engine checks do not establish rendered appearance, audio, touch feel, Windows graphics-driver support or achieved device FPS. An X display could not open a listening socket here, so no rendered screenshot QA is claimed. The portable editable project has empty custom-template fields; source excludes build output and test profiles.
+
+## Historical verification
+
+# 0.13.0 Wilds & Wonders verification
+
+73 Survival mode checks pass: migration of old characters to Classic; malformed needs rejection; real active-play food/water/rest drain; pause behavior; spring proximity and E interaction; flask capacity and charge consumption; raw and cooked food consumption; tea; cold, winter, summer heat, snow, fire fuel and roof effects; real deprivation damage without passive recovery cancelling it; exhaustion movement penalty; safe bed rest and its supply costs; garden harvest objective; chapter goal reward and repeat protection; mode switching without refill; five-floor Survival completion and Classic floor-six regression; defeat recovery; responsive gauge and menu widths; JSON roundtrip.
+
+45 spellbook checks pass: legacy starter loadout; invalid ranks and slot rejection; merchant proximity, level, price and rank caps; slot swaps; preview without mana consumption; cancel with right click or Escape; confirmation spending once; delayed meteor damage and burn; placement wall blocking; cooldown; chain jumps; directional ice lance swept collision and slow; repeated blizzard pulses and expiry; Sunburst heal/damage; Ward's reduction in real enemy strikes and lack of deprivation immunity; pause and scene cleanup; native menu widths; hotbar labels and saved assignments. Quality controls and fixed light-pool behavior are checked.
+
+All 20 integration suite runs pass with isolated local profiles: auto pickup, desktop, safe desktop boot, gameplay/save, menu scrolling, rotation, movement in both orientations, live frames in both orientations, camp survival/building, opening forest, region/class expansion, presentation, contracts, weather, trader, farming, Survival mode and spellbook. There are no script errors in passing logs. The final hotbar, artwork and Survival fatal-damage adjustment were rechecked with the desktop, Survival mode and spellbook suites.
+
+Windows x64 release export succeeds. Its actual compiled Runebound.pck passes 20 release checks, including native keyboard/aimed input, auto pickup, menu pause, save export, enabling Survival and actual gauge drain, buying/equipping Meteor, preview/confirmation/expiry, Survival supplies, lighting-pool presence and native draw callbacks. PE architecture and 0.13.0.0 product metadata are verified.
+
+Limits: the Windows PE executable was not run on Windows in this environment. The compiled pack was loaded with Linux Godot using its exported laptop feature. A native rendered graphics display could not be opened here; no screenshot, Windows GPU FPS, audio, actual fullscreen behavior, file-picker or physical device validation is claimed. Balance of the five-day chapter and spell economy still needs playtesting. No new Android APK is included.
+
+## Historical verification
+
 # 0.12.0 Laptop Edition verification
 
 109 desktop checks passed with real native input events and engine callbacks. Coverage includes desktop detection; 1280x720 logical view; hidden touch joystick; native mouse hotbar; physical WASD input, release and normalized diagonals; world-space pointer aim; held attacks, cooldown repeats and release over UI; keyboard attacks; hotbar taps without duplicate world actions; preserving aim while hovering GUI; aimed arrows and Firebolt without a locked target; mana costs; shifted physical skill keys; forward sword arcs and miss animations; shelter restrictions; keyboard/right-mouse dodges and fixed dodge direction; R/E/Escape construction controls; camp/map/equipment shortcuts; automatic combat toggle; paused calendars; focus-loss handling; hotbar and menu bounds at 1366x768, 1920x1080 and 960x540; settings, F11 and view changes; saved aim/view preferences; 30/60 FPS caps; native Save-dialog configuration; filesystem export, validated shared JSON and real import callbacks with partial crops; failed-write reporting; and native world/reticle drawing. One additional safe-mode boot check confirms Close view, windowed preference, 30 FPS and disabled weather particles.

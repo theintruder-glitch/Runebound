@@ -47,11 +47,16 @@ func build_palette(season:String) -> void:
 		colors[0]=Color("514331");colors[1]=Color("5c4933");colors[2]=Color("483d30");colors[11]=Color("6a5540")
 	elif season=="Winter":
 		colors[0]=Color("8ba4a6");colors[1]=Color("98afb0");colors[2]=Color("829da0");colors[11]=Color("728c8a");colors[3]=Color("50696a");colors[8]=Color("425c61")
+	var noise=FastNoiseLite.new();noise.seed=1594;noise.frequency=.13
 	var rng = RandomNumberGenerator.new()
 	rng.seed = 1594
 	for tile in range(12):
 		image.fill_rect(Rect2i(tile*TILE,0,TILE,TILE),colors[tile])
-		for i in range(35):
+		for px in range(TILE):
+			for py in range(TILE):
+				var variation=noise.get_noise_2d(px,py)*.14
+				image.set_pixel(tile*TILE+px,py,colors[tile].lightened(variation) if variation>0 else colors[tile].darkened(-variation))
+		for i in range(22):
 			var px = tile*TILE+rng.randi_range(2,45)
 			var py = rng.randi_range(2,45)
 			image.fill_rect(Rect2i(px,py,2,3),colors[tile].lightened(rng.randf_range(.03,.14)))
@@ -152,6 +157,7 @@ static func tile_hash(x: int,y: int,salt: int=0) -> float:
 func _process(dt: float) -> void:
 	if game==null or game.hero.is_empty():
 		return
+	texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR if game.graphics.enhanced() else CanvasItem.TEXTURE_FILTER_NEAREST
 	refresh_scenery()
 	if game.playing:
 		clock += dt
@@ -160,6 +166,7 @@ func _process(dt: float) -> void:
 func _draw() -> void:
 	if game==null or game.hero.is_empty():
 		return
+	game.fishing.draw_line(self)
 	var hero_position = Vector2(game.hero.x,game.hero.y)
 	var profile_start = Time.get_ticks_usec() if profile_enabled else 0
 	draw_bounds = Rect2(game.camera.position-get_viewport_rect().size/2-Vector2(80,80),get_viewport_rect().size+Vector2(160,160))
@@ -205,7 +212,9 @@ func _draw() -> void:
 			continue
 		var color = Color("e4cf9b") if shot.kind=="bow" else Color("ffb077") if shot.kind=="fire" else Color("c9adf8")
 		if shot.get("enchant",0)>0: color=[color,Color("ffbc80"),Color("9fe0f0"),Color("cdb4f4"),Color("edabc0")][int(shot.enchant)]
+		color=shot.get("color",color)
 		var direction = shot.velocity.normalized()
+		if shot.get("lance",false): draw_line(shot.pos-direction*30,shot.pos+direction*9,color,5,true)
 		if shot.kind!="bow":
 			var trail=color;trail.a=.35
 			draw_line(shot.pos-direction*26,shot.pos,trail,8)
@@ -227,6 +236,8 @@ func _draw() -> void:
 		else:
 			draw_circle(effect.pos,2,color)
 
+	game.spellbook.draw(self)
+	game.graphics.atmosphere(self)
 	draw_weather()
 	game.desktop.draw_reticle(self)
 	if profile_enabled:
@@ -258,7 +269,11 @@ func draw_hero(at: Vector2) -> void:
 		var foot=Vector2(side*5,15)+Vector2(facing.x,facing.y*.7)*bob*side
 		draw_line(Vector2(side*5,5),foot,Color("29383b"),6)
 		draw_rect(Rect2(foot-Vector2(3,0),Vector2(7,4)),Color("baa381"))
-	draw_rect(Rect2(-10,-9,20,19),color)
+	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(-15,13),Vector2(0,19),Vector2(13,12),Vector2(8,-10)]),color.darkened(.55))
+	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(7,-10),Vector2(11,8),Vector2(4,13),Vector2(-10,8)]),color)
+	draw_line(Vector2(-7,-7),Vector2(-7,6),color.lightened(.25),2,true)
+	draw_line(Vector2(2,-7),Vector2(2,8),color.darkened(.3),2,true)
+	draw_rect(Rect2(-10,4,20,4),Color("514437"));draw_rect(Rect2(-2,3,5,6),Color("e7c37f"))
 	draw_line(Vector2(-12,-5),Vector2(-14,6)+facing*bob*.4,Color("d6b494"),5)
 	draw_line(Vector2(12,-5),Vector2(14,6)-facing*bob*.4,Color("d6b494"),5)
 	draw_rect(Rect2(-7,-23,14,14),Color("e5c39f"))
@@ -381,7 +396,7 @@ func draw_visual(effect:Dictionary) -> void:
 				var center=pos+Vector2((i-1)*15,-progress*35-i*5)
 				draw_line(center-Vector2(0,5),center+Vector2(0,5),color,2)
 				draw_line(center-Vector2(5,0),center+Vector2(5,0),color,2)
-		"fire":
+		"fire","meteor","sunburst":
 			var r=radius*(.25+progress*.75)
 			var fill=color;fill.a*=.25
 			draw_circle(pos,r,fill)

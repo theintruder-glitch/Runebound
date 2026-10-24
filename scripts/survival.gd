@@ -2,9 +2,11 @@ extends RefCounted
 const Data=preload("res://scripts/data.gd")
 const STRUCTURES=["Campfire","Shelter","Workbench","Wall","Door","Bed","Storage","Roof","Garden"]
 var moving:Dictionary={}
-const FOODS={"Warm tea":{"hp":15,"mp":15},"Roasted berries":{"hp":35,"mp":0},"Herbal stew":{"hp":70,"mp":25},"Roasted meat":{"hp":50,"mp":0},"Bog remedy":{"hp":35,"mp":50},"Trail stew":{"hp":85,"mp":15}}
-const MATERIALS=["Warm tea","Wood","Stone","Fiber","Berries","Herbs","Iron","Plank","Rope","Roasted berries","Herbal stew","Resin","Crystal","Glowcap","Reeds","Frost shard","Pine resin","Raw meat","Hide","Roasted meat","Bog remedy","Trail stew"]
+const FOODS={"Grilled fish":{"hp":55,"mp":0},"Fisher stew":{"hp":80,"mp":15},"Warm tea":{"hp":15,"mp":15},"Roasted berries":{"hp":35,"mp":0},"Herbal stew":{"hp":70,"mp":25},"Roasted meat":{"hp":50,"mp":0},"Bog remedy":{"hp":35,"mp":50},"Trail stew":{"hp":85,"mp":15}}
+const MATERIALS=["Raw fish","Grilled fish","Fisher stew","Warm tea","Wood","Stone","Fiber","Berries","Herbs","Iron","Plank","Rope","Roasted berries","Herbal stew","Resin","Crystal","Glowcap","Reeds","Frost shard","Pine resin","Raw meat","Hide","Roasted meat","Bog remedy","Trail stew"]
 const RECIPES={
+ "Grilled fish":{"cost":{"Raw fish":1,"Herbs":1},"station":"fire","desc":"Restores 55 health. In Survival, restores 35 food. Use a reachable lit campfire."},
+ "Fisher stew":{"cost":{"Raw fish":2,"Herbs":2,"Berries":1},"station":"fire","desc":"Restores 80 health and 15 mana. In Survival, restores 55 food and 18 water. Use a reachable lit campfire."},
  "Garden":{"cost":{"Wood":4,"Stone":2,"Fiber":2},"station":"","desc":"An outdoor garden plot. Plant carried berries, herbs or discovered glowcaps. Up to 12 plots; walk over them freely."},
  "Warm tea":{"cost":{"Herbs":2,"Berries":1},"station":"fire","desc":"Restores 15 health and mana, then +1 mana/sec outside combat for 3 minutes. Refreshes rather than stacks."},
  "Resin blade":{"cost":{"Resin":4,"Iron":4},"station":"bench","kind":"sword","enchant":1,"discovery":"forest","desc":"A Rare Ember-enchanted sword using forest resin."},
@@ -123,7 +125,7 @@ func tick(dt:float) -> void:
    var was_lit=s.fuel>0
    s.fuel=maxf(0,s.fuel-dt)
    if was_lit and s.fuel==0: revision+=1
- if sheltered(): game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+dt*6)
+ if sheltered() and not game.expedition.deprived(): game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+dt*6)
  refresh_timer-=dt
  if refresh_timer<=0:
   refresh_timer=1
@@ -137,10 +139,12 @@ func cost_text(recipe:String) -> String:
 func reason(recipe:String,check_place:bool=true) -> String:
  if not RECIPES.has(recipe): return "Unknown recipe"
  var r=RECIPES[recipe]
+ if recipe not in STRUCTURES and r.station!="bench" and count(r.get("product",recipe))>=99999: return "Make room in your carried supplies"
  if r.has("discovery") and not game.hero.exploration.discovered.get(r.discovery,false): return "Discover "+game.exploration.REGIONS[r.discovery].landmark+" to learn this recipe"
  if r.station=="fire":
   var fire=near("Campfire")
   if fire.is_empty() or fire.fuel<=0: return "Stand near a lit campfire"
+  if recipe in ["Grilled fish","Fisher stew"] and not game.line_clear(game.player_position(),at(fire)): return "Reach the campfire without a wall in the way"
  if r.station=="bench" and near("Workbench").is_empty(): return "Stand near a workbench"
  if recipe in STRUCTURES:
   if game.hero.dungeon!=null: return "Build in the wilds"
@@ -150,6 +154,8 @@ func reason(recipe:String,check_place:bool=true) -> String:
    if game.exploration.region_at(place_position())=="caves": return "Garden plots need outdoor ground"
   if check_place:
    var pos=place_position()
+   for spot in game.fishing.SPOTS.values():
+    if footprint(recipe,pos,game.build_rotation).grow(12).intersects(Rect2(spot.pond-Vector2(85,85),Vector2(170,170))): return "Keep fishing pools and their banks clear"
    if footprint(recipe,pos,game.build_rotation).grow(25).has_point(game.trader.POSITION): return "Keep Mara's trading stall approachable"
    if footprint(recipe,pos,game.build_rotation).grow(25).has_point(game.contracts.BOARD): return "Keep the quest board approachable"
    for region_info in game.exploration.REGIONS.values():
@@ -205,6 +211,7 @@ func eat(food:String) -> bool:
  game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+FOODS[food].hp)
  game.hero.mp=minf(Data.max_mp(game.hero),game.hero.mp+FOODS[food].mp)
  if food=="Warm tea": game.hero.warmUntil=game.hero.worldTime+180
+ game.expedition.on_food(food)
  game.save_game(); game.hud.update_hud()
  return true
 func enemy_direction(e:Dictionary,dt:float) -> Vector2:
@@ -285,13 +292,14 @@ func transfer(s:Dictionary,deposit:bool) -> bool:
   if source[key]==0: source.erase(key)
  game.save_game(); return true
 func rest(s:Dictionary) -> bool:
- if s.kind!="Bed" or at(s).distance_to(game.player_position())>110: return false
+ if s.is_empty() or s.get("kind","")!="Bed" or not s in data().structures or at(s).distance_to(game.player_position())>110 or not game.line_clear(game.player_position(),at(s)): return false
  for e in game.enemies:
-  if not e.dead and e.pos.distance_to(game.player_position())<180:
+  if not e.dead and not e.get("neutral",false) and e.pos.distance_to(game.player_position())<180:
    game.notify("Enemies are too close to rest.",3); return false
  var pos=at(s)+Vector2(0,48)
  if blocked(pos,12): game.notify("Clear space beside the bed first.",3); return false
  game.hero.respawn={"x":pos.x,"y":pos.y}
+ game.expedition.sleep_at_bed()
  game.hero.hp=Data.max_hp(game.hero); game.hero.mp=Data.max_mp(game.hero)
  game.notify("Rested. This bed is now your return point after defeat.",4)
  game.save_game(); return true

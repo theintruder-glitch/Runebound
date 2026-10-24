@@ -1,0 +1,13 @@
+RUNEBOUND 0.16.0 — WINDOWS x64
+
+Extract all files, then open Runebound.exe beside Runebound.pck.
+Keep any exported DLLs in the same directory.
+WASD/arrows: move. Mouse: aim. Space/left mouse: attack. Shift/right mouse: dodge.
+1/2/3: spells. Q: class skill. E: interact. C: camp. I: inventory. M: map.
+V: Survival supplies. B: spellbook. Escape: pause/back. F11: fullscreen.
+Start-Low-Power.bat selects safe settings. Start-OpenGL.bat selects native OpenGL.
+
+Your existing save directory and application name remain unchanged.
+Pause > Export character save makes a transferable JSON backup for Windows or Android.
+Gameplay content matches the Android build. Windows executable startup, graphics drivers,
+audio and long-session performance still require testing on Windows hardware.

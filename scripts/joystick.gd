@@ -3,13 +3,17 @@ extends Control
 var game
 var finger = -1
 var direction = Vector2.ZERO
+const DEAD_ZONE = 0.12
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	custom_minimum_size = Vector2(116,116)
+	visibility_changed.connect(func():
+		if not is_visible_in_tree(): reset())
 
 func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree() or game==null or not game.playing:
+		if finger!=-1: reset()
 		return
 	if event is InputEventScreenTouch:
 		if event.pressed and finger==-1 and get_global_rect().has_point(event.position):
@@ -23,7 +27,7 @@ func _input(event: InputEvent) -> void:
 		move_knob(event.position)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=-1 and event.button_index==MOUSE_BUTTON_LEFT:
-		if event.pressed and get_global_rect().has_point(event.position):
+		if event.pressed and finger==-1 and get_global_rect().has_point(event.position):
 			finger = -2
 			move_knob(event.position)
 			get_viewport().set_input_as_handled()
@@ -35,9 +39,14 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func move_knob(at: Vector2) -> void:
-	direction = ((at-global_position-size/2)/(size.x*.33)).limit_length(1)
+	var offset = (at-global_position-size/2)/(size.x*.33)
+	var strength = clampf((offset.length()-DEAD_ZONE)/(1.0-DEAD_ZONE),0,1)
+	direction = offset.normalized()*strength
 	game.move_vector = direction
 	queue_redraw()
+
+func _notification(what:int) -> void:
+	if what in [NOTIFICATION_APPLICATION_PAUSED,NOTIFICATION_APPLICATION_FOCUS_OUT]: reset()
 
 func reset() -> void:
 	finger = -1

@@ -11,6 +11,7 @@ func _draw() -> void:
 	if world==null or world.game.hero.is_empty():
 		return
 	var game = world.game
+	game.graphics.details(self,bounds)
 	for decoration in decorations:
 		var region=decoration.get("biome","forest")
 		var tint=Color(.85,1,1.15) if region=="snow" else Color(.8,.9,.85) if region=="swamp" else Color(.8,.8,1) if region=="caves" else Color.WHITE
@@ -35,6 +36,8 @@ func _draw() -> void:
 		draw_landmarks(game)
 		draw_quest_board(game)
 		draw_trader(game)
+		draw_spring(game)
+		game.fishing.draw_pools(self,bounds)
 	for chest in visible_chests:
 		var opened = game.hero.opened.has(chest.id)
 		draw_texture(world.textures["chest_open" if opened else "chest"],chest.pos-Vector2(32,64))
@@ -201,3 +204,11 @@ func draw_trader(game) -> void:
 	draw_line(person+Vector2(-11,-15),person+Vector2(-14,-4),Color("dfbb98"),4)
 	draw_line(person+Vector2(11,-15),person+Vector2(17,-19),Color("dfbb98"),4)
 	draw_string(ThemeDB.fallback_font,pos+Vector2(-47,-79),"TRADER MARA",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e9d89f"))
+
+func draw_spring(game) -> void:
+	var pos:Vector2=game.expedition.SPRING
+	if not bounds.grow(90).has_point(pos): return
+	draw_circle(pos,36,Color("233c4a"));draw_circle(pos,29,Color("4a91a5"));draw_circle(pos-Vector2(5,4),21,Color("68b9c4"))
+	for i in range(9): draw_circle(pos+Vector2.from_angle(i*TAU/9)*34,7,Color("93a69c"))
+	draw_arc(pos,18,.4,2.8,20,Color("ceeee7"),2,true)
+	draw_string(ThemeDB.fallback_font,pos+Vector2(-48,56),"FRESH SPRING",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("c8e9e4"))

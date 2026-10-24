@@ -37,6 +37,7 @@ func use() -> bool:
  if cls in ["Mage","Ranger","Arcane Archer"] and target.is_empty(): game.notify("No enemy in skill range.",2); return false
  var near=game.enemies.filter(func(e):return not e.dead and not e.get("neutral",false) and e.pos.distance_to(game.player_position())<150 and game.line_clear(game.player_position(),e.pos))
  if cls in ["Warrior","Spellblade","Reaper"] and near.is_empty(): game.notify("Move closer to an enemy.",2); return false
+ game.fishing.cancel()
  game.hero.mp-=skill.cost; cooldown=skill.cooldown; game.swing_time=.3
  game.sound("spell")
  game.visual_fx("rune",game.player_position(),105,Color(Data.CLASSES[cls].color),.5)

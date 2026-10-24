@@ -1,52 +1,54 @@
-# Runebound — Android Edition (Godot v0.12.0)
+# RUNEBOUND 0.16.0 — Shelter & Steel
 
-**Runebound is an offline fantasy RPG developed for Android phones.** This repository's main build target is **Android**, not Windows. It contains editable Godot/GDScript game source, not an installable APK.
+An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
 
-## Android game features
+## This milestone
 
-- Touchscreen joystick, attack, dodge, spells and class skills
-- Portrait, landscape, and auto-rotate modes
-- Four explorable regions: Mossveil Forest, Hollowdeep Caves, Whisperfen Swamp, and Frostfall Reach
-- Eight character classes (including adventure-unlocked classes), directional combat, enemies, spells, loot and dungeons
-- Auto pickup for nearby world resources, crafting, shelters, building, storage and campfires
-- Weather and seasonal changes, crop gardens, quest board, and camp trader
-- Local character saving; the game does not require a connection or an app store
+- Responsive joystick dead zone, finger ownership, and reliable release when controls hide, the app loses focus, or play pauses.
+- Recovery saves keep their last valid backup instead of replacing it with a corrupt primary.
+- Survival wetness: rain and snow soak clothing; wet clothing worsens cold exposure; cover dries clothing and reachable fires dry it faster. Older characters start dry. Classic has no needs drain.
+- Walls block campfire warmth and bed interaction. Peaceful wildlife does not block bed rest. Removed beds cannot be used through stale menu selections.
+- Enemy attacks cancel when enemies disengage or you reach shelter. Existing dodge, class abilities, telegraphs, weapon animations and learned spells remain.
+- Pinned engine/templates, JDK 17 and Android SDK export helpers; isolated regression runner; Android and Windows build workflows.
 
-**Not yet implemented in this recovered version:** a separate full hunger/thirst/sleep survival mode. These were discussed for a future update, not confirmed as shipped in v0.12.0.
+Existing content includes eight classes, four regions, quests and regional trials, five-floor Survival expeditions, Classic endless dungeons, building, gardens, crafting, trading, equipment, spell purchases and hotbar assignments, fishing, cooking, weather, hunger, thirst, sleep, warmth, waterskins, cloaks and bedrolls.
 
-## Edit on an Android phone
+## Play and preserve saves
 
-1. Install the official **Godot 4 Android editor** (Godot 4.5.x is appropriate for this source).
-2. Clone or download this repository, then import the root `project.godot`.
-3. Open the main scene and tap **Play** to test the project in the Android editor.
-4. Edit files under `scripts/`, `scenes/`, and `assets/`. The current Android export preset lives in `export_presets.cfg`.
+**Android:** install `Runebound-Godot-v0.16.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **23**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
-The project's Android configuration uses the Godot Compatibility renderer and ARM64 export. The project itself can be edited on a computer if desired, but there is **no Windows export preset** in this Android-focused repository.
+**Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
-## Build an APK
+The original non-Godot v0.2 Android app has a separate package and private save directory; it still needs its existing save-transfer procedure. Do not uninstall it to move a character.
 
-Requires Godot 4.5.x with its matching Android export templates, a compatible Android SDK and JDK 17. This repository includes an **Android** export preset:
+## Editable source and tests
+
+Import `project.godot` into **Godot 4.5.1 standard GDScript**. Compatibility renderer; no external game plugins. Main systems remain under `scripts/`; `scenes/main.tscn` is the entry scene.
 
 ```bash
-mkdir -p builds
-godot --headless --path . --export-release Android builds/Runebound-Android-v0.12.0.apk
+bash BUILD-ANDROID-CODEX.sh --engine-only
+export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
+"$GODOT_BIN" --headless --path . --import
+python3 tools/run_tests.py
 ```
 
-The release export needs a correctly configured **private signing key**. The current package ID is `app.runebound.godot` and the current version code is `19`, inherited from the existing Android project. The export preset is for ARM64. Do not change the package ID or signing certificate if you intend to install an update over your existing Runebound app.
+The runner selects each suite's required desktop flags, covers both movement orientations, checks exit codes and script/assertion errors, and requires a completion marker. Every suite gets a disposable XDG save/config directory, protecting developer characters. `--suite test_stability` selects the new checks. Tests do not establish physical-phone FPS or touch feel.
 
-**Your existing Android signing key is not in this public repository.** Keep it private and backed up. A new or debug signing key generally cannot update an app installed with a different certificate. To protect existing character saves, **do not uninstall the app or clear its data** while testing upgrades.
+## Build
 
-A manually dispatched Android GitHub Actions workflow is present in `.github/workflows/android-debug.yml`; it requires the previously used debug signing identity in GitHub Secrets. It is not proof that an installable, update-compatible APK has been built.
+Linux x86_64 helpers download official pinned Godot 4.5.1 assets and Android command-line tools with SHA-256 verification. Java 17 must be installed. `--engine-only` also enables Windows builds without an Android SDK or signing key.
 
-## Current source status
+For Android, supply the **original** keystore through `GODOT_ANDROID_KEYSTORE_RELEASE_PATH`, its alias through `GODOT_ANDROID_KEYSTORE_RELEASE_USER`, and password through `GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD`. Keys and passwords are not included in this source or committed to GitHub. Recover the original identity from your privately retained v0.15.0 source; do not generate a substitute.
 
-- **Editable Android-oriented source:** v0.12.0, recovered and uploaded.
-- **Latest confirmed APK from this repository:** none produced or validated in this GitHub conversion.
-- **Proposed next version:** v0.13.0; newer editable source has not yet been incorporated.
-- Android screen/touch compatibility and installed-APK upgrade behavior still require testing on the actual device.
+```bash
+bash BUILD-ANDROID-CODEX.sh --accept-sdk-licenses
+bash BUILD-WINDOWS-CODEX.sh
+```
 
-The Android game uses `scripts/game.gd`, `scripts/hud.gd`, `scripts/joystick.gd`, `scripts/survival.gd`, and other GDScript files. A small desktop-support script remains because game code references it, but it is inactive on Android; removing it without refactoring would break the project.
+The license flag accepts the SDK terms. The prebuilt APK path installs platform tools, Android 35 and Build-Tools 35.0.1; no Gradle/NDK compilation is required. The Android helper imports assets, runs regression suites, exports release ARM64, checks ZIP integrity, original certificate, actual manifest/version/ABI, ELF load alignment and ZIP alignment for 16 KB devices. `--skip-test` is for an already-tested checkout; asset import and package validation still run. Windows exports and tests its actual compiled PCK before packaging all output files.
 
-Development check scripts are under `tests/`. Historical feature and test notes are in `VERIFICATION.md` and `PERFORMANCE.md`.
+GitHub Actions `.github/workflows/build.yml` runs source tests and Windows exports on pushes and PRs. Android release export is manually dispatched with `build_android=true`, using repository secrets `ANDROID_RELEASE_KEYSTORE_BASE64`, `ANDROID_RELEASE_KEY_ALIAS`, and `ANDROID_RELEASE_KEY_PASSWORD`. It fails if the original identity is absent or different. Remote CI runs must be checked separately; local validation is recorded in `VERIFICATION.md`.
 
-This is a development game, not a published store release.
+## Release status
+
+This is a development milestone for final playtesting, not a finished commercial release. See `VERIFICATION.md`, `PLAYTEST.md`, and `ROADMAP_ANDROID.md` for evidence, limits and remaining work. Native Android installation, native Windows startup, hardware audio, long sessions, balance and Motorola Edge 2025 performance still require actual-device tests.

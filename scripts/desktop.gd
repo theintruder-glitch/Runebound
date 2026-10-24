@@ -13,6 +13,7 @@ var pointer_screen=Vector2.ZERO
 
 func initialize() -> void:
 	enabled=OS.has_feature("laptop") or "--desktop" in OS.get_cmdline_user_args() or (OS.has_feature("pc") and DisplayServer.get_name()!="headless")
+	if "--mobile" in OS.get_cmdline_user_args(): enabled=false
 	if not enabled: return
 	var config=ConfigFile.new()
 	if config.load("user://desktop.cfg")==OK:
@@ -26,7 +27,7 @@ func initialize() -> void:
 		view_name="Close";fullscreen=false
 	var window=game.get_window()
 	window.min_size=Vector2i(960,540)
-	window.title="Runebound · Laptop Edition"
+	window.title="Runebound · Shelter & Steel"
 	if DisplayServer.get_name()!="headless":
 		var usable=DisplayServer.screen_get_usable_rect()
 		window.size=Vector2i(mini(1152,maxi(960,usable.size.x-80)),mini(648,maxi(540,usable.size.y-100)))
@@ -82,6 +83,10 @@ func handle_input(event:InputEvent) -> void:
 		pointer_screen=event.position;pointer_seen=true;update_aim()
 	elif event is InputEventMouseButton and event.pressed:
 		pointer_screen=event.position;pointer_seen=true;update_aim()
+		if not game.spellbook.targeting.is_empty():
+			if event.button_index==MOUSE_BUTTON_LEFT: game.spellbook.confirm()
+			elif event.button_index==MOUSE_BUTTON_RIGHT: game.spellbook.targeting=""
+			game.get_viewport().set_input_as_handled();return
 		if event.button_index==MOUSE_BUTTON_LEFT:
 			if not game.build_recipe.is_empty(): game.interact()
 			else: mouse_attack=true;game.attack()
@@ -97,9 +102,12 @@ func handle_key(event:InputEventKey) -> bool:
 	if not game.playing: return false
 	match code:
 		KEY_ESCAPE:
+			if not game.spellbook.targeting.is_empty(): game.spellbook.targeting="";return true
 			if not game.build_recipe.is_empty(): game.cancel_build();return true
 		KEY_R:
 			if not game.build_recipe.is_empty(): game.build_rotation=(game.build_rotation+1)%4;return true
+		KEY_B: game.hud.show_character("spells");return true
+		KEY_V: game.hud.show_character("needs");return true
 		KEY_C: game.hud.show_character("camp");return true
 		KEY_T:
 			game.hero.auto=not game.hero.auto;game.hud.update_hud();game.save_game();return true

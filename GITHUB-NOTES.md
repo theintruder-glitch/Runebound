@@ -1,11 +1,7 @@
-# Runebound Android repository
+# GitHub development handoff — 0.16.0
 
-This repository contains the recovered **v0.12.0 editable Godot game source**, configured for **Android ARM64** with touchscreen controls and an Android-only export preset.
+This branch advances the repository from its older v0.12.0 snapshot using the user-supplied v0.15.0 source, then adds the Shelter & Steel stabilization milestone. Android remains primary; Windows uses the same gameplay scripts.
 
-The source was previously described as the "Laptop Edition" because that version also added Windows-specific functionality. This repository is now Android-focused. Desktop-related helper code stays only where it is still referenced by the game; it does not turn Android exports into Windows builds.
+Read README.md, VERIFICATION.md, PLAYTEST.md and ROADMAP_ANDROID.md. New tests are in tests/test_stability.gd. The reproducible runner is tools/run_tests.py. The obsolete debug workflow is superseded by .github/workflows/build.yml.
 
-**Not included:** Android signing keys, prior APKs, the historical legacy-Android migration bundle, or a completed v0.13.0 project.
-
-Do not commit `.jks` files or credentials. Keep your original Android signing key secure to preserve update compatibility with the app already installed on your phone.
-
-Building and testing the APK is a separate step; changing the export preset does **not** automatically create an installable APK.
+No signing keys, passwords, build binaries or player saves are committed. The new workflow requires original release-signing secrets for manually requested Android exports; automatic PR checks and Windows builds do not need a key. Local build verification is recorded separately from remote CI and physical-device results.

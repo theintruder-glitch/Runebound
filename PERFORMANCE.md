@@ -1,3 +1,9 @@
+# 0.13 PC performance bounds
+
+Graphics quality has Performance, Balanced and Rich settings. A fixed pool contains eight shadow-free PointLight2D nodes; Balanced enables up to four and Rich up to eight. Performance and the safe launcher disable those lights and ground-detail additions. Scenery draw commands are cached using the original camera/chest/build invalidation path. Terrain texture noise is generated when the seasonal palette changes, not every frame. Spell zones and temporary visual effects use existing bounded world simulation and redraw paths. The laptop frame cap is adjustable to 30 or 60 FPS.
+
+These bounds and passing headless integration checks do not establish the player's Windows GPU performance. This environment could not open a native graphics display; no rendered screenshot or physical FPS result is claimed. Use Performance or Start-Low-Power.bat on a laptop where Balanced is slow.
+
 # Reproducing the script benchmark
 
 Run `godot --headless --path . --script res://tests/benchmark.gd`.
