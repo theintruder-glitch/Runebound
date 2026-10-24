@@ -468,6 +468,7 @@ func show_title(has_save: bool) -> void:
 	if has_save:
 		action(content,"Continue journey",func():game.start_character(Data.read_save()))
 	action(content,"Begin a new journey",func():show_classes(true))
+	paragraph("Survival available: continue or create a character, then open Pause → SURVIVAL / ADVENTURE.",14,Color("bce7b7"))
 	action(content,"Import a character save",choose_import)
 	if game.desktop.enabled: action(content,"Laptop settings and controls",show_desktop_settings)
 	paragraph("This Godot edition has its own save. To bring a character from v0.2, use the included Save Transfer update and export your character first.",12)
@@ -494,7 +495,9 @@ func show_pause(message: String="") -> void:
 	paragraph(game.weather.summary(),13)
 	paragraph("Level %d %s · %d kills · %d chests" % [game.hero.level,game.hero.className,game.hero.kills,game.hero.stats.chests])
 	action(content,"Resume journey",resume)
-	action(content,"Game mode: "+game.hero.gameMode.capitalize(),show_survival_mode)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)
+	action(content,"Explore calmly: "+("ON" if game.calm_exploration else "OFF"),func():game.set_calm_exploration(not game.calm_exploration);show_pause())
+	paragraph("Explore calmly: ordinary wilderness monsters defend themselves only when attacked. Bosses and dungeons remain dangerous.",12)
 	paragraph("%d FPS · %d enemies · %d MB engine memory" % [Engine.get_frames_per_second(),game.enemies.size(),Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0],12)
 	action(content,"Low power: "+("ON · 30 FPS" if game.low_power else "OFF · 60 FPS"),func():game.set_low_power(not game.low_power);show_pause())
 	action(content,"Auto pickup: "+("ON" if game.survival.auto_pickup else "OFF"),func():game.survival.set_auto_pickup(not game.survival.auto_pickup);show_pause())
@@ -765,6 +768,7 @@ func _draw() -> void:
 func show_camp() -> void:
 	var camp=game.survival
 	paragraph(game.forest.objective(),15,Color("eddaaa"))
+	action(content,"Survival mode and travel supplies",show_survival_mode)
 	action(content,"Garden plots · %d ready" % game.farming.ready_count(),func():show_character("farm"))
 	action(content,"Trader Mara",func():show_character("trader"))
 	action(content,"Quest board and active jobs",func():show_character("quests"))
@@ -969,7 +973,7 @@ func show_quests() -> void:
 	paragraph("Progress counts only while a job is accepted. Survey jobs require new visits. Abandoning resets that job's progress and keeps your supplies. Completed jobs repost after 10 minutes of active play; menus and time away pause this timer.",12)
 	action(content,"Back to camp",func():show_character("camp"))
 	action(content,"Resume journey",resume)
-	action(content,"Game mode: "+game.hero.gameMode.capitalize(),show_survival_mode)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)
 
 func show_trader() -> void:
 	var market=game.trader
@@ -1052,4 +1056,4 @@ func show_trader() -> void:
 			action(body,"Buy back · %dg" % market.buyback_price(entry),func():market.buyback(id);show_character("trader"),not why.is_empty())
 	action(content,"Back to camp",func():show_character("camp"))
 	action(content,"Resume journey",resume)
-	action(content,"Game mode: "+game.hero.gameMode.capitalize(),show_survival_mode)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)

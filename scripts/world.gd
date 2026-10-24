@@ -129,6 +129,7 @@ func refresh_scenery(force: bool=false) -> void:
 	scenery_rebuilds += 1
 	scenery.bounds = Rect2(at-view/2-Vector2(120,120),view+Vector2(240,240))
 	scenery.decorations.clear()
+	scenery.landforms=landforms_for(scenery.bounds) if game.hero.dungeon==null else []
 	scenery.visible_chests.clear()
 	if game.hero.dungeon==null:
 		var begin = Vector2i(floori(scenery.bounds.position.x/TILE),floori(scenery.bounds.position.y/TILE))
@@ -144,6 +145,23 @@ func refresh_scenery(force: bool=false) -> void:
 		if scenery.bounds.has_point(chest.pos):
 			scenery.visible_chests.append(chest)
 	scenery.queue_redraw()
+
+func landforms_for(bounds:Rect2) -> Array:
+	var forms:Array=[]
+	var begin=Vector2i(floori(bounds.position.x/384),floori(bounds.position.y/384))
+	var end=Vector2i(ceili(bounds.end.x/384),ceili(bounds.end.y/384))
+	for x in range(begin.x,end.x+1):
+		for y in range(begin.y,end.y+1):
+			if tile_hash(x,y,9)>.65: continue
+			var pos=Vector2(x*384+192,y*384+192)
+			if pos.length()<350 or pos.distance_to(game.exploration.RUINS)<240: continue
+			var clear=true
+			for region in game.exploration.REGIONS.values():
+				if pos.distance_to(region.point)<250: clear=false
+			for structure in game.hero.survival.structures:
+				if pos.distance_to(game.survival.at(structure))<220: clear=false
+			if clear: forms.append({"pos":pos,"biome":game.exploration.region_at(pos),"ruin":tile_hash(x,y,10)>.7})
+	return forms
 
 static func tile_hash(x: int,y: int,salt: int=0) -> float:
 	var value = sin(float(x)*127.1+float(y)*311.7+salt*78.233)*43758.5453123
@@ -317,6 +335,9 @@ func draw_enemy(enemy: Dictionary) -> void:
 			draw_arc(Vector2.ZERO,14,-1.2,1.2,12,Color("dfc48e"),2)
 			draw_line(Vector2(5,-13),Vector2(5,13),Color("dfc48e"),1)
 			draw_set_transform(Vector2.ZERO)
+	if not enemy.get("neutral",false): draw_dread_details(enemy)
+	if enemy.get("retreating",false): label(at+Vector2(-24,-74),"RETREAT",9,Color("e6bc9b"))
+	elif game.unprovoked_wildlife(enemy): label(at+Vector2(-20,-74),"WARY",9,Color("b3c4a1"))
 	if enemy.get("named","")=="The Root Warden":
 		for side in [-1,1]:
 			draw_line(at+Vector2(side*10,-42),at+Vector2(side*30,-68),Color("a18a59"),5)
@@ -328,6 +349,20 @@ func draw_enemy(enemy: Dictionary) -> void:
 		draw_rect(Rect2(at+Vector2(-width/2,-enemy.radius-20),Vector2(width*maxf(0,enemy.hp/enemy.max_hp),4)),Color("dcaa7a") if enemy.boss else Color("d18d87"))
 	if enemy.boss or not game.low_power:
 		label(at+Vector2(-10,enemy.radius+17),"Lv "+str(enemy.level),10,Color("c4d0bc"))
+
+func draw_dread_details(enemy:Dictionary) -> void:
+	var at:Vector2=enemy.pos
+	var spirit=enemy.type in ["wisp","crystal_wisp"]
+	var face=at+Vector2(0,-30 if spirit else -24 if enemy.type in ["wolf","frost_wolf","slime","bog_toad"] else -43)
+	for side in [-1,1]:
+		if enemy.type not in ["slime","bog_toad"]:
+			draw_colored_polygon(PackedVector2Array([face+Vector2(side*8,-5),face+Vector2(side*20,-24),face+Vector2(side*15,1)]),Color("323d43"))
+		draw_line(face+Vector2(side*3,-1),face+Vector2(side*9,-3),Color("f08b76") if not spirit else Color("c8a1ff"),3)
+		draw_colored_polygon(PackedVector2Array([face+Vector2(side*3,6),face+Vector2(side*6,13),face+Vector2(side*8,5)]),Color("dfd8bd"))
+	if spirit:
+		for i in range(3):
+			var dx=(i-1)*10.0
+			draw_polyline(PackedVector2Array([at+Vector2(dx,-20),at+Vector2(dx+sin(clock*2+i)*5,0),at+Vector2(dx-4,12)]),Color("8b65b9aa"),2)
 
 func draw_beast(enemy:Dictionary) -> void:
 	var at=enemy.pos

@@ -216,6 +216,13 @@ func enemy_direction(e:Dictionary,dt:float) -> Vector2:
  if e.get("neutral",false):
   if distance<240: return -e.pos.direction_to(pos)*1.1
   return e.pos.direction_to(e.home)*.3 if e.pos.distance_to(e.home)>100 else Vector2.ZERO
+ e["retreating"]=false
+ if game.unprovoked_wildlife(e):
+  e.windup=0
+  return e.pos.direction_to(e.home)*.3 if e.pos.distance_to(e.home)>100 else Vector2.ZERO
+ if e.hp<e.max_hp*.25 and not e.boss and not e.has("named") and e.aggro>0 and distance<180:
+  e["retreating"]=true
+  return -e.pos.direction_to(pos)*.8
  if e.type in ["wolf","frost_wolf"] and distance<175 and game.line_clear(e.pos,pos): game.exploration.pack_alert(e)
  if sheltered() or game.abilities.stealth>0 or distance>300 or e.pos.distance_to(e.home)>420:
   e.aggro=0; e.returning=true

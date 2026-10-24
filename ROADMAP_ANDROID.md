@@ -30,6 +30,7 @@
 ## Priority 3: RPG expansion and content
 - [ ] Expand spell upgrade/buy/unlock paths, spell hotbar customization, gear and enchantment variety.
 - [ ] Make combat skills, enemies, treasure and region exploration more varied and legible on a phone.
+  - Wilderness milestone: optional calm exploration, wounded-enemy retreat and clearer monster silhouettes; deterministic terrace/ruin scenery adds visual depth while preserving old camps/routes. Physical height traversal and phone art/performance validation remain pending.
 - [ ] Improve world objectives, quests, progression pacing, crafting and camp personalization.
 - [ ] Improve art consistency and readable visual effects while keeping an adjustable low-power mode.
 - [ ] Consider a separate endless/survival challenge mode, distinct from the main storyline, with clear player choice.

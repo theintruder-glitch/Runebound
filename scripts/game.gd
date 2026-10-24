@@ -59,6 +59,7 @@ var saved: Dictionary = {}
 var low_power = true
 var is_walking = false
 var screen_landscape = false
+var calm_exploration = false
 
 func _ready() -> void:
 	desktop=DesktopScript.new()
@@ -87,6 +88,9 @@ func _ready() -> void:
 	weather.game=self
 	weather.load_settings()
 	load_performance_settings()
+	var encounter_config=ConfigFile.new()
+	if encounter_config.load("user://encounters.cfg")==OK:
+		calm_exploration=encounter_config.get_value("world","calm",false)==true
 	world = $World
 	world.game = self
 	camera = $Camera2D
@@ -891,6 +895,23 @@ func burst(at: Vector2,color: Color,count: int) -> void:
 	for i in range(count):
 		effects.append({"pos":at,"color":color,"velocity":Vector2.from_angle(randf()*TAU)*randf_range(20,110),"life":randf_range(.25,.7)})
 
+func set_calm_exploration(enabled:bool) -> bool:
+	var config=ConfigFile.new()
+	config.set_value("world","calm",enabled)
+	if config.save("user://encounters.cfg")!=OK:
+		notify("Could not save encounter preference.",3)
+		return false
+	calm_exploration=enabled
+	if enabled and hero.dungeon==null:
+		for enemy in enemies:
+			if not enemy.boss and not enemy.has("named"):
+				enemy.aggro=0
+				enemy.windup=0
+	return true
+
+func unprovoked_wildlife(enemy:Dictionary) -> bool:
+	return calm_exploration and hero.dungeon==null and not enemy.boss and not enemy.has("named") and enemy.aggro<=0
+
 func load_performance_settings() -> void:
 	var config = ConfigFile.new()
 	low_power=not desktop.enabled
@@ -938,6 +959,9 @@ func cancel_build() -> void:
 	if hud!=null: hud.build_tools.visible=false
 func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 	if enemy.get("neutral",false): return
+	if unprovoked_wildlife(enemy) or enemy.get("retreating",false):
+		enemy.windup=0
+		return
 	if abilities.stealth>0:
 		enemy.windup=0
 		return

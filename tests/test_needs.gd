@@ -46,7 +46,7 @@ func run():
 	game.tick(1)
 	check(n==before and game.needs.speed_scale()==1,"Adventure simulation preserves original movement and freezes needs")
 	game.hud.show_pause()
-	button("Game mode:").pressed.emit()
+	button("SURVIVAL / ADVENTURE").pressed.emit()
 	check(game.hud.current_page=="survival_mode" and game.hero.gameMode=="adventure","Opening mode menu does not opt in automatically")
 	button("Enable Survival · Normal").pressed.emit()
 	check(game.hero.gameMode=="survival" and Data.read_save().gameMode=="survival","Explicit menu choice enables and saves Survival")
