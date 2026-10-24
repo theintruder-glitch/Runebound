@@ -36,12 +36,14 @@ The release export needs a correctly configured **private signing key**. The cur
 
 **Your existing Android signing key is not in this public repository.** Keep it private and backed up. A new or debug signing key generally cannot update an app installed with a different certificate. To protect existing character saves, **do not uninstall the app or clear its data** while testing upgrades.
 
-A manually dispatched Android GitHub Actions workflow is present in `.github/workflows/android-debug.yml`; it requires the previously used debug signing identity in GitHub Secrets. It is not proof that an installable, update-compatible APK has been built.
+The Android GitHub Actions workflow runs on pull requests and manual dispatch. It pins Godot **4.5.1**, Java **17**, SDK/build-tools **35**, imports the project, runs the Android regression suites with isolated saves, and verifies APK identity, signature, integrity and alignment before uploading an artifact. See [ANDROID_BUILD.md](ANDROID_BUILD.md) for local commands and signing restrictions.
+
+The default artifact is **FRESH INSTALL ONLY**, signed with a disposable test key, for a separate test device/profile without Runebound. **Never uninstall your existing game or clear its data to install this artifact.** Manual `original` mode requires the existing private key through GitHub Secrets and rejects any certificate other than the historical Runebound certificate. Physical-device upgrades remain untested.
 
 ## Current source status
 
 - **Editable Android-oriented source:** v0.12.0, recovered and uploaded.
-- **Latest confirmed APK from this repository:** none produced or validated in this GitHub conversion.
+- **Latest local verification:** an ARM64 Android test APK has been exported and independently verified; see [ANDROID_BUILD.md](ANDROID_BUILD.md) for current evidence and limitations. It is not signed with the original certificate.
 - **Proposed next version:** v0.13.0; newer editable source has not yet been incorporated.
 - Android screen/touch compatibility and installed-APK upgrade behavior still require testing on the actual device.
 

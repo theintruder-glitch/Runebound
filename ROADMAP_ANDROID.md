@@ -2,16 +2,19 @@
 
 **Baseline**: editable Godot v0.12.0 sources in this repository. Android-focused export preset uses ARM64, app ID `app.runebound.godot`, version code 19. No new Android APK has been built or verified by this handoff.
 
+**2026-10-24 progress:** the baseline and touch-control milestone now have passing Android regression runs and an independently verified local test APK. See [ANDROID_BUILD.md](ANDROID_BUILD.md) for exact evidence, signing restrictions, CI status limitations and the physical-phone checklist. This does not establish original-key upgrade compatibility or physical-device validation.
+
 ## Priority 0: Make the current Android game buildable and testable
-- [ ] Verify exact Godot 4.5.x version required; install the matching editor and export templates, Android SDK/build-tools, and Java 17 in a supported build environment.
-- [ ] Run Godot project import and existing automated tests; repair actual failures without dropping features.
+- [x] Verify exact Godot 4.5.x version required; install the matching editor and export templates, Android SDK/build-tools, and Java 17 in a supported build environment. Pinned to 4.5.1 / SDK 35 / build-tools 35.0.0 / Java 17.
+- [x] Run Godot project import and existing automated tests; repair actual failures without dropping features. 1,150 assertions across 18 Android runs pass; local sandbox editor-service errors are recorded separately.
 - [ ] Audit `.github/workflows/android-debug.yml` and make it successfully publish **verified Android test APKs** on GitHub Actions. Do not claim an update-compatible APK unless signed by the original certificate.
-- [ ] Verify APK manifest: ARM64, `app.runebound.godot`, appropriate Android compatibility, versionCode, package identity, and signature.
-- [ ] Prepare a physical-phone test checklist for Motorola Edge 2025 / Android 16. Validate installation, boot, joystick and combat, rotation, scrolling, resume, saving and loading.
+- [x] Verify APK manifest: ARM64, `app.runebound.godot`, appropriate Android compatibility, versionCode, package identity, and signature. Disposable certificate only; API 24/35, version 19, v2/v3 signature and 16 KB ZIP alignment checked.
+- [x] Prepare a physical-phone test checklist for Motorola Edge 2025 / Android 16. See ANDROID_BUILD.md. Execution of installation, boot, joystick/combat, rotation, scrolling, resume and save/load checks is still pending.
 - [ ] Preserve existing data during updates: require the exact old signing certificate for install-over-previous-build testing; if unavailable, use a fresh-install-only test flow and explain the limitation.
 
 ## Priority 1: Finish the Android experience
 - [ ] Fix joystick lag, drift and rotation-position errors; controls must respond continuously.
+  - Automated milestone: center dead zone, ownership, cancellation and hidden-control release implemented; native movement, rotation and 36 new combat-input assertions pass. Phone comfort/performance testing remains pending.
 - [ ] Improve touch control placement, spell buttons, screen scaling and accessible menu scrolling in both orientations.
 - [ ] Polish responsive combat animations, hit feedback, dodge cues and audio; profile CPU/GPU and RAM on a real phone.
 - [ ] Harden save migration, autosaves and reload/recovery with regression tests.

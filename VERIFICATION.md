@@ -1,4 +1,10 @@
-# 0.12.0 Laptop Edition verification
+# Current Android milestone — 2026-10-24
+
+See [ANDROID_BUILD.md](ANDROID_BUILD.md) for reproducible commands, APK checks, signing limitations and pending Motorola Edge 2025 / Android 16 tests. The current Android regressions pass 1,150 assertions across 18 runs, including 36 new multi-touch/lifecycle assertions. An Android test APK is verified locally with a disposable certificate; it cannot update the original installation. The strict local pipeline also records sandbox TCP-listener failures separately. No physical-phone installation or original-key upgrade is claimed.
+
+The sections below are retained historical release notes, not fresh execution evidence for this checkout.
+
+# Historical 0.12.0 Laptop Edition verification
 
 109 desktop checks passed with real native input events and engine callbacks. Coverage includes desktop detection; 1280x720 logical view; hidden touch joystick; native mouse hotbar; physical WASD input, release and normalized diagonals; world-space pointer aim; held attacks, cooldown repeats and release over UI; keyboard attacks; hotbar taps without duplicate world actions; preserving aim while hovering GUI; aimed arrows and Firebolt without a locked target; mana costs; shifted physical skill keys; forward sword arcs and miss animations; shelter restrictions; keyboard/right-mouse dodges and fixed dodge direction; R/E/Escape construction controls; camp/map/equipment shortcuts; automatic combat toggle; paused calendars; focus-loss handling; hotbar and menu bounds at 1366x768, 1920x1080 and 960x540; settings, F11 and view changes; saved aim/view preferences; 30/60 FPS caps; native Save-dialog configuration; filesystem export, validated shared JSON and real import callbacks with partial crops; failed-write reporting; and native world/reticle drawing. One additional safe-mode boot check confirms Close view, windowed preference, 30 FPS and disabled weather particles.
 

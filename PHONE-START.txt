@@ -32,4 +32,5 @@ THE ANDROID BUILD:
 SOURCE SNAPSHOT:
 - v0.12.0 editable game; Android focused.
 - v0.13.0 has not been uploaded; hunger/thirst/sleep survival is a future addition.
-- No APK build was produced as part of switching the repository to Android.
+- A fresh-install-only Android test APK has now been built and checked; see ANDROID_BUILD.md.
+- It uses a disposable test certificate. Keep the original installed game and its data.

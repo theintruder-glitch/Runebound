@@ -374,7 +374,7 @@ func reset_stick() -> void:
 	if buttons!=null:
 		for child in buttons.get_children():
 			if child.get_script()==TouchActionScript:
-				child.finger = -1
+				child.release_touch()
 
 func blocks_world_pointer(at:Vector2) -> bool:
 	if overlay.visible: return true
