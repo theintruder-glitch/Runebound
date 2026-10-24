@@ -201,8 +201,8 @@ func label(parent: Node,text_value: String,font_size: int=15,color: Color=Color(
 	parent.add_child(result)
 	return result
 
-func action(parent: Node,text_value: String,callback: Callable,disabled: bool=false) -> Button:
-	var result = TouchActionScript.new() if parent==buttons and buttons!=null and not game.desktop.enabled else Button.new()
+func action(parent: Node,text_value: String,callback: Callable,disabled: bool=false,touch_action:bool=false) -> Button:
+	var result = TouchActionScript.new() if (parent==buttons or touch_action) and buttons!=null and not game.desktop.enabled else Button.new()
 	# Let native touch drags reach the enclosing ScrollContainer. It cancels
 	# pending button taps when a swipe starts, and provides inertial scrolling.
 	if not result is TouchActionScript:
@@ -366,7 +366,9 @@ func _process(dt: float) -> void:
 		if game.expedition.enabled() and not game.forest.active() and not game.exploration.active() and game.build_recipe.is_empty():
 			objective_label.text="SURVIVAL · "+("Chapter complete · your home awaits" if game.hero.needs.won else "Build a home · harvest food · survive 5 days · clear the 5-floor ruins")
 		if not game.fishing.objective().is_empty() and game.build_recipe.is_empty() and not game.forest.active() and not game.exploration.active(): objective_label.text=game.fishing.objective()
-		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · Left click: cast · Right click / Esc: cancel"
+		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
+		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
+		spell_ui.update_targeting()
 		var phase = Data.phase(game.hero.worldTime) if game.hero.dungeon==null else "Dungeon"
 		if phase!=shade_phase:
 			shade_phase = phase
@@ -385,14 +387,16 @@ func reset_stick() -> void:
 	if stick!=null:
 		stick.reset()
 	if buttons!=null:
-		for child in buttons.get_children():
+		var touch_controls=buttons.get_children()
+		if spell_ui!=null and spell_ui.aim_controls!=null: touch_controls.append_array(spell_ui.aim_controls.get_children())
+		for child in touch_controls:
 			if child.get_script()==TouchActionScript:
 				child.reset()
 
 func blocks_world_pointer(at:Vector2) -> bool:
 	if overlay.visible: return true
 	for child in top.get_children()+buttons.get_children():
-		if (child is BaseButton or child==build_tools) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
+		if (child is BaseButton or child in [build_tools,stick,spell_ui.aim_controls]) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
 	return false
 
 func update_hud() -> void:
@@ -518,6 +522,8 @@ func show_pause(message: String="") -> void:
 	action(content,"Save and title screen",func():game.save_game();show_title(true))
 
 func back() -> void:
+	if game.playing and not game.spellbook.targeting.is_empty():
+		game.spellbook.cancel_target();return
 	if current_page=="title":
 		return
 	if game.hero.is_empty() and current_page=="laptop":

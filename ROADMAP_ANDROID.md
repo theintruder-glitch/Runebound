@@ -1,15 +1,21 @@
 # Android-first completion roadmap
 
-Current source: **0.16.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.17.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
 
 ## Completed in this milestone
 
 - [x] Install pinned Godot 4.5.1 engine/templates, JDK 17 and Android SDK/build tools; produce signed ARM64 APK and Windows x64 package locally.
-- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 23.
+- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 24.
 - [x] Isolate automated tests from developer saves and detect silent script errors, assertion failures, missing completion and timeouts.
 - [x] Repair touch lifecycle/dead zone and save recovery; verify rotation/scrolling and existing combat/magic in engine checks.
 - [x] Expand existing Survival mode with persisted wetness and cover/fire drying; fix heat/bed wall checks and stale enemy windups.
 - [x] Prepare GitHub Actions tests and both build targets; inspect rendered mobile layouts.
+
+## Combat milestone completed
+
+- [x] Touch placement and CAST/CANCEL for learned ground spells, retaining multi-touch movement.
+- [x] Shared forward melee, visible misses, directional weapon sweeps, spell glow and guarded ordinary-enemy stagger.
+- [x] Add real touch-event tests and compiled Android/Windows regression coverage.
 
 ## Next: hardware playtest and fixes
 
@@ -17,7 +23,8 @@ Current source: **0.16.0**, built incrementally from supplied **0.15.0**. The ol
 - [ ] Exercise real multi-touch, both landscape directions, scrolling, focus/resume and file import/export dialogs.
 - [ ] Measure FPS/frame times, RAM, heat and battery during 30–60 minute sessions; tune limits from actual measurements.
 - [ ] Run Windows executable on the laptop; verify driver fallback, audio and save location.
-- [ ] Observe a successful GitHub Actions run; configure original Android release-signing secrets for remote APK builds.
+- [x] Observe successful GitHub Actions source/Windows validation for v0.16.0 (run 40093299724).
+- [ ] Configure original Android release-signing secrets for remote APK builds.
 
 ## Then: RPG/content completion
 

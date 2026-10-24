@@ -161,7 +161,10 @@ echo "$SIGNATURE_INFO" | grep -qi "79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b
 "$SDK/build-tools/35.0.1/aapt" dump badging "$OUTPUT" > "$ROOT/builds/logs/android-badging.log"
 python3 tools/verify_apk.py "$OUTPUT" "$ROOT/builds/logs/android-badging.log" || fail "APK package/ABI/version checks failed"
 "$SDK/build-tools/35.0.1/zipalign" -c -P 16 -v 4 "$OUTPUT" > "$ROOT/builds/logs/android-alignment.log" || fail "APK alignment check failed"
+VERIFIED_CHECKSUM="$(sha256sum "$OUTPUT")"
 GODOT_BIN="$GODOT_EXE" python3 tools/test_apk.py "$OUTPUT" || fail "Signed APK resource tests failed"
+[[ "$(sha256sum "$OUTPUT")" == "$VERIFIED_CHECKSUM" ]] || fail "APK changed during resource testing; refusing to publish it"
+"$SDK/build-tools/35.0.1/apksigner" verify --verbose "$OUTPUT" || fail "Final APK signature verification failed"
 if command -v sha256sum >/dev/null; then sha256sum "$OUTPUT"; fi
 msg "SUCCESS: $OUTPUT"
 msg "Install over the existing Godot app; do not uninstall or clear its data. For any later version, raise version/code in export_presets.cfg."

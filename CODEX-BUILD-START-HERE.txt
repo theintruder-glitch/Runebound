@@ -1,4 +1,4 @@
-RUNEBOUND 0.16.0 — BUILD START
+RUNEBOUND 0.17.0 — BUILD START
 
 Read README.md for current setup. This source continues supplied Godot v0.15.0.
 

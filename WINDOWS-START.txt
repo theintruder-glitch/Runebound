@@ -1,4 +1,4 @@
-RUNEBOUND 0.16.0 — WINDOWS x64
+RUNEBOUND 0.17.0 — WINDOWS x64
 
 Extract all files, then open Runebound.exe beside Runebound.pck.
 Keep any exported DLLs in the same directory.

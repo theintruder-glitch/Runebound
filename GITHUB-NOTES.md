@@ -1,7 +1,9 @@
-# GitHub development handoff — 0.16.0
+# GitHub development handoff — 0.17.0
 
-This branch advances the repository from its older v0.12.0 snapshot using the user-supplied v0.15.0 source, then adds the Shelter & Steel stabilization milestone. Android remains primary; Windows uses the same gameplay scripts.
+This branch continues the supplied v0.15.0 source, v0.16.0 stabilization and the Focused Combat update. Android is primary; Windows shares combat and spell logic. The older repository main snapshot is v0.12.0 until the review branch is merged.
 
-Read README.md, VERIFICATION.md, PLAYTEST.md and ROADMAP_ANDROID.md. New tests are in tests/test_stability.gd. The reproducible runner is tools/run_tests.py. The obsolete debug workflow is superseded by .github/workflows/build.yml.
+New work: touch selection/drag/CAST/CANCEL for learned ground spells; independent movement/aim fingers; shared forward melee; animated misses, sweeps, recoil and casting glow; guarded ordinary-enemy stagger; lifecycle and mana checks. Existing progression, Survival, fishing/crafting and save handling are retained.
 
-No signing keys, passwords, build binaries or player saves are committed. The new workflow requires original release-signing secrets for manually requested Android exports; automatic PR checks and Windows builds do not need a key. Local build verification is recorded separately from remote CI and physical-device results.
+Read README.md, VERIFICATION.md and PLAYTEST.md. Source and exact Android resources pass 1,628 checks; Windows PCK passes 333. Build verification checks actual signer blocks and final byte identity. The old v0.16 APK copy fails fresh signature verification; use the verified v0.17 output.
+
+No keys, passwords, player saves or binaries are committed. CI tests and Windows export run automatically; remote Android release exports require the original signing secrets. Do not generate a replacement identity.

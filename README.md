@@ -1,21 +1,20 @@
-# RUNEBOUND 0.16.0 — Shelter & Steel
+# RUNEBOUND 0.17.0 — Focused Combat
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
 
 ## This milestone
 
-- Responsive joystick dead zone, finger ownership, and reliable release when controls hide, the app loses focus, or play pauses.
-- Recovery saves keep their last valid backup instead of replacing it with a corrupt primary.
-- Survival wetness: rain and snow soak clothing; wet clothing worsens cold exposure; cover dries clothing and reachable fires dry it faster. Older characters start dry. Classic has no needs drain.
-- Walls block campfire warmth and bed interaction. Peaceful wildlife does not block bed rest. Removed beds cannot be used through stale menu selections.
-- Enemy attacks cancel when enemies disengage or you reach shelter. Existing dodge, class abilities, telegraphs, weapon animations and learned spells remain.
-- Pinned engine/templates, JDK 17 and Android SDK export helpers; isolated regression runner; Android and Windows build workflows.
+- **Touch ground targeting:** learned Meteor Fall and Blizzard now preview a movable circle on Android. Select the hotbar spell, tap or drag the ground, then tap CAST. CANCEL or Back spends no mana. Red circles and disabled CAST mark wall-blocked ground. Moving and combat time continue while aiming.
+- **Independent fingers:** movement, aiming and confirmation use separate touch ownership. Lifting an aim finger over CAST never confirms accidentally. Menus, rotation, focus loss, dodge and class skills clear unfinished placement. Desktop keeps mouse placement and cancellation.
+- **Forward melee on both platforms:** basic attacks use the same frontal arc. Touch keeps nearby-target assistance for bows/staves. Missed manual attacks animate and respect cooldowns; automatic combat still ignores wildlife.
+- **Combat reactions:** weapon sweeps keep their strike direction, ranged weapons recoil, and successful spells show a short casting glow. Clean melee hits briefly stagger ordinary enemies, interrupting their windup; a guard prevents every hit from interrupting them. Bosses and named trial enemies resist basic stagger. Enemy strikes have a short visual lunge.
+- All v0.16 save recovery, wetness, crafting, exploration, progression, Android identity and original signing compatibility are retained. No new character/save schema is needed.
 
 Existing content includes eight classes, four regions, quests and regional trials, five-floor Survival expeditions, Classic endless dungeons, building, gardens, crafting, trading, equipment, spell purchases and hotbar assignments, fishing, cooking, weather, hunger, thirst, sleep, warmth, waterskins, cloaks and bedrolls.
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.16.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **23**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.17.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **24**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
@@ -32,7 +31,7 @@ export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
 python3 tools/run_tests.py
 ```
 
-The runner selects each suite's required desktop flags, covers both movement orientations, checks exit codes and script/assertion errors, and requires a completion marker. Every suite gets a disposable XDG save/config directory, protecting developer characters. `--suite test_stability` selects the new checks. Tests do not establish physical-phone FPS or touch feel.
+The runner selects each suite's required desktop flags, covers both movement orientations, checks exit codes and script/assertion errors, and requires a completion marker. Every suite gets a disposable XDG save/config directory, protecting developer characters. `--suite test_touch_combat` selects the new touch/combat checks; `test_stability` retains the prior save/Survival checks. Tests do not establish physical-phone FPS or touch feel.
 
 ## Build
 

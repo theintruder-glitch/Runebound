@@ -37,6 +37,10 @@ var audio
 var build_recipe=""
 var build_rotation=0
 var swing_time=0.0
+var swing_duration=.24
+var swing_direction=Vector2.DOWN
+var cast_time=0.0
+var cast_color=Color.WHITE
 var hero: Dictionary = {}
 var enemies: Array = []
 var shots: Array = []
@@ -165,6 +169,7 @@ func clear_scene() -> void:
 	chest_near = {}
 	chunk_key = Vector2i(999999,999999)
 	attack_cooldown = 0
+	swing_time=0;cast_time=0
 	dash_time = 0
 	dash_cooldown = 0
 	spell_cooldowns = {"fire":0.0,"frost":0.0,"heal":0.0}
@@ -177,7 +182,7 @@ func pause_game() -> void:
 	if fishing!=null: fishing.cancel("Line packed away while paused. Bait was used.")
 	if desktop!=null: desktop.clear_input()
 	playing = false
-	if spellbook!=null: spellbook.targeting=""
+	if spellbook!=null: spellbook.cancel_target()
 	move_vector = Vector2.ZERO
 	is_walking = false
 	attack_held = false
@@ -229,9 +234,12 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			KEY_SHIFT: dash()
 
 func _input(event:InputEvent) -> void:
+	if spellbook!=null: spellbook.release_touch(event)
 	if desktop!=null and desktop.enabled: desktop.release_input(event)
 
 func _unhandled_input(event:InputEvent) -> void:
+	if spellbook!=null and spellbook.handle_touch(event):
+		get_viewport().set_input_as_handled();return
 	if desktop!=null: desktop.handle_input(event)
 
 func _physics_process(dt: float) -> void:
@@ -241,6 +249,7 @@ func _physics_process(dt: float) -> void:
 
 func tick(dt: float) -> void:
 	swing_time=maxf(0,swing_time-dt)
+	cast_time=maxf(0,cast_time-dt)
 	forest.reset_if_abandoned()
 	exploration.tick(dt)
 	abilities.tick(dt)
@@ -295,6 +304,9 @@ func tick(dt: float) -> void:
 			continue
 		enemy.cooldown -= dt
 		enemy.flash = maxf(0,enemy.flash-dt)
+		enemy["stagger"]=maxf(0,enemy.get("stagger",0.0)-dt)
+		enemy["stagger_guard"]=maxf(0,enemy.get("stagger_guard",0.0)-dt)
+		enemy["attack_pose"]=maxf(0,enemy.get("attack_pose",0.0)-dt)
 		enemy.slow = maxf(0,enemy.slow-dt)
 		enemy.aggro = maxf(0,enemy.aggro-dt)
 		if enemy.burn>0:
@@ -313,6 +325,7 @@ func tick(dt: float) -> void:
 		elif distance<330 or enemy.aggro>0:
 			in_combat = true
 			direction = dungeon_direction(enemy,dt)
+		if enemy.stagger>0: direction=Vector2.ZERO
 		enemy["motion"]=direction
 		if (distance>enemy.radius+12 or enemy.get("neutral",false)) and enemy.get("windup",0.0)<=0:
 			enemy.pos = move_position(enemy.pos,direction*enemy.speed*(.4 if enemy.slow>0 else 1)*dt,enemy.radius)
@@ -423,28 +436,40 @@ func attack(auto_only:bool=false) -> bool:
 	if fishing.active():
 		if auto_only: return false
 		fishing.cancel()
-	if attack_cooldown>0 or survival.sheltered() or not spellbook.targeting.is_empty():
+	if not playing or hero.is_empty() or attack_cooldown>0 or survival.sheltered() or not spellbook.targeting.is_empty() or not build_recipe.is_empty():
 		return false
 	if desktop.enabled and desktop.mouse_aim and not auto_only: return desktop.manual_attack()
 	var weapon = Data.equipped(hero,"weapon")
 	var kind = "bow" if weapon.get("kind")=="bow" else "magic" if weapon.get("kind")=="staff" else "melee"
 	var target = closest(72 if kind=="melee" else 430,player_position(),{},auto_only)
-	if target.is_empty():
-		return false
-	if auto_only and hero.dungeon==null and target.aggro<=0:
-		return false
-	abilities.stealth=0
-	swing_time=.22
-	sound("attack")
-	attack_cooldown = .65 if kind=="bow" else .72 if kind=="magic" else .52
-	facing = player_position().direction_to(target.pos)
+	if auto_only and (target.is_empty() or (hero.dungeon==null and target.aggro<=0)): return false
+	var direction=facing
+	if not target.is_empty() and (auto_only or kind!="melee" or facing.dot(player_position().direction_to(target.pos))>.25): direction=player_position().direction_to(target.pos)
+	return directional_attack(direction,auto_only)
+
+func start_swing(direction:Vector2,duration:float=.24) -> void:
+	swing_direction=direction.normalized() if direction.length_squared()>.01 else Vector2.DOWN
+	swing_duration=duration;swing_time=duration
+
+func cast_feedback(color:Color) -> void:
+	cast_time=.35;cast_color=color
+
+func directional_attack(direction:Vector2,auto_only:bool=false) -> bool:
+	if not playing or hero.is_empty() or attack_cooldown>0 or survival.sheltered() or not spellbook.targeting.is_empty() or not build_recipe.is_empty(): return false
+	direction=direction.normalized() if direction.length_squared()>.01 else Vector2.DOWN
+	var weapon=Data.equipped(hero,"weapon")
+	var kind="bow" if weapon.get("kind")=="bow" else "magic" if weapon.get("kind")=="staff" else "melee"
+	abilities.stealth=0;start_swing(direction);sound("attack")
+	attack_cooldown=.65 if kind=="bow" else .72 if kind=="magic" else .52
+	if dash_time<=0: facing=direction
 	if kind=="melee":
 		for enemy in enemies.duplicate():
-			if not enemy.dead and (not auto_only or not enemy.get("neutral",false)) and enemy.pos.distance_to(player_position())<72 and line_clear(player_position(),enemy.pos):
+			var delta=enemy.pos-player_position()
+			if not enemy.dead and (not auto_only or not enemy.get("neutral",false)) and delta.length()<72 and (delta.length()<12 or delta.normalized().dot(direction)>.25) and line_clear(player_position(),enemy.pos):
 				hurt(enemy,Data.damage(hero,kind),kind,int(weapon.get("enchant",0)))
-		burst(player_position()+facing*32,Color("fff0c8"),8)
+		burst(player_position()+direction*32,Color("fff0c8"),8)
 	else:
-		shoot(target,kind,Data.damage(hero,kind),int(weapon.get("enchant",0)))
+		desktop.shoot(direction,kind,Data.damage(hero,kind),int(weapon.get("enchant",0)))
 	return true
 
 func shoot(target: Dictionary,kind: String,amount: float,enchant: int=0) -> void:
@@ -464,6 +489,10 @@ func hurt(enemy: Dictionary,amount: float,kind: String,enchant: int=0,no_chain: 
 	exploration.pack_alert(enemy)
 	enemy.aggro = 6
 	enemy.flash = .12
+	if kind=="melee" and not no_chain and not enemy.get("boss",false) and not enemy.has("named") and enemy.get("stagger_guard",0.0)<=0:
+		enemy["stagger"]=.14;enemy["stagger_guard"]=.9
+		enemy["recoil_direction"]=player_position().direction_to(enemy.pos)
+		enemy.windup=0;enemy.cooldown=maxf(.4,enemy.get("cooldown",0.0))
 	floating(enemy.pos+Vector2(-10,-enemy.radius-7),str(int(amount))+("!" if critical else ""),Color("ffdf87") if critical else Color("f8e8c8"))
 	if enchant==4 or hero.className=="Reaper":
 		hero.hp = minf(Data.max_hp(hero),hero.hp+maxf(1,amount*.07))
@@ -545,7 +574,7 @@ func cast(spell:String) -> bool:
 	return spellbook.cast(spell,spellbook.target_point())
 
 func cast_legacy(spell: String) -> bool:
-	if not playing or spell_cooldowns[spell]>0 or (spell!="heal" and survival.sheltered()):
+	if not playing or float(spell_cooldowns.get(spell,0.0))>0 or (spell!="heal" and survival.sheltered()):
 		return false
 	var cost = {"fire":12,"frost":20,"heal":25}[spell]
 	if hero.mp<cost:
@@ -557,6 +586,7 @@ func cast_legacy(spell: String) -> bool:
 		notify("No enemy in Firebolt range.",2)
 		return false
 	sound("spell")
+	cast_feedback(Color({"fire":"ffb077","frost":"9edff4","heal":"aedfb6"}[spell]))
 	if spell!="heal": abilities.stealth=0
 	hero.mp -= cost
 	spell_cooldowns[spell] = {"fire":1.3,"frost":5.5,"heal":9.0}[spell]
@@ -579,6 +609,7 @@ func dash() -> void:
 	if not playing or dash_cooldown>0:
 		return
 	fishing.cancel()
+	spellbook.cancel_target()
 	if exploration.active(): exploration.dodged=true
 	dash_cooldown = 2.4 if hero.className=="Rogue" else 3.8
 	dash_time = .23
@@ -854,6 +885,7 @@ func update_interaction() -> void:
 func interact() -> void:
 	if not playing:
 		return
+	if not spellbook.targeting.is_empty(): return
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
@@ -945,6 +977,7 @@ func adapt_screen() -> void:
 	if hud!=null:
 		hud.reset_stick()
 		attack_held=false
+	if spellbook!=null: spellbook.cancel_target()
 	if landscape!=screen_landscape and not hero.is_empty():
 		camera.position=player_position()
 		camera.force_update_scroll()
@@ -955,6 +988,7 @@ func sound(cue:String) -> void:
 	if audio!=null: audio.play_cue(cue)
 func begin_build(recipe:String,move_source:Dictionary={}) -> void:
 	fishing.cancel()
+	spellbook.cancel_target()
 	survival.moving=move_source
 	build_recipe=recipe
 	build_rotation=int(move_source.get("rotation",0))
@@ -966,6 +1000,7 @@ func cancel_build() -> void:
 	if hud!=null: hud.build_tools.visible=false
 func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 	if enemy.dead or enemy.get("neutral",false): return
+	if enemy.get("stagger",0.0)>0: return
 	if abilities.stealth>0 or survival.sheltered() or enemy.get("returning",false):
 		enemy.windup=0
 		return
@@ -974,6 +1009,7 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 	if enemy.get("windup",0.0)>0:
 		enemy.windup=maxf(0,enemy.windup-dt)
 		if enemy.windup==0:
+			enemy["attack_pose"]=.18
 			burst(enemy.strike,Color("f29875"),12)
 			if pos.distance_to(enemy.strike)<enemy.strike_radius+9 and dash_time<=0 and not survival.sheltered() and line_clear(enemy.pos,pos):
 				var mitigation=Data.power(hero,"armor")*.045+Data.power(hero,"shield")*.18+Data.power(hero,"helmet")*.1

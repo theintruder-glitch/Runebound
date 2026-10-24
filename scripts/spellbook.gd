@@ -1,13 +1,13 @@
 extends RefCounted
 const Data=preload("res://scripts/data.gd")
 const BOOK={
- "fire":{"name":"Firebolt","short":"FIREBOLT","cost":12,"cooldown":1.3,"level":1,"price":0,"color":"ffb077","desc":"A burning projectile fired toward your mouse."},
+ "fire":{"name":"Firebolt","short":"FIREBOLT","cost":12,"cooldown":1.3,"level":1,"price":0,"color":"ffb077","desc":"A burning projectile. Touch assists toward a nearby enemy; mouse aiming follows your pointer."},
  "frost":{"name":"Frost Nova","short":"FROST","cost":20,"cooldown":5.5,"level":1,"price":0,"color":"9edff4","desc":"Freeze enemies in a circle around you."},
  "heal":{"name":"Mend","short":"MEND","cost":25,"cooldown":9.0,"level":1,"price":0,"color":"aedfb6","desc":"Restore health. Can be used inside a shelter."},
  "arc":{"name":"Chain Lightning","short":"LIGHTNING","cost":22,"cooldown":4.0,"level":2,"price":90,"color":"c7b1ff","desc":"Aim near a foe to chain lightning through up to four enemies. Walls block jumps."},
  "lance":{"name":"Glacial Lance","short":"ICE LANCE","cost":18,"cooldown":2.5,"level":3,"price":140,"color":"91e8f5","desc":"A fast, heavy ice spear that slows its victim."},
  "ward":{"name":"Astral Ward","short":"WARD","cost":28,"cooldown":16.0,"level":4,"price":210,"color":"9ecfff","desc":"Reduce enemy strike damage by 60% for 8 seconds. Hunger and exposure still hurt."},
- "meteor":{"name":"Meteor Fall","short":"METEOR","cost":32,"cooldown":8.0,"level":5,"price":280,"color":"ffa46e","desc":"Place a ground circle with left click. A meteor strikes after 0.9 seconds and burns enemies."},
+ "meteor":{"name":"Meteor Fall","short":"METEOR","cost":32,"cooldown":8.0,"level":5,"price":280,"color":"ffa46e","desc":"Choose a ground circle, then confirm. A meteor strikes after 0.9 seconds and burns enemies."},
  "sunburst":{"name":"Sunburst","short":"SUNBURST","cost":35,"cooldown":12.0,"level":6,"price":360,"color":"ffe2a0","desc":"Blast enemies around you and restore 18% health."},
  "blizzard":{"name":"Blizzard","short":"BLIZZARD","cost":40,"cooldown":12.0,"level":7,"price":460,"color":"b2edfa","desc":"Place a field that damages and slows enemies for 5 seconds."}
 }
@@ -15,7 +15,12 @@ var game
 var targeting=""
 var zones:Array=[]
 var ward_time=0.0
-func reset() -> void: targeting="";zones.clear();ward_time=0.0
+var aim_finger=-1
+var mobile_point=Vector2.ZERO
+var mobile_point_set=false
+func cancel_target() -> void:
+	targeting="";aim_finger=-1;mobile_point_set=false
+func reset() -> void: cancel_target();zones.clear();ward_time=0.0
 func known(id:String) -> bool: return not game.hero.is_empty() and game.hero.spells.known.has(id)
 func rank(id:String) -> int: return int(game.hero.spells.known.get(id,0))
 func power(id:String) -> float: return 1.0+maxi(0,rank(id)-1)*.25
@@ -43,13 +48,29 @@ func request_slot(slot:int) -> bool:
 	var id=game.hero.spells.slots[slot]
 	if not can_cast(id): game.notify("Spell unavailable: check mana, cooldown, or shelter.",2);return false
 	game.fishing.cancel()
-	if id in ["meteor","blizzard"] and game.desktop.enabled:
-		targeting=id;game.desktop.clear_input();game.attack_held=false
-		game.notify("Aim "+BOOK[id].name+" · Left click: cast · Right click / Esc: cancel",3);return true
+	if id in ["meteor","blizzard"]:
+		cancel_target();targeting=id;game.desktop.clear_input();game.attack_held=false
+		game.notify("Aim "+BOOK[id].name+" · "+placement_hint(),3);return true
+	cancel_target()
 	return cast(id,target_point())
+func placement_hint() -> String:
+	return "Left click: cast · Right click / Esc: cancel" if game.desktop.enabled else "Tap or drag ground · CAST / CANCEL"
+func release_touch(event:InputEvent) -> void:
+	if event is InputEventScreenTouch and not event.pressed and event.index==aim_finger: aim_finger=-1
+func handle_touch(event:InputEvent) -> bool:
+	if game.desktop.enabled or not game.playing or targeting.is_empty(): return false
+	if event is InputEventScreenTouch:
+		if not event.pressed or aim_finger!=-1 or game.hud.blocks_world_pointer(event.position): return false
+		aim_finger=event.index
+	elif event is InputEventScreenDrag:
+		if event.index!=aim_finger or game.hud.blocks_world_pointer(event.position): return false
+	else: return false
+	mobile_point=game.get_canvas_transform().affine_inverse()*event.position
+	mobile_point_set=true
+	return true
 func target_point() -> Vector2:
 	var at=game.player_position()
-	var target=game.desktop.aim_point() if game.desktop.enabled and game.desktop.pointer_seen else at+game.facing*180
+	var target=game.desktop.aim_point() if game.desktop.enabled and game.desktop.pointer_seen else mobile_point if not game.desktop.enabled and mobile_point_set else at+game.facing*180
 	return at+(target-at).limit_length(380)
 func valid_ground(at:Vector2) -> bool:
 	return at.distance_to(game.player_position())<=381 and game.walkable(at) and game.line_clear(game.player_position(),at)
@@ -57,7 +78,7 @@ func confirm() -> bool:
 	if targeting.is_empty(): return false
 	if not valid_ground(target_point()): game.notify("That target is blocked. Choose clear ground.",2);return false
 	var result=cast(targeting,target_point())
-	if result: targeting=""
+	if result: cancel_target()
 	return result
 func cast(id:String,at:Vector2=Vector2.ZERO) -> bool:
 	if not can_cast(id): return false
@@ -73,6 +94,7 @@ func cast(id:String,at:Vector2=Vector2.ZERO) -> bool:
 		targets.append(first)
 	if id in ["meteor","blizzard"] and not valid_ground(at): return false
 	game.hero.mp-=BOOK[id].cost;game.spell_cooldowns[id]=BOOK[id].cooldown;game.sound("spell")
+	game.cast_feedback(Color(BOOK[id].color))
 	if id!="ward": game.abilities.stealth=0
 	var damage=Data.damage(game.hero,"magic")*power(id);var color=Color(BOOK[id].color)
 	match id:

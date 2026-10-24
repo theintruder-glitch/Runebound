@@ -1,9 +1,9 @@
-RUNEBOUND 0.16.0 — ANDROID
+RUNEBOUND 0.17.0 — ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Runebound-Godot-v0.16.0.apk and install it over the existing app.
+2. Download Runebound-Godot-v0.17.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
-4. Continue your character. Older saves keep progression and start with dry clothing.
+4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
 MOVE: left joystick. ATTACK: weapon. DASH: dodge. Spells and class skill have their existing buttons.
 Gear/Camp menus: swipe the content to scroll; tap actions normally.
@@ -13,6 +13,17 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 23 and the original prototype certificate.
+This update uses app.runebound.godot, version code 24 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
+
+NEW GROUND SPELL AIMING:
+Learn Meteor Fall (level 5) or Blizzard (level 7) from Mara, then assign it in the spellbook.
+Tap its bottom spell button, tap/drag a ground spot, then tap CAST. Tap CANCEL or Back to stop.
+The preview is free. Moving, enemies and Survival needs remain live while you aim.
+CAST is disabled if a wall blocks the selected point. Dodge cancels an unfinished cast.
+This applies to learned hotbar spells; the Mage class skill keeps its existing behavior.
+
+BASIC ATTACKS:
+Face toward enemies for melee. Attacks strike ahead, not behind you. Misses still animate.
+Ordinary foes briefly recoil from clean melee hits; bosses resist this interruption.

@@ -256,7 +256,7 @@ func draw_tree(at: Vector2) -> void:
 func draw_hero(at: Vector2) -> void:
 	draw_set_transform(at)
 	var cls=game.hero.className
-	var facing=game.facing
+	var facing=game.swing_direction if game.swing_time>0 else game.facing
 	var angle=facing.angle()
 	var bob=sin(clock*13)*4 if game.is_walking else 0.0
 	var color=Color(Data.CLASSES[cls].color)
@@ -298,7 +298,8 @@ func draw_hero(at: Vector2) -> void:
 	var enchant=int(weapon.get("enchant",0))
 	var metal=[Color("e3d6b4"),Color("ffab6b"),Color("9cddf7"),Color("c4a0f1"),Color("e999ac")][enchant]
 	var hand=Vector2(12 if facing.x>=0 else -12,0)+facing*3
-	var swing=(1-game.swing_time/.3) if game.swing_time>0 else .5
+	var swing=(1-game.swing_time/game.swing_duration) if game.swing_time>0 else .5
+	if game.swing_time>0 and weapon.get("kind") in ["bow","staff"]: hand-=facing*6*sin(swing*PI)
 	draw_set_transform(at+hand,angle+(-.8+swing*1.6 if game.swing_time>0 and weapon.get("kind")=="sword" else 0))
 	match weapon.get("kind","sword"):
 		"bow":
@@ -308,19 +309,28 @@ func draw_hero(at: Vector2) -> void:
 		"staff": draw_line(Vector2(-12,0),Vector2(21,0),metal,3); draw_circle(Vector2(23,0),5,color.lightened(.4))
 		_: draw_line(Vector2(-5,0),Vector2(24,0),metal,4); draw_line(Vector2(0,-6),Vector2(0,6),Color("b9a078"),3)
 	draw_set_transform(at)
-	if game.swing_time>0: draw_arc(Vector2.ZERO,36,angle-.8,angle+.8,18,Color("f9e8be"),3)
+	if game.swing_time>0:
+		var sweep=angle-.9+swing*1.8
+		draw_arc(Vector2.ZERO,36,sweep-.65,sweep+.25,18,Color(1,.91,.74,1-swing*.6),3)
+	if game.cast_time>0:
+		var cast_progress=1-game.cast_time/.35
+		var glow=game.cast_color;glow.a=1-cast_progress
+		draw_arc(Vector2(0,-4),20+cast_progress*15,-PI/2,-PI/2+TAU,24,glow,2)
+		draw_circle(Vector2(14,-7),4+cast_progress*3,glow)
 	if game.dash_time>0: draw_arc(Vector2.ZERO,24,0,TAU,24,Color("a4f3cb"),2)
 	draw_colored_polygon(PackedVector2Array([Vector2(0,-47),Vector2(-4,-54),Vector2(4,-54)]),Color("a7e3b6"))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_enemy(enemy: Dictionary) -> void:
-	var at = enemy.pos
+	var recoil=enemy.get("recoil_direction",Vector2.ZERO)*sin(clampf(enemy.get("stagger",0.0)/.14,0,1)*PI)*7
+	var lunge=enemy.pos.direction_to(enemy.get("strike",enemy.pos))*sin(clampf(enemy.get("attack_pose",0.0)/.18,0,1)*PI)*7
+	var at = enemy.pos+recoil+lunge
 	if enemy.has("named"):
 		draw_arc(at,34,0,TAU,28,Color("d1be76"),2)
 		label(at+Vector2(-54,-78),enemy.named,14,Color("edda98"))
 	var tint = Color(1.5,1.5,1.5) if enemy.flash>0 else Color(.7,1,1.3) if enemy.slow>0 else Color.WHITE
 	if enemy.type in ["wolf","frost_wolf","deer"]:
-		draw_beast(enemy)
+		draw_beast(enemy,recoil+lunge)
 	else:
 		var sprite={"archer":"goblin","ice_archer":"skeleton","bog_toad":"slime","crystal_wisp":"wisp"}.get(enemy.type,enemy.type)
 		if enemy.type=="ice_archer": tint=Color(.8,1.2,1.5)
@@ -344,8 +354,8 @@ func draw_enemy(enemy: Dictionary) -> void:
 	if enemy.boss or not game.low_power:
 		label(at+Vector2(-10,enemy.radius+17),"Lv "+str(enemy.level),10,Color("c4d0bc"))
 
-func draw_beast(enemy:Dictionary) -> void:
-	var at=enemy.pos
+func draw_beast(enemy:Dictionary,offset:Vector2=Vector2.ZERO) -> void:
+	var at=enemy.pos+offset
 	var direction=enemy.get("motion",Vector2.RIGHT)
 	var side=1 if direction.x>=0 else -1
 	var deer=enemy.type=="deer"

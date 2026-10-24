@@ -2,10 +2,26 @@ extends RefCounted
 var hud
 var game
 var button:Button
+var aim_controls:HBoxContainer
+var cast_button:Button
+var cancel_button:Button
 func setup() -> void:
 	button=hud.action(hud.top,"[B] Spells",func():hud.show_character("spells"));button.visible=game.desktop.enabled
+	aim_controls=HBoxContainer.new();aim_controls.add_theme_constant_override("separation",8);hud.buttons.add_child(aim_controls)
+	cast_button=hud.action(aim_controls,"CAST",func():game.spellbook.confirm(),false,true)
+	cancel_button=hud.action(aim_controls,"CANCEL",func():game.spellbook.cancel_target(),false,true)
+	for control in [cast_button,cancel_button]: control.custom_minimum_size=Vector2(108,52)
+	aim_controls.hide()
 func layout() -> void:
 	button.position=Vector2(hud.get_viewport_rect().size.x-508,16);button.size=Vector2(108,44)
+	var view=hud.get_viewport_rect().size
+	aim_controls.position=Vector2(view.x/2-112,view.y-128 if view.x>view.y else view.y-325)
+	aim_controls.size=Vector2(224,52)
+func update_targeting() -> void:
+	var book=game.spellbook
+	aim_controls.visible=game.playing and not game.desktop.enabled and not book.targeting.is_empty()
+	if aim_controls.visible:
+		cast_button.disabled=not book.can_cast(book.targeting) or not book.valid_ground(book.target_point())
 func update() -> void:
 	for i in range(3):
 		var b=hud.spell_buttons[["fire","frost","heal"][i]]
@@ -22,7 +38,7 @@ func show_spells() -> void:
 	var book=game.spellbook;var names=[]
 	for i in range(3): names.append("[%d] %s" % [i+1,book.BOOK[game.hero.spells.slots[i]].name])
 	hud.paragraph("  ·  ".join(names),17,Color("e8e4d5"))
-	hud.paragraph("Assign learned spells below. Assigning a spell already on your bar swaps those slots. Meteor / Blizzard: press its key, aim the circle, left click to cast; right click or Esc to cancel.",13)
+	hud.paragraph("Assign learned spells below. Assigning a spell already on your bar swaps those slots. Meteor / Blizzard: select the spell, then "+book.placement_hint()+". The preview costs no mana; the fight keeps moving while you aim.",13)
 	hud.action(hud.content,"Buy spells and upgrades from Mara",func():hud.show_character("spellshop"))
 	for name_value in book.BOOK:
 		var id=name_value

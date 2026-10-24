@@ -1,3 +1,28 @@
+# 0.17.0 Focused Combat verification — 2026-10-24
+
+Continues v0.16.0 and the supplied v0.15.0 Godot source. Android remains primary. No application ID, save path, signing identity or character schema change.
+
+- **Source:** 25 isolated suite runs, **1,628 checks**, pass in Godot 4.5.1.stable.official.f62fdbde1, including **71 new touch/combat checks**. No script errors or failed assertions in passing test logs.
+- **Android compiled resources:** all 25 runs / **1,628 checks** pass against actual resources extracted from the signed APK. The export helper additionally runs six focused compiled-resource suites / **541 checks**, protects the APK checksum while tests run, and verifies its signature again afterward.
+- **Windows compiled PCK:** six suites / **333 checks** pass: release boot, fishing, Survival kit, prior stability, new touch/combat in forced mobile mode, and desktop spellbook. This executes the exported PCK using the matching Linux engine, not the native Windows executable.
+- **APK export:** actual ARM64 APK; app.runebound.godot; version code **24**; 0.17.0-focused-combat; minimum API 24; target API 35. ZIP integrity, native ELF 16 KB alignment, ZIP 16 KB alignment, actual v2/v3 signer-block presence and apksigner verification pass.
+- **Signing comparison:** the new APK's certificate matches the supplied signed v0.15.0 APK: SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. No new key was generated. Physical install-over-existing-app was not tested.
+- **Earlier artifact discrepancy:** the v0.16.0 APK copy presently in this workspace has no APK Signing Block and fails verification, conflicting with the earlier recorded success. Treat that APK as superseded; use the freshly verified v0.17.0 package. Independent signing-block checks and checksum protection now guard final output. A deliberately unsigned ZIP with the correct game contents is rejected by the verifier.
+- **Rendered phone QA:** inspected portrait and landscape target placement, valid green circles / blocked red circles, disabled CAST, controls clear of the joystick, and the forward melee hit pose, using native Godot drawing and Linux/Mesa software rendering. The capture fixture uses dummy audio; its shutdown reports audio playback objects retained by the engine, so no hardware-audio or leak-free runtime claim is made from these captures.
+- **Prior CI evidence:** v0.16.0 GitHub Actions run 40093299724 passed source tests and Windows export. Current-commit CI status is separate from these local results.
+
+## New behavior checked
+
+Separate movement/aim/confirm fingers; preview without spending; touch-to-world coordinates and drag ownership; release without casting; CAST exactly once at the chosen point; delayed real Meteor damage/burn; free cancellation; release over CAST without accidental confirmation; blocked targets and range limits; Back, dodge, focus, menu and layout cancellation; needs/time/movement remaining live while aiming; unavailable mana during preview; instant healing; canceled Android touches; forward-only melee; ordinary-enemy windup interruption and guard; boss/named/burn resistance to stun locking; short hit/cast recovery; visible missed attacks, weapon cooldowns, paused attack rejection and wildlife protection; unchanged character roundtrip.
+
+The older gameplay test now resumes play before its bow attack; paused attacks are correctly rejected. Legacy spells also tolerate a missing cooldown entry after a cooldown reset.
+
+## Remaining validation
+
+Real Motorola Edge 2025 / Android 16 installation, physical multi-touch feel, heat/battery/RAM/FPS, hardware audio, native Windows startup and graphics-driver behavior, long-session balance and remaining quest/dungeon content still need playtesting. No commercial-release completion claim is made. See PLAYTEST.md and ROADMAP_ANDROID.md.
+
+## Historical verification (retained; current artifact observations above take precedence)
+
 # 0.16.0 Shelter & Steel verification — 2026-10-24
 
 Continues the supplied v0.15.0 Godot project. The GitHub base was v0.12.0; the branch incorporates existing 0.13–0.15 systems as well as this stabilization milestone.
