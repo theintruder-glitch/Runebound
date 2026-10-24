@@ -25,9 +25,6 @@ jobs:
     timeout-minutes: 30
     env:
       GODOT_VERSION: 4.5.1
-      XDG_CONFIG_HOME: ${{ runner.temp }}/runebound/config
-      XDG_DATA_HOME: ${{ runner.temp }}/runebound/data
-      XDG_CACHE_HOME: ${{ runner.temp }}/runebound/cache
     steps:
       - uses: actions/checkout@v4
 
@@ -49,6 +46,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          export XDG_CONFIG_HOME="$RUNNER_TEMP/runebound/config"
+          export XDG_DATA_HOME="$RUNNER_TEMP/runebound/data"
+          export XDG_CACHE_HOME="$RUNNER_TEMP/runebound/cache"
+          printf 'XDG_CONFIG_HOME=%s\nXDG_DATA_HOME=%s\nXDG_CACHE_HOME=%s\n' "$XDG_CONFIG_HOME" "$XDG_DATA_HOME" "$XDG_CACHE_HOME" >> "$GITHUB_ENV"
           install_dir="$RUNNER_TEMP/runebound/godot"
           mkdir -p "$install_dir" "$XDG_DATA_HOME/godot/export_templates/$GODOT_VERSION.stable"
           cd "$install_dir"
