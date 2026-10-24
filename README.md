@@ -12,7 +12,7 @@
 - Weather and seasonal changes, crop gardens, quest board, and camp trader
 - Local character saving; the game does not require a connection or an app store
 
-**Not yet implemented in this recovered version:** a separate full hunger/thirst/sleep survival mode. These were discussed for a future update, not confirmed as shipped in v0.12.0.
+**Opt-in Survival:** open Pause → Game mode to enable Normal or Gentle on the current character. Food, water, fatigue and cold exposure use active play time only. Existing saves default to Adventure. Use cooked food/tea, the travel flask, camp refills, safe rest, shelter and warmth to recover. Needs affect walking speed with a bounded penalty and never cause damage. Adventure freezes the meters without resetting them. This first milestone uses the existing camp/story and save slot; it is not a separate character slot or endless challenge.
 
 ## Edit on an Android phone
 

@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 ERROR = re.compile(r"SCRIPT ERROR:|ERROR:|FAIL:|Assertion failed")
 SUITES = ["game", "survival", "forest", "expansion", "presentation", "contracts",
           "weather", "trader", "farming", "auto_pickup", "menu_scroll", "rotation",
-          "movement", "live_frames", "mobile_controls"]
+          "movement", "live_frames", "mobile_controls", "needs"]
 
 
 def run_logged(command, log, env, timeout=180):
@@ -39,7 +39,7 @@ def main():
     results = []
     with tempfile.TemporaryDirectory(prefix="runebound-tests-") as temporary:
         for suite in args.suite or SUITES:
-            modes = ["portrait", "landscape"] if suite in ["movement", "live_frames", "mobile_controls"] else ["portrait"]
+            modes = ["portrait", "landscape"] if suite in ["movement", "live_frames", "mobile_controls", "needs"] else ["portrait"]
             for mode in modes:
                 name = f"{suite}-{mode}"
                 env = dict(os.environ, XDG_DATA_HOME=str(Path(temporary) / name))

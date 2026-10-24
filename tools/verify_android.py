@@ -31,7 +31,8 @@ def verify(apk, sdk, expected_cert, mode):
             raise RuntimeError(f"Wrong native libraries: {abis}")
         for required in ["AndroidManifest.xml", "classes.dex", "assets/project.binary",
                          "assets/scripts/game.gdc", "assets/scripts/hud.gdc",
-                         "assets/scripts/survival.gdc", "assets/scripts/farming.gdc"]:
+                         "assets/scripts/survival.gdc", "assets/scripts/farming.gdc",
+                         "assets/scripts/needs.gdc"]:
             if required not in names:
                 raise RuntimeError(f"APK missing {required}")
         if any(n.startswith(("assets/tests/", "assets/tools/", "assets/signing/")) for n in names):

@@ -1,6 +1,6 @@
 # Current Android milestone — 2026-10-24
 
-See [ANDROID_BUILD.md](ANDROID_BUILD.md) for reproducible commands, APK checks, signing limitations and pending Motorola Edge 2025 / Android 16 tests. The current Android regressions pass 1,150 assertions across 18 runs, including 36 new multi-touch/lifecycle assertions. An Android test APK is verified locally with a disposable certificate; it cannot update the original installation. The strict local pipeline also records sandbox TCP-listener failures separately. No physical-phone installation or original-key upgrade is claimed.
+See [ANDROID_BUILD.md](ANDROID_BUILD.md) for reproducible commands, APK checks, signing limitations and pending Motorola Edge 2025 / Android 16 tests. The earlier touch milestone passed 1,150 assertions across 18 runs. Subsequent combat and opt-in Survival checks, including save migration, rollback and recovery, are recorded in ANDROID_BUILD.md and PR #1. An Android test APK is verified locally with a disposable certificate; it cannot update the original installation. The strict local pipeline also records sandbox TCP-listener failures separately. No physical-phone installation or original-key upgrade is claimed.
 
 The sections below are retained historical release notes, not fresh execution evidence for this checkout.
 

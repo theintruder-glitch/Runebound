@@ -204,6 +204,7 @@ func eat(food:String) -> bool:
  add(food,-1)
  game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+FOODS[food].hp)
  game.hero.mp=minf(Data.max_mp(game.hero),game.hero.mp+FOODS[food].mp)
+ game.needs.feed(food)
  if food=="Warm tea": game.hero.warmUntil=game.hero.worldTime+180
  game.save_game(); game.hud.update_hud()
  return true
@@ -293,5 +294,6 @@ func rest(s:Dictionary) -> bool:
  if blocked(pos,12): game.notify("Clear space beside the bed first.",3); return false
  game.hero.respawn={"x":pos.x,"y":pos.y}
  game.hero.hp=Data.max_hp(game.hero); game.hero.mp=Data.max_mp(game.hero)
+ if game.needs.active(): game.hero.needs.fatigue=0.0
  game.notify("Rested. This bed is now your return point after defeat.",4)
  game.save_game(); return true

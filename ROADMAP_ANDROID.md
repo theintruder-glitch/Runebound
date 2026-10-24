@@ -20,12 +20,12 @@
   - Combat readability milestone: named cooldowns, recovery bars, immediate spell/dodge HUD feedback and directional dodge cues. 1,184 assertions pass across 18 Android runs; physical-phone graphics and profiling remain pending.
 - [ ] Harden save migration, autosaves and reload/recovery with regression tests.
 
-## Priority 2: Expanded survival mode (planned, not shipped)
-- [ ] Offer **Adventure** (existing core gameplay) and separate **Survival** game modes.
-- [ ] Survival meters: hunger, thirst, fatigue/sleep, temperature/exposure; weather and biome conditions matter.
-- [ ] Add fair remedies: food, water, shelter, bedding, fires and useful crafted tools; avoid unplayable punishment loops.
-- [ ] Persist new meters and difficulty options without corrupting old Adventure saves.
-- [ ] Build automated checks around regeneration, depletion, shelter, seasons, save/load and mode switching.
+## Priority 2: Expanded survival mode (first opt-in milestone implemented)
+- [x] Offer **Adventure** (existing core gameplay) and opt-in **Survival** rules, selected in Pause → Game mode on the current character. Existing saves default to Adventure; no separate save slot is introduced.
+- [x] Survival meters: food, water, fatigue and cold exposure. Rain, winter, snow biome, underground cover, roofs, shelters, fire and tea affect exposure.
+- [ ] Expand survival remedies and useful crafted tools. Initial remedies reuse cooked food, tea, crafted shelters/beds/fires and add a three-use travel flask with starting-camp refills. Needs never damage health; walking penalties cap at 30% (10% on Gentle). Crafted flask upgrades and more water sources remain future work.
+- [x] Persist additive meters, flask charges and Normal/Gentle difficulty. Validate malformed data, use existing backup recovery and roll back failed mode/flask saves.
+- [x] Build automated checks around recovery, depletion, shelter, seasons/biomes, save/load and mode switching, plus native menu swipes. Physical-device validation and balance remain pending.
 
 ## Priority 3: RPG expansion and content
 - [ ] Expand spell upgrade/buy/unlock paths, spell hotbar customization, gear and enchantment variety.

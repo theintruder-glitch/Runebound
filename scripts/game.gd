@@ -9,6 +9,8 @@ const DesktopScript=preload("res://scripts/desktop.gd")
 var desktop
 const SurvivalScript = preload("res://scripts/survival.gd")
 var survival
+const NeedsScript=preload("res://scripts/needs.gd")
+var needs
 const FarmingScript=preload("res://scripts/farming.gd")
 var farming
 const WeatherScript=preload("res://scripts/weather.gd")
@@ -72,6 +74,8 @@ func _ready() -> void:
 	add_child(audio)
 	survival = SurvivalScript.new()
 	survival.game = self
+	needs=NeedsScript.new()
+	needs.game=self
 	survival.load_pickup_settings()
 	farming=FarmingScript.new()
 	farming.game=self
@@ -231,11 +235,13 @@ func tick(dt: float) -> void:
 	weather.tick()
 	survival.tick(dt)
 	farming.tick(dt)
+	needs.tick(dt)
 	var keyboard = Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)),float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
 	var movement = (move_vector+keyboard).limit_length(1)
 	is_walking = movement.length()>.1 or dash_time>0
 	var speed = 147 if hero.className=="Rogue" else 142 if hero.className=="Ranger" else 130
 	if abilities.stealth>0: speed*=1.25
+	speed*=needs.speed_scale()
 	var at = player_position()
 	if dash_time>0:
 		at = move_position(at,facing*490*dt,10)

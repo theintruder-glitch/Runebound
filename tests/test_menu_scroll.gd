@@ -146,6 +146,17 @@ func run():
 			var direction=-60.0 if before<limit-15 else 60.0
 			await swipe(target,direction)
 			check(absf(hud.scroll.scroll_vertical-before)>15 if limit>15 else hud.scroll.scroll_vertical==0,"Content swipe handles the "+page+" menu and its bounds "+str(dims))
+		game.needs.configure("survival","normal")
+		game.hero.needs.water=20
+		hud.show_survival_mode();await settle()
+		var drink=find_button("Drink flask")
+		await reveal(drink);before=hud.scroll.scroll_vertical
+		var water=game.hero.needs.water;var uses=game.hero.needs.flask
+		var maximum=hud.scroll.get_v_scroll_bar().max_value-hud.scroll.get_v_scroll_bar().page
+		await swipe(drink,-60.0 if before<maximum-15 else 60.0)
+		check(absf(hud.scroll.scroll_vertical-before)>15 if maximum>15 else hud.scroll.scroll_vertical==0,"Survival supplies swipe respects content bounds "+str(dims))
+		check(game.hero.needs.water==water and game.hero.needs.flask==uses,"Swiping Survival controls spends no water "+str(dims))
+		game.needs.configure("adventure","normal")
 		# New menu pages must stop the preceding page's momentum and start at top.
 		hud.show_character("gear");await settle();await create_timer(.12).timeout
 		check(hud.scroll.scroll_vertical==0,"Changing pages cancels old scroll momentum "+str(dims))

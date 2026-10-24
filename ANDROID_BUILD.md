@@ -1,6 +1,6 @@
 # Android build and milestone evidence
 
-The game remains Godot/GDScript, package `app.runebound.godot`, ARM64, version code **19**, with the existing character/save migration code and all existing content. `project.godot`, `export_presets.cfg` and `scripts/data.gd` are unchanged.
+The game remains Godot/GDScript, package `app.runebound.godot`, ARM64, version code **19**, with the existing character/save migration code and all existing content. `project.godot` and `export_presets.cfg` are unchanged. The Survival milestone adds validated optional fields to the existing save migration; the save path, atomic write/backup handling, progression and inventory remain intact.
 
 ## Reproducible build
 
@@ -71,3 +71,13 @@ The joystick now has an 8% center dead zone to suppress thumb drift, retains con
 Spell, class-skill and dodge labels retain their names while recovering. Touch buttons show a compact recovery bar, and mana-limited spells keep their cost visible. Spell casts and dodges update the HUD immediately; cooldown buttons stay unavailable until the action actually recovers. Dodge adds a short directional chevron cue within the existing 24/48-effect budgets. Costs, damage, recovery durations, save format and Android identity are unchanged.
 
 Local validation passed **1,184 assertions across 18 Android runs**, including 35 mobile-control checks per orientation. The new checks exercise real touch casts/dodges, cooldown tap rejection, recovery progress, mana versus cooldown state, world draw callbacks and the low-power effect cap. CI results for this milestone are attached to PR #1; the earlier artifact above predates these graphics changes. Physical-phone appearance, sustained performance and Android 16 installation remain untested. Next: phone readability feedback and save-safe opt-in Survival mechanics.
+
+## Opt-in Survival milestone — 2026-10-24
+
+Pause → Game mode offers Adventure, Survival Normal and Survival Gentle for the current character. Existing saves and new characters start in Adventure. Modes share the existing character/camp/story and save slot. Switching freezes/resumes the same meters; it never refills them. Gentle halves depletion. Normal rates per active second are food −0.04, water −0.06 and fatigue +0.02. All meters remain between 0 and 100. Critical needs reduce ordinary walking by at most 30% (Gentle 10%); they never cause damage and do not alter dodge speed.
+
+Food/tea use the existing inventory and recipes. Survival adds a three-use travel flask (40 water per use), free hydration/refills near the starting camp, and safe fatigue recovery at camp, a shelter or bed. Close hostiles prevent rest. Existing bed rest also recovers fatigue. Exposure responds to winter, snow regions and rain; cover, fueled fires and tea reverse it. No offline depletion, new timers/nodes or heavy rendering are introduced. Gameplay HUD shows the meters while Survival is active; actions use the existing scrolling menu.
+
+New migration fields are gameMode and needs (food, water, fatigue, exposure, flask, difficulty). Missing fields get safe defaults. Invalid or nonfinite values are rejected so the existing backup-read fallback can recover the previous valid save. Mode changes and flask/rest/refill actions restore their prior state if saving fails. New tests cover old/partial saves, invalid fields, actual simulation/movement, conditions/remedies, difficulty, persistence, corrupt-save recovery, failed-write rollback and native swipes over hydration controls in both orientations.
+
+Manual checks still needed: Android 16 installation, meter readability, touch comfort and long-session balance on Motorola Edge 2025. Original-certificate upgrades remain untested. Local validation passed 1,348 assertions across 20 Android runs, including 79 Survival checks per orientation and 85 native menu-scroll checks. CI artifacts for this milestone are recorded in PR #1. Earlier APK links in this file predate Survival. Next: more water sources/crafted travel tools and phone playtesting; then spell upgrade/hotbar expansion.
