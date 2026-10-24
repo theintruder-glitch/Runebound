@@ -1,5 +1,6 @@
 """Fail-closed signing and version policy; never generate an update key."""
 import re
+from pathlib import Path
 from verify_android import ORIGINAL_CERT
 
 
@@ -12,6 +13,10 @@ def signing_inputs(mode, environment):
     certificate = ORIGINAL_CERT if mode == 'original' else environment.get('UPDATE_CERT_SHA256', '').lower()
     if not all(values) or not re.fullmatch('[0-9a-f]{64}', certificate):
         raise ValueError('Persistent signing key, alias, password and pinned certificate are required. No replacement key will be generated.')
+    if mode == "updates":
+        pinned = (Path(__file__).resolve().parents[1] / "android-update-certificate.sha256").read_text().strip()
+        if certificate != pinned:
+            raise ValueError("Update signing certificate differs from the pinned series; refusing identity change")
     return (*values, certificate)
 
 

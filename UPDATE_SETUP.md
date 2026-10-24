@@ -32,3 +32,11 @@ The existing workflow uses version code `1000 + github.run_number`. Keep using t
 After setup, download a verified update APK and tap it on the phone. Android should offer an update when the installed package/certificate/version are compatible. Cancel if it asks you to uninstall or rejects the signature. Verify the existing character after updating.
 
 If the installed app's private key cannot be recovered, an in-place update signed by that key is blocked. Preserve the original installation and JSON backup. A one-time move into a separately installed, permanently signed series (for example in another Android profile) can use the game's existing character import; verify the imported character before considering any later migration. That does not retroactively make the old disposable APKs update-compatible.
+
+## New continuing series prepared after the old installation was cleared
+
+The public certificate for the new continuing series is pinned in android-update-certificate.sha256. The private key was generated once in the private execution workspace with alias runebound and a 10,000-day validity. It is not committed. Update mode now rejects any certificate other than this pinned series, even if a different certificate is entered in the repository variable. Original mode still requires the historical original certificate.
+
+A private backup ZIP and the first version-code-1020 APK were prepared locally. Workspace storage alone is not a durable backup: download and keep the private ZIP safely, and configure the three ANDROID_UPDATE_* Actions secrets plus the public ANDROID_UPDATE_CERT_SHA256 variable from the matching text files in that ZIP. Never upload the ZIP or its private files to GitHub source, issues or public artifacts. The ZIP contains the key and password; protect it as a private signing credential. The current connector cannot complete this secret setup.
+
+After setup, select updates mode for this new series; do not use original mode. Future workflow version codes will exceed 1020 as the existing workflow counter increases. The first local APK was independently checked; install-over-existing behavior still requires testing on the phone.

@@ -1,4 +1,5 @@
 import unittest
+from pathlib import Path
 from signing_policy import signing_inputs, update_version
 from verify_android import ORIGINAL_CERT
 
@@ -15,7 +16,10 @@ class SigningPolicyTests(unittest.TestCase):
         env={f'UPDATE_{key}':'test-fixture' for key in ('KEYSTORE_B64','KEY_ALIAS','KEY_PASSWORD')}
         with self.assertRaises(ValueError): signing_inputs('updates',env)
         env['UPDATE_CERT_SHA256']='ab'*32
-        self.assertEqual(signing_inputs('updates',env)[3],'ab'*32)
+        with self.assertRaises(ValueError): signing_inputs('updates',env)
+        pinned=(Path(__file__).resolve().parents[1]/'android-update-certificate.sha256').read_text().strip()
+        env['UPDATE_CERT_SHA256']=pinned
+        self.assertEqual(signing_inputs('updates',env)[3],pinned)
     def test_version_must_increase(self):
         for value in (None,'19','18','-1','abc','2100000001'):
             with self.assertRaises(ValueError): update_version(value,19)
