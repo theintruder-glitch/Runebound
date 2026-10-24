@@ -17,6 +17,7 @@
   - Automated milestone: center dead zone, ownership, cancellation and hidden-control release implemented; native movement, rotation and 36 new combat-input assertions pass. Phone comfort/performance testing remains pending.
 - [ ] Improve touch control placement, spell buttons, screen scaling and accessible menu scrolling in both orientations.
 - [ ] Polish responsive combat animations, hit feedback, dodge cues and audio; profile CPU/GPU and RAM on a real phone.
+  - Combat readability milestone: named cooldowns, recovery bars, immediate spell/dodge HUD feedback and directional dodge cues. 1,184 assertions pass across 18 Android runs; physical-phone graphics and profiling remain pending.
 - [ ] Harden save migration, autosaves and reload/recovery with regression tests.
 
 ## Priority 2: Expanded survival mode (planned, not shipped)

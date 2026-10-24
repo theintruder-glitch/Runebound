@@ -65,3 +65,9 @@ The joystick now has an 8% center dead zone to suppress thumb drift, retains con
 2. Profile combat/effects on the phone, then improve dodge/hit cues and spell readability within the existing low-power effect limits.
 3. Add opt-in Survival mode separately from Adventure, with old-save defaults, hunger/thirst/fatigue/exposure, fair remedies and save/load regression tests before shipping.
 4. Expand spell upgrades/hotbar choices, encounters, quests and progression in later tested milestones. These expansions are not implemented by this change.
+
+## Combat readability milestone — 2026-10-24
+
+Spell, class-skill and dodge labels retain their names while recovering. Touch buttons show a compact recovery bar, and mana-limited spells keep their cost visible. Spell casts and dodges update the HUD immediately; cooldown buttons stay unavailable until the action actually recovers. Dodge adds a short directional chevron cue within the existing 24/48-effect budgets. Costs, damage, recovery durations, save format and Android identity are unchanged.
+
+Local validation passed **1,184 assertions across 18 Android runs**, including 35 mobile-control checks per orientation. The new checks exercise real touch casts/dodges, cooldown tap rejection, recovery progress, mana versus cooldown state, world draw callbacks and the low-power effect cap. CI results for this milestone are attached to PR #1; the earlier artifact above predates these graphics changes. Physical-phone appearance, sustained performance and Android 16 installation remain untested. Next: phone readability feedback and save-safe opt-in Survival mechanics.

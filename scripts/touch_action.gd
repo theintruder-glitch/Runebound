@@ -3,6 +3,20 @@ extends Button
 # Normal menu Buttons use Godot's touch-to-mouse support. Combat buttons handle
 # each touch index explicitly, so a second finger can cast while the first moves.
 var finger = -1
+var cooldown_fraction = 0.0
+
+func show_cooldown(remaining: float, duration: float) -> void:
+	var fraction=clampf(remaining/maxf(duration,.001),0,1)
+	if not is_equal_approx(fraction,cooldown_fraction):
+		cooldown_fraction=fraction
+		queue_redraw()
+
+func _draw() -> void:
+	if cooldown_fraction>0:
+		var track=Rect2(Vector2(8,size.y-7),Vector2(maxf(0,size.x-16),3))
+		draw_rect(track,Color("203e48"))
+		track.size.x*=1-cooldown_fraction
+		draw_rect(track,Color("b9ecdc"))
 
 func release_touch() -> void:
 	var held = finger!=-1

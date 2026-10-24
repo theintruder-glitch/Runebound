@@ -366,6 +366,12 @@ func draw_visual(effect:Dictionary) -> void:
 			for i in range(4):
 				var direction=Vector2.from_angle(i*PI/2+.4)
 				draw_line(pos+direction*r*.35,pos+direction*r,color,2)
+		"dodge":
+			var direction:Vector2=effect.get("direction",Vector2.DOWN)
+			var side=direction.orthogonal()
+			for i in range(2):
+				var tip=pos+direction*(radius*(.4+progress*.5)-i*12)
+				draw_polyline(PackedVector2Array([tip-direction*9+side*8,tip,tip-direction*9-side*8]),color,2)
 		"dash":
 			color.a*=.4
 			draw_rect(Rect2(pos+Vector2(-9,-22),Vector2(18,32)),color)

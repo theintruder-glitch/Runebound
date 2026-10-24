@@ -55,6 +55,7 @@ func run() -> void:
 	var mana=game.hero.mp
 	touch(3,fire_at)
 	check(game.hero.mp==mana-12 and game.spell_cooldowns.fire>0,"A third finger casts Firebolt exactly once")
+	check(fire.disabled and fire.cooldown_fraction==1,"Touch spell immediately displays its recovery state")
 	check(game.attack_held and game.move_vector==Vector2.RIGHT,"Spell casting preserves held attack and movement")
 	# Android emits a mouse event for the same touch; it must not cast twice.
 	game.spell_cooldowns.fire=0
@@ -90,5 +91,52 @@ func run() -> void:
 	game.notification(MainLoop.NOTIFICATION_APPLICATION_FOCUS_OUT)
 	check(not game.playing and not game.attack_held and attack.finger==-1,"App focus loss cannot leave attack held on resume")
 	check(Data.read_save().className=="Mage","Lifecycle input resets preserve the existing character save")
+	game.hud.resume()
+	game.move_vector=Vector2.RIGHT
+	game.dash_cooldown=0
+	game.visuals.clear()
+	touch(11,game.hud.dash_button.get_global_rect().get_center())
+	touch(11,Vector2.ZERO,false)
+	check(game.dash_time>0 and game.dash_cooldown==3.8,"Touch dodge retains its existing timing")
+	check(game.visuals.size()==1 and game.visuals[0].kind=="dodge" and game.visuals[0].direction==Vector2.RIGHT,"Dodge immediately shows its movement direction")
+	check(game.hud.dash_button.text.begins_with("DASH") and game.hud.dash_button.disabled,"Recovering dodge keeps its name and disables repeat taps")
+	check(game.hud.dash_button.cooldown_fraction==1,"Dodge recovery bar starts empty")
+	var effects=game.visuals.size()
+	touch(12,game.hud.dash_button.get_global_rect().get_center())
+	touch(12,Vector2.ZERO,false)
+	check(game.visuals.size()==effects and game.dash_cooldown==3.8,"Cooldown tap cannot restart dodge or add a false cue")
+	game.dash_cooldown=1.9
+	game.hud.update_hud()
+	check(is_equal_approx(game.hud.dash_button.cooldown_fraction,.5),"Dodge bar tracks remaining recovery")
+	for key in ["fire","frost","heal"]:
+		game.spell_cooldowns[key]=game.SPELL_RECOVERY[key]*.5
+	game.abilities.cooldown=7
+	game.hud.update_hud()
+	for key in ["fire","frost","heal"]:
+		var button=game.hud.spell_buttons[key]
+		check(button.text.begins_with(key.to_upper()) and button.disabled and is_equal_approx(button.cooldown_fraction,.5),"Spell name and recovery remain readable: "+key)
+	check(game.hud.skill_button.text.begins_with("METEOR") and is_equal_approx(game.hud.skill_button.cooldown_fraction,.5),"Class skill keeps its identity while recovering")
+	game.spell_cooldowns.fire=.05
+	game.hud.update_hud()
+	check(game.hud.spell_buttons.fire.disabled,"Final cooldown fraction cannot advertise an unusable spell")
+	game.spell_cooldowns.fire=0
+	game.hero.mp=0
+	game.hud.update_hud()
+	check(game.hud.spell_buttons.fire.disabled and game.hud.spell_buttons.fire.text=="FIRE\n12 MP" and game.hud.spell_buttons.fire.cooldown_fraction==0,"Low mana shows cost without a false cooldown bar")
+	game.hero.mp=Data.max_mp(game.hero)
+	game.hud.update_hud()
+	check(not game.hud.spell_buttons.fire.disabled,"Recovered spell becomes available with sufficient mana")
+	game.world.profile_enabled=true
+	game.world.queue_redraw()
+	await process_frame
+	await process_frame
+	check(game.world.profile_draw_samples.size()>0,"Dodge cue runs through the actual world draw callback")
+	game.set_low_power(true)
+	for i in range(40):
+		game.dash_cooldown=0
+		game.dash()
+	check(game.visuals.size()==24,"Repeated dodge cues respect the low-power effect budget")
+	game.clear_scene()
+	check(game.visuals.is_empty(),"Scene changes remove dodge cues")
 	print(str(checks)+" MOBILE CONTROL CHECKS PASSED")
 	quit()

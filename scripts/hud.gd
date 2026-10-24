@@ -400,15 +400,21 @@ func update_hud() -> void:
 	wealth.text = "%d gold · %d essence · %d kills · %d FPS" % [h.gold,h.essence,h.kills,Engine.get_frames_per_second()]
 	movement_status.text = ("Sheltered · recovering" if game.survival.sheltered() else game.weather.comfort())+" · %dm from camp" % int(game.player_position().length()/10)
 	var skill=game.abilities.SKILLS[h.className]
-	skill_button.text=("%.1fs" % game.abilities.cooldown) if game.abilities.cooldown>.1 else skill.name+"\n%d MP" % skill.cost
-	skill_button.disabled=game.abilities.cooldown>.1 or h.mp<skill.cost or not game.build_recipe.is_empty()
+	skill_button.text=skill.name+"\n"+(("%.1fs" % game.abilities.cooldown) if game.abilities.cooldown>0 else "%d MP" % skill.cost)
+	skill_button.disabled=game.abilities.cooldown>0 or h.mp<skill.cost or not game.build_recipe.is_empty()
 	auto_button.text = "AUTO\nON" if h.auto else "AUTO\nOFF"
-	dash_button.text = "%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "DASH"
+	dash_button.text = "DASH\n%.1fs" % game.dash_cooldown if game.dash_cooldown>0 else "DASH"
 	for key in spell_buttons:
 		var cost = {"fire":12,"frost":20,"heal":25}[key]
 		var cooldown = game.spell_cooldowns[key]
-		spell_buttons[key].text = "%.1fs" % cooldown if cooldown>.1 else key.to_upper()+"\n%d MP" % cost
-		spell_buttons[key].disabled = cooldown>.1 or h.mp<cost
+		spell_buttons[key].text = key.to_upper()+"\n"+("%.1fs" % cooldown if cooldown>0 else "%d MP" % cost)
+		spell_buttons[key].disabled = cooldown>0 or h.mp<cost
+	if not game.desktop.enabled:
+		dash_button.disabled=game.dash_cooldown>0
+		dash_button.show_cooldown(game.dash_cooldown,game.dash_recovery_time())
+		skill_button.show_cooldown(game.abilities.cooldown,skill.cooldown)
+		for key in spell_buttons:
+			spell_buttons[key].show_cooldown(game.spell_cooldowns[key],game.SPELL_RECOVERY[key])
 	if game.desktop.enabled:
 		attack_button.text="[LMB] ATTACK\nSpace"
 		dash_button.text="[Shift] DASH\n"+("%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "Right click")

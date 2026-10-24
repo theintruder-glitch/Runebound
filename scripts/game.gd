@@ -4,6 +4,7 @@ const Data = preload("res://scripts/data.gd")
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
+const SPELL_RECOVERY = {"fire":1.3,"frost":5.5,"heal":9.0}
 const DesktopScript=preload("res://scripts/desktop.gd")
 var desktop
 const SurvivalScript = preload("res://scripts/survival.gd")
@@ -530,7 +531,7 @@ func cast(spell: String) -> bool:
 	sound("spell")
 	if spell!="heal": abilities.stealth=0
 	hero.mp -= cost
-	spell_cooldowns[spell] = {"fire":1.3,"frost":5.5,"heal":9.0}[spell]
+	spell_cooldowns[spell] = SPELL_RECOVERY[spell]
 	if spell=="fire":
 		if mouse_fire: desktop.shoot(desktop.aim_direction(),"fire",Data.damage(hero,"magic")*1.7,1)
 		else: shoot(target,"fire",Data.damage(hero,"magic")*1.7,1)
@@ -544,18 +545,26 @@ func cast(spell: String) -> bool:
 		visual_fx("heal",player_position(),40,Color("bce7b7"),.65)
 		hero.hp = minf(Data.max_hp(hero),hero.hp+Data.max_hp(hero)*(.55 if hero.className=="Cleric" else .33))
 		burst(player_position(),Color("b2efb9"),25)
+	hud.update_hud()
 	return true
+
+func dash_recovery_time() -> float:
+	return 2.4 if hero.className=="Rogue" else 3.8
 
 func dash() -> void:
 	if not playing or dash_cooldown>0:
 		return
 	if exploration.active(): exploration.dodged=true
-	dash_cooldown = 2.4 if hero.className=="Rogue" else 3.8
+	dash_cooldown = dash_recovery_time()
 	dash_time = .23
 	if move_vector.length()>.1:
 		facing = move_vector.normalized()
 	if desktop.enabled and desktop.keyboard_direction().length()>.1:
 		facing=desktop.keyboard_direction().normalized()
+
+	var cue=visual_fx("dodge",player_position(),40,Color("b8f0df"),.23)
+	cue["direction"]=facing
+	hud.update_hud()
 
 func take_item(item: Dictionary) -> void:
 	if hero.inventory.size()>=40:
