@@ -3,6 +3,11 @@ extends Control
 var game
 var finger = -1
 var direction = Vector2.ZERO
+const DEAD_ZONE = 0.08
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_VISIBILITY_CHANGED and not is_visible_in_tree():
+		reset()
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -12,7 +17,10 @@ func _input(event: InputEvent) -> void:
 	if not is_visible_in_tree() or game==null or not game.playing:
 		return
 	if event is InputEventScreenTouch:
-		if event.pressed and finger==-1 and get_global_rect().has_point(event.position):
+		if event.canceled and event.index==finger:
+			reset()
+			get_viewport().set_input_as_handled()
+		elif event.pressed and not event.canceled and finger==-1 and get_global_rect().has_point(event.position):
 			finger = event.index
 			move_knob(event.position)
 			get_viewport().set_input_as_handled()
@@ -23,7 +31,7 @@ func _input(event: InputEvent) -> void:
 		move_knob(event.position)
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.device!=-1 and event.button_index==MOUSE_BUTTON_LEFT:
-		if event.pressed and get_global_rect().has_point(event.position):
+		if event.pressed and finger==-1 and get_global_rect().has_point(event.position):
 			finger = -2
 			move_knob(event.position)
 			get_viewport().set_input_as_handled()
@@ -35,7 +43,9 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func move_knob(at: Vector2) -> void:
-	direction = ((at-global_position-size/2)/(size.x*.33)).limit_length(1)
+	var raw = ((at-global_position-size/2)/(size.x*.33)).limit_length(1)
+	# Ignore small thumb jitter while keeping full travel and continuous response.
+	direction = raw.normalized()*maxf(0,(raw.length()-DEAD_ZONE)/(1-DEAD_ZONE))
 	game.move_vector = direction
 	queue_redraw()
 

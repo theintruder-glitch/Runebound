@@ -1,6 +1,7 @@
 class_name RuneboundData
 extends RefCounted
 
+const Needs=preload("res://scripts/needs.gd")
 const SAVE_PATH = "user://character.json"
 const CLASSES = {
 	"Warrior": {"weapon":"sword", "color":"dca58d", "desc":"Sword damage +35%. Maximum health +35."},
@@ -61,6 +62,7 @@ static func migrate(hero: Dictionary) -> Dictionary:
 				return {}
 		if not ITEM_NAMES.has(item.kind) or item.rarity<0 or item.rarity>4 or item.enchant<0 or item.enchant>4:
 			return {}
+	if not Needs.migrate(hero): return {}
 	if not hero.has("kingdom"):
 		hero.kingdom = {"renown":0,"buildings":[]}
 	hero.worldTime = hero.get("worldTime",120.0)

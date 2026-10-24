@@ -204,6 +204,7 @@ func eat(food:String) -> bool:
  add(food,-1)
  game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+FOODS[food].hp)
  game.hero.mp=minf(Data.max_mp(game.hero),game.hero.mp+FOODS[food].mp)
+ game.needs.feed(food)
  if food=="Warm tea": game.hero.warmUntil=game.hero.worldTime+180
  game.save_game(); game.hud.update_hud()
  return true
@@ -215,6 +216,13 @@ func enemy_direction(e:Dictionary,dt:float) -> Vector2:
  if e.get("neutral",false):
   if distance<240: return -e.pos.direction_to(pos)*1.1
   return e.pos.direction_to(e.home)*.3 if e.pos.distance_to(e.home)>100 else Vector2.ZERO
+ e["retreating"]=false
+ if game.unprovoked_wildlife(e):
+  e.windup=0
+  return e.pos.direction_to(e.home)*.3 if e.pos.distance_to(e.home)>100 else Vector2.ZERO
+ if e.hp<e.max_hp*.25 and not e.boss and not e.has("named") and e.aggro>0 and distance<180:
+  e["retreating"]=true
+  return -e.pos.direction_to(pos)*.8
  if e.type in ["wolf","frost_wolf"] and distance<175 and game.line_clear(e.pos,pos): game.exploration.pack_alert(e)
  if sheltered() or game.abilities.stealth>0 or distance>300 or e.pos.distance_to(e.home)>420:
   e.aggro=0; e.returning=true
@@ -293,5 +301,6 @@ func rest(s:Dictionary) -> bool:
  if blocked(pos,12): game.notify("Clear space beside the bed first.",3); return false
  game.hero.respawn={"x":pos.x,"y":pos.y}
  game.hero.hp=Data.max_hp(game.hero); game.hero.mp=Data.max_mp(game.hero)
+ if game.needs.active(): game.hero.needs.fatigue=0.0
  game.notify("Rested. This bed is now your return point after defeat.",4)
  game.save_game(); return true

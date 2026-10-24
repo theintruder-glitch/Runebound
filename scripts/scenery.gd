@@ -4,6 +4,7 @@ extends Node2D
 # only changes when the camera moves a tile, loot opens, or buildings change.
 var world
 var decorations: Array = []
+var landforms:Array=[]
 var visible_chests: Array = []
 var bounds = Rect2()
 
@@ -11,6 +12,7 @@ func _draw() -> void:
 	if world==null or world.game.hero.is_empty():
 		return
 	var game = world.game
+	draw_landforms()
 	for decoration in decorations:
 		var region=decoration.get("biome","forest")
 		var tint=Color(.85,1,1.15) if region=="snow" else Color(.8,.9,.85) if region=="swamp" else Color(.8,.8,1) if region=="caves" else Color.WHITE
@@ -40,6 +42,25 @@ func _draw() -> void:
 		draw_texture(world.textures["chest_open" if opened else "chest"],chest.pos-Vector2(32,64))
 		if not opened:
 			draw_string(ThemeDB.fallback_font,chest.pos+Vector2(-20,-23),"CHEST",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("e1c98f"))
+
+func draw_landforms() -> void:
+	for form in landforms:
+		var p:Vector2=form.pos
+		var top=Color("425f47") if form.biome=="forest" else Color("4b5264") if form.biome=="caves" else Color("7e9ca6") if form.biome=="snow" else Color("3c5350")
+		if world.game.weather.season()=="Winter": top=top.lightened(.15)
+		draw_colored_polygon(PackedVector2Array([p+Vector2(-90,5),p+Vector2(65,12),p+Vector2(86,38),p+Vector2(22,68),p+Vector2(-70,48)]),Color("101d2366"))
+		var rim=PackedVector2Array([p+Vector2(-82,-20),p+Vector2(20,-45),p+Vector2(80,-18),p+Vector2(62,22),p+Vector2(-60,30)])
+		var face=PackedVector2Array([rim[2],rim[3],rim[4],rim[4]+Vector2(0,25),rim[3]+Vector2(0,25),rim[2]+Vector2(0,18)])
+		draw_colored_polygon(face,top.darkened(.45))
+		draw_colored_polygon(rim,top)
+		draw_polyline(PackedVector2Array([rim[0],rim[1],rim[2]]),top.lightened(.25),3)
+		for offset in [-42,0,38]:
+			draw_line(p+Vector2(offset,28),p+Vector2(offset-5,45),top.darkened(.6),2)
+		if form.ruin:
+			for dx in [-28,24]:
+				draw_rect(Rect2(p+Vector2(dx,-54),Vector2(13,42)),Color("778581"))
+				draw_line(p+Vector2(dx,-54),p+Vector2(dx+13,-54),Color("b3b8a2"),3)
+			draw_line(p+Vector2(-28,-54),p+Vector2(12,-59),Color("737f78"),8)
 
 func draw_survival(game) -> void:
 	for node in game.survival.nodes:

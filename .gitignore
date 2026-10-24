@@ -14,3 +14,4 @@ export_credentials.cfg
 !*.env.example
 .DS_Store
 Thumbs.db
+__pycache__/

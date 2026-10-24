@@ -10,9 +10,10 @@
 - Eight character classes (including adventure-unlocked classes), directional combat, enemies, spells, loot and dungeons
 - Auto pickup for nearby world resources, crafting, shelters, building, storage and campfires
 - Weather and seasonal changes, crop gardens, quest board, and camp trader
+- Raised terrace and ruin scenery, sharper monster details, and optional calm wilderness exploration
 - Local character saving; the game does not require a connection or an app store
 
-**Not yet implemented in this recovered version:** a separate full hunger/thirst/sleep survival mode. These were discussed for a future update, not confirmed as shipped in v0.12.0.
+**Opt-in Survival:** open Pause → SURVIVAL / ADVENTURE (also available from Camp) to enable Normal or Gentle on the current character. Food, water, fatigue and cold exposure use active play time only. Existing saves default to Adventure. Use cooked food/tea, the travel flask, camp refills, safe rest, shelter and warmth to recover. Needs affect walking speed with a bounded penalty and never cause damage. Adventure freezes the meters without resetting them. This first milestone uses the existing camp/story and save slot; it is not a separate character slot or endless challenge.
 
 ## Edit on an Android phone
 
@@ -36,12 +37,14 @@ The release export needs a correctly configured **private signing key**. The cur
 
 **Your existing Android signing key is not in this public repository.** Keep it private and backed up. A new or debug signing key generally cannot update an app installed with a different certificate. To protect existing character saves, **do not uninstall the app or clear its data** while testing upgrades.
 
-A manually dispatched Android GitHub Actions workflow is present in `.github/workflows/android-debug.yml`; it requires the previously used debug signing identity in GitHub Secrets. It is not proof that an installable, update-compatible APK has been built.
+The Android GitHub Actions workflow runs on pull requests and manual dispatch. It pins Godot **4.5.1**, Java **17**, SDK/build-tools **35**, imports the project, runs the Android regression suites with isolated saves, and verifies APK identity, signature, integrity and alignment before uploading an artifact. See [ANDROID_BUILD.md](ANDROID_BUILD.md) for local commands and signing restrictions.
+
+Installable builds now require a **persistent private signing key** and increasing Android version codes. Pull requests run checks only; they no longer publish disposable APKs. Manual update builds fail if the required key or pinned certificate is missing. See [UPDATE_SETUP.md](UPDATE_SETUP.md) for the one-time secure setup. Earlier disposable test APKs cannot update each other; keep your installed game and save data.
 
 ## Current source status
 
 - **Editable Android-oriented source:** v0.12.0, recovered and uploaded.
-- **Latest confirmed APK from this repository:** none produced or validated in this GitHub conversion.
+- **Latest local verification:** an ARM64 Android test APK has been exported and independently verified; see [ANDROID_BUILD.md](ANDROID_BUILD.md) for current evidence and limitations. It is not signed with the original certificate.
 - **Proposed next version:** v0.13.0; newer editable source has not yet been incorporated.
 - Android screen/touch compatibility and installed-APK upgrade behavior still require testing on the actual device.
 
@@ -50,3 +53,5 @@ The Android game uses `scripts/game.gd`, `scripts/hud.gd`, `scripts/joystick.gd`
 Development check scripts are under `tests/`. Historical feature and test notes are in `VERIFICATION.md` and `PERFORMANCE.md`.
 
 This is a development game, not a published store release.
+
+**Less chasing:** Pause → Explore calmly lets ordinary wilderness monsters leave you alone until attacked. Bosses and dungeons stay dangerous. Wounded ordinary enemies can retreat. New terrace/ruin art adds visual depth without introducing collisions into existing camps or changing saved routes.

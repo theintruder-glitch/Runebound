@@ -374,7 +374,7 @@ func reset_stick() -> void:
 	if buttons!=null:
 		for child in buttons.get_children():
 			if child.get_script()==TouchActionScript:
-				child.finger = -1
+				child.release_touch()
 
 func blocks_world_pointer(at:Vector2) -> bool:
 	if overlay.visible: return true
@@ -399,16 +399,23 @@ func update_hud() -> void:
 	mp_label.text = "%d / %d MANA" % [h.mp,Data.max_mp(h)]
 	wealth.text = "%d gold · %d essence · %d kills · %d FPS" % [h.gold,h.essence,h.kills,Engine.get_frames_per_second()]
 	movement_status.text = ("Sheltered · recovering" if game.survival.sheltered() else game.weather.comfort())+" · %dm from camp" % int(game.player_position().length()/10)
+	if game.needs.active(): movement_status.text=game.needs.summary()
 	var skill=game.abilities.SKILLS[h.className]
-	skill_button.text=("%.1fs" % game.abilities.cooldown) if game.abilities.cooldown>.1 else skill.name+"\n%d MP" % skill.cost
-	skill_button.disabled=game.abilities.cooldown>.1 or h.mp<skill.cost or not game.build_recipe.is_empty()
+	skill_button.text=skill.name+"\n"+(("%.1fs" % game.abilities.cooldown) if game.abilities.cooldown>0 else "%d MP" % skill.cost)
+	skill_button.disabled=game.abilities.cooldown>0 or h.mp<skill.cost or not game.build_recipe.is_empty()
 	auto_button.text = "AUTO\nON" if h.auto else "AUTO\nOFF"
-	dash_button.text = "%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "DASH"
+	dash_button.text = "DASH\n%.1fs" % game.dash_cooldown if game.dash_cooldown>0 else "DASH"
 	for key in spell_buttons:
 		var cost = {"fire":12,"frost":20,"heal":25}[key]
 		var cooldown = game.spell_cooldowns[key]
-		spell_buttons[key].text = "%.1fs" % cooldown if cooldown>.1 else key.to_upper()+"\n%d MP" % cost
-		spell_buttons[key].disabled = cooldown>.1 or h.mp<cost
+		spell_buttons[key].text = key.to_upper()+"\n"+("%.1fs" % cooldown if cooldown>0 else "%d MP" % cost)
+		spell_buttons[key].disabled = cooldown>0 or h.mp<cost
+	if not game.desktop.enabled:
+		dash_button.disabled=game.dash_cooldown>0
+		dash_button.show_cooldown(game.dash_cooldown,game.dash_recovery_time())
+		skill_button.show_cooldown(game.abilities.cooldown,skill.cooldown)
+		for key in spell_buttons:
+			spell_buttons[key].show_cooldown(game.spell_cooldowns[key],game.SPELL_RECOVERY[key])
 	if game.desktop.enabled:
 		attack_button.text="[LMB] ATTACK\nSpace"
 		dash_button.text="[Shift] DASH\n"+("%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "Right click")
@@ -461,6 +468,7 @@ func show_title(has_save: bool) -> void:
 	if has_save:
 		action(content,"Continue journey",func():game.start_character(Data.read_save()))
 	action(content,"Begin a new journey",func():show_classes(true))
+	paragraph("Survival available: continue or create a character, then open Pause → SURVIVAL / ADVENTURE.",14,Color("bce7b7"))
 	action(content,"Import a character save",choose_import)
 	if game.desktop.enabled: action(content,"Laptop settings and controls",show_desktop_settings)
 	paragraph("This Godot edition has its own save. To bring a character from v0.2, use the included Save Transfer update and export your character first.",12)
@@ -487,6 +495,9 @@ func show_pause(message: String="") -> void:
 	paragraph(game.weather.summary(),13)
 	paragraph("Level %d %s · %d kills · %d chests" % [game.hero.level,game.hero.className,game.hero.kills,game.hero.stats.chests])
 	action(content,"Resume journey",resume)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)
+	action(content,"Explore calmly: "+("ON" if game.calm_exploration else "OFF"),func():game.set_calm_exploration(not game.calm_exploration);show_pause())
+	paragraph("Explore calmly: ordinary wilderness monsters defend themselves only when attacked. Bosses and dungeons remain dangerous.",12)
 	paragraph("%d FPS · %d enemies · %d MB engine memory" % [Engine.get_frames_per_second(),game.enemies.size(),Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0],12)
 	action(content,"Low power: "+("ON · 30 FPS" if game.low_power else "OFF · 60 FPS"),func():game.set_low_power(not game.low_power);show_pause())
 	action(content,"Auto pickup: "+("ON" if game.survival.auto_pickup else "OFF"),func():game.survival.set_auto_pickup(not game.survival.auto_pickup);show_pause())
@@ -506,6 +517,32 @@ func show_pause(message: String="") -> void:
 	action(content,"Copy save to clipboard",func():DisplayServer.clipboard_set(JSON.stringify(game.hero));toast("Save copied. Paste it into a text file to back it up.",5))
 	action(content,"Export character save",choose_export)
 	action(content,"Save and title screen",func():game.save_game();show_title(true))
+
+func show_survival_mode() -> void:
+	game.pause_game()
+	current_page="survival_mode"
+	clear_content("Adventure and Survival",false)
+	paragraph("Adventure keeps the original rules. Survival adds food, water, fatigue and cold. Hunger, thirst, exhaustion and cold slow walking by at most 30% (10% on Gentle); they never cause damage. Dodging keeps its normal speed.",14)
+	paragraph("This changes your current character's mode. Your gear and progress stay with you. Adventure freezes Survival meters; switching modes never refills them. Menus and time away do not deplete needs.",13)
+	paragraph("Current mode: "+game.hero.gameMode.capitalize()+" · "+game.hero.needs.difficulty.capitalize(),15)
+	paragraph(game.needs.summary(),14)
+	paragraph("Meters range from 0 to 100. Keep Food and Water high; keep Tired and Cold low.",13)
+	for mode in ["adventure","survival"]:
+		for difficulty in (["gentle","normal"] if mode=="survival" else [game.hero.needs.difficulty]):
+			var selected_mode=mode
+			var selected_difficulty=difficulty
+			var title="Use Adventure" if mode=="adventure" else "Enable Survival · "+difficulty.capitalize()
+			action(content,title,func():
+				if game.needs.configure(selected_mode,selected_difficulty): show_survival_mode(),game.hero.gameMode==mode and game.hero.needs.difficulty==difficulty)
+	if game.needs.active():
+		section("Travel supplies")
+		paragraph("Food and tea from Camp → Supplies restore your needs. Drink from your flask while exploring. Return near the starting camp to drink and refill all three uses.",13)
+		action(content,"Drink flask · %d / 3 uses" % game.hero.needs.flask,func():game.needs.drink();show_survival_mode(),game.hero.needs.flask<=0 or game.hero.needs.water>=100)
+		action(content,"Drink and refill at starting camp",func():game.needs.refill();show_survival_mode(),not game.needs.at_camp())
+		paragraph("Rest at the starting camp, a shelter or a nearby bed with no enemies close by. Roofs and shelters reduce cold exposure; a lit fire or warm tea restores warmth faster. Gentle halves depletion.",13)
+		action(content,"Rest here · recover fatigue",func():game.needs.rest();show_survival_mode(),not game.needs.can_rest())
+		action(content,"Food and camp supplies",func():camp_page="Supplies";show_character("camp"))
+	action(content,"Back to pause",show_pause)
 
 func back() -> void:
 	if current_page=="title":
@@ -731,6 +768,7 @@ func _draw() -> void:
 func show_camp() -> void:
 	var camp=game.survival
 	paragraph(game.forest.objective(),15,Color("eddaaa"))
+	action(content,"Survival mode and travel supplies",show_survival_mode)
 	action(content,"Garden plots · %d ready" % game.farming.ready_count(),func():show_character("farm"))
 	action(content,"Trader Mara",func():show_character("trader"))
 	action(content,"Quest board and active jobs",func():show_character("quests"))
@@ -935,6 +973,7 @@ func show_quests() -> void:
 	paragraph("Progress counts only while a job is accepted. Survey jobs require new visits. Abandoning resets that job's progress and keeps your supplies. Completed jobs repost after 10 minutes of active play; menus and time away pause this timer.",12)
 	action(content,"Back to camp",func():show_character("camp"))
 	action(content,"Resume journey",resume)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)
 
 func show_trader() -> void:
 	var market=game.trader
@@ -1017,3 +1056,4 @@ func show_trader() -> void:
 			action(body,"Buy back · %dg" % market.buyback_price(entry),func():market.buyback(id);show_character("trader"),not why.is_empty())
 	action(content,"Back to camp",func():show_character("camp"))
 	action(content,"Resume journey",resume)
+	action(content,"SURVIVAL / ADVENTURE · "+game.hero.gameMode.capitalize(),show_survival_mode)

@@ -4,10 +4,13 @@ const Data = preload("res://scripts/data.gd")
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
+const SPELL_RECOVERY = {"fire":1.3,"frost":5.5,"heal":9.0}
 const DesktopScript=preload("res://scripts/desktop.gd")
 var desktop
 const SurvivalScript = preload("res://scripts/survival.gd")
 var survival
+const NeedsScript=preload("res://scripts/needs.gd")
+var needs
 const FarmingScript=preload("res://scripts/farming.gd")
 var farming
 const WeatherScript=preload("res://scripts/weather.gd")
@@ -56,6 +59,7 @@ var saved: Dictionary = {}
 var low_power = true
 var is_walking = false
 var screen_landscape = false
+var calm_exploration = false
 
 func _ready() -> void:
 	desktop=DesktopScript.new()
@@ -71,6 +75,8 @@ func _ready() -> void:
 	add_child(audio)
 	survival = SurvivalScript.new()
 	survival.game = self
+	needs=NeedsScript.new()
+	needs.game=self
 	survival.load_pickup_settings()
 	farming=FarmingScript.new()
 	farming.game=self
@@ -82,6 +88,9 @@ func _ready() -> void:
 	weather.game=self
 	weather.load_settings()
 	load_performance_settings()
+	var encounter_config=ConfigFile.new()
+	if encounter_config.load("user://encounters.cfg")==OK:
+		calm_exploration=encounter_config.get_value("world","calm",false)==true
 	world = $World
 	world.game = self
 	camera = $Camera2D
@@ -230,11 +239,13 @@ func tick(dt: float) -> void:
 	weather.tick()
 	survival.tick(dt)
 	farming.tick(dt)
+	needs.tick(dt)
 	var keyboard = Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)),float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
 	var movement = (move_vector+keyboard).limit_length(1)
 	is_walking = movement.length()>.1 or dash_time>0
 	var speed = 147 if hero.className=="Rogue" else 142 if hero.className=="Ranger" else 130
 	if abilities.stealth>0: speed*=1.25
+	speed*=needs.speed_scale()
 	var at = player_position()
 	if dash_time>0:
 		at = move_position(at,facing*490*dt,10)
@@ -530,7 +541,7 @@ func cast(spell: String) -> bool:
 	sound("spell")
 	if spell!="heal": abilities.stealth=0
 	hero.mp -= cost
-	spell_cooldowns[spell] = {"fire":1.3,"frost":5.5,"heal":9.0}[spell]
+	spell_cooldowns[spell] = SPELL_RECOVERY[spell]
 	if spell=="fire":
 		if mouse_fire: desktop.shoot(desktop.aim_direction(),"fire",Data.damage(hero,"magic")*1.7,1)
 		else: shoot(target,"fire",Data.damage(hero,"magic")*1.7,1)
@@ -544,18 +555,26 @@ func cast(spell: String) -> bool:
 		visual_fx("heal",player_position(),40,Color("bce7b7"),.65)
 		hero.hp = minf(Data.max_hp(hero),hero.hp+Data.max_hp(hero)*(.55 if hero.className=="Cleric" else .33))
 		burst(player_position(),Color("b2efb9"),25)
+	hud.update_hud()
 	return true
+
+func dash_recovery_time() -> float:
+	return 2.4 if hero.className=="Rogue" else 3.8
 
 func dash() -> void:
 	if not playing or dash_cooldown>0:
 		return
 	if exploration.active(): exploration.dodged=true
-	dash_cooldown = 2.4 if hero.className=="Rogue" else 3.8
+	dash_cooldown = dash_recovery_time()
 	dash_time = .23
 	if move_vector.length()>.1:
 		facing = move_vector.normalized()
 	if desktop.enabled and desktop.keyboard_direction().length()>.1:
 		facing=desktop.keyboard_direction().normalized()
+
+	var cue=visual_fx("dodge",player_position(),40,Color("b8f0df"),.23)
+	cue["direction"]=facing
+	hud.update_hud()
 
 func take_item(item: Dictionary) -> void:
 	if hero.inventory.size()>=40:
@@ -876,6 +895,23 @@ func burst(at: Vector2,color: Color,count: int) -> void:
 	for i in range(count):
 		effects.append({"pos":at,"color":color,"velocity":Vector2.from_angle(randf()*TAU)*randf_range(20,110),"life":randf_range(.25,.7)})
 
+func set_calm_exploration(enabled:bool) -> bool:
+	var config=ConfigFile.new()
+	config.set_value("world","calm",enabled)
+	if config.save("user://encounters.cfg")!=OK:
+		notify("Could not save encounter preference.",3)
+		return false
+	calm_exploration=enabled
+	if enabled and hero.dungeon==null:
+		for enemy in enemies:
+			if not enemy.boss and not enemy.has("named"):
+				enemy.aggro=0
+				enemy.windup=0
+	return true
+
+func unprovoked_wildlife(enemy:Dictionary) -> bool:
+	return calm_exploration and hero.dungeon==null and not enemy.boss and not enemy.has("named") and enemy.aggro<=0
+
 func load_performance_settings() -> void:
 	var config = ConfigFile.new()
 	low_power=not desktop.enabled
@@ -923,6 +959,9 @@ func cancel_build() -> void:
 	if hud!=null: hud.build_tools.visible=false
 func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 	if enemy.get("neutral",false): return
+	if unprovoked_wildlife(enemy) or enemy.get("retreating",false):
+		enemy.windup=0
+		return
 	if abilities.stealth>0:
 		enemy.windup=0
 		return

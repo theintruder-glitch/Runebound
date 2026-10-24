@@ -31,5 +31,13 @@ THE ANDROID BUILD:
 
 SOURCE SNAPSHOT:
 - v0.12.0 editable game; Android focused.
-- v0.13.0 has not been uploaded; hunger/thirst/sleep survival is a future addition.
-- No APK build was produced as part of switching the repository to Android.
+- Opt-in Survival is available at Pause > SURVIVAL / ADVENTURE (or Camp > Survival mode); old characters default to Adventure.
+- Food/water should stay high; fatigue/cold should stay low. Drink from the travel flask,
+  refill near the starting camp, and use cooked food, warm tea, shelter, fire and safe rest.
+- Normal and Gentle share your character and save; switching back to Adventure freezes needs.
+- A fresh-install-only Android test APK has now been built and checked; see ANDROID_BUILD.md.
+- It uses a disposable test certificate. Keep the original installed game and its data.
+
+LESS CHASING: Pause > Explore calmly. Ordinary wilderness monsters defend only
+when attacked; bosses and dungeons remain dangerous. Back up your current character
+before any APK change; this test certificate cannot replace the original signed app.
