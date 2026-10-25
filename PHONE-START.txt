@@ -1,35 +1,84 @@
-RUNEBOUND — ANDROID EDITION — GODOT 0.12.0
-===========================================
+VYRNSPIRE 0.26.0 — THORNWATCH / ANDROID
 
-THIS GITHUB REPOSITORY IS FOR THE ANDROID GAME.
+1. In your current Runebound Godot app, use Pause > Export character save.
+2. Download Vyrnspire-Godot-v0.26.0.apk and install it over the existing app.
+3. Keep the app installed; do not uninstall or clear its data.
+4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
-PLAY (installed APK):
-- Keep the existing Runebound Godot app and its saved data.
-- To apply a newer APK, it must use the same app package and signing certificate.
-- Do not uninstall or clear data when updating.
-- This repository contains editable project source; cloning it does not install the game.
+MOVE: left joystick. ATTACK: weapon. DASH: dodge. Spells and class skill have their existing buttons.
+Gear/Camp menus: swipe the content to scroll; tap actions normally.
+Pause: orientation, battery saver, sound, weather effects and character export.
 
-EDIT THE GAME ON YOUR PHONE:
-1. Install the official Godot 4 Android editor, compatible with Godot 4.5.x.
-2. Download/clone the repository.
-3. Import project.godot.
-4. Open the project and use the editor's Play button.
-5. Edit scenes, scripts and touch controls; save/commit changes to GitHub.
+SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold worse.
+A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
+Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-PHONE CONTROLS:
-- Joystick: move; ATTACK: melee or weapon attack; DASH: dodge.
-- Fire / Frost / Heal: spells; class-skill button: unique ability.
-- Camp: building, crafting, cooking, gardens and trading.
-- Pause: orientation, low-power mode, sound, auto pickup and saves.
-- Auto pickup collects nearby resources; chests and gardens are interactive.
+This update uses app.runebound.godot, version code 35 and the original prototype certificate.
+If Android rejects the update, keep the current app and save. Report the exact message.
+Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
-THE ANDROID BUILD:
-- Android export preset only; package ID app.runebound.godot.
-- ARM64, version code 19, Godot 4.5.x matching templates + Android SDK + JDK 17.
-- Private signing key is NOT provided in the public GitHub repository.
-- New keys generally prevent installing over the original app while retaining its data.
+NEW GROUND SPELL AIMING:
+Learn Meteor Fall (level 5) or Blizzard (level 7) from Mara, then assign it in the spellbook.
+Tap its bottom spell button, tap/drag a ground spot, then tap CAST. Tap CANCEL or Back to stop.
+The preview is free. Moving, enemies and Survival needs remain live while you aim.
+CAST is disabled if a wall blocks the selected point. Dodge cancels an unfinished cast.
+This applies to learned hotbar spells; the Mage class skill keeps its existing behavior.
 
-SOURCE SNAPSHOT:
-- v0.12.0 editable game; Android focused.
-- v0.13.0 has not been uploaded; hunger/thirst/sleep survival is a future addition.
-- No APK build was produced as part of switching the repository to Android.
+BASIC ATTACKS:
+Face toward enemies for melee. Attacks strike ahead, not behind you. Misses still animate.
+Ordinary foes briefly recoil from clean melee hits; bosses resist this interruption.
+
+CHAPTER I — THE HOLLOW ROOT:
+Open Camp > Chapter I, then visit Mara to begin. Investigate the three camps, return to Mara,
+then choose the story expedition at Mossveil Ruins. It has three floors and a named final boss.
+Purple rune circles warn before they strike; move away or dodge. Return to Mara to claim Hearthcall.
+Your old tutorial, shrine and regular dungeons stay available.
+
+ENEMY TACTICS:
+Dungeon archers and wisps hold their firing distance. Close in to force them back; cornered shooters
+stand their ground. A gold dashed line connects a shooter to its locked warning circle.
+Move out of the circle or dodge. Walls interrupt pending attacks; melee enemies spread as they approach.
+Chapter I and your existing character remain available.
+
+DREADWOOD GRAPHICS:
+All graphics qualities include the new scary creature/boss designs and detailed trees/chests.
+Pause > Graphics: Performance is the phone default. Try Balanced for soft dungeon/camp lighting.
+Rich adds detail; return to Performance if your phone feels warm or slow.
+Low power still caps the game at 30 FPS and limits soft lights to two.
+Bosses look larger; their hitboxes and warning/dodge rules have not changed.
+
+STUCK IN SNOW / MAP CORNER FIX:
+Install over the current app. Continue the same character.
+Pause > Recover stuck character > Return to original camp - keep my character.
+You stay paused at camp: review supplies if needed, then Resume journey.
+Gear, level, quests, camp and gold remain. No health/mana/survival refill is granted.
+Maps now center on distant characters. Around me centers on you; World overview shows you and home.
+
+CAMP PROVISIONS:
+Camp > Craft > Food or Parts > Choose quantity on a recipe.
+Choose an exact amount with plus/minus, a 1/5/10 preset, or Maximum (up to 99).
+Review carried ingredients and shortages, then tap Make. Back spends nothing.
+Use a reachable lit fire for cooking and a reachable bench for gear. Walls block station access.
+Cooking creates food for your bag; eat it separately under Supplies.
+
+VYRNSPIRE RENAME / CAMP STORES:
+Install over the old Runebound app; the launcher name becomes VYRNSPIRE. Do not clear data.
+The original package/key and old save directory are retained for compatibility.
+Near a built Storage chest: Camp > Choose supplies to store or take > select a supply.
+Store/take 1, 5, 10 or the maximum. Food and other materials stay where you leave them.
+Reach the chest without a wall or closed door in the way. Old bulk transfer buttons remain.
+New exported saves use VYRNSPIRE-Character.json; old exported saves still import.
+
+NEW: Finish Chapter I and return to Mara. Camp > Story journal > Ask Mara about Emberforge begins Chapter II. Earlier Emberforge trial wins count. Read the inscription, break the ashen binding, then return to Mara.
+
+LAG PATCH: Reduced crowds is ON by default (6 roaming enemies). Pause > Enemy crowds changes this separately from Low power/30 FPS. Keep Reduced selected on the phone. Named/story/trial/dungeon encounters remain intact.
+
+NEW ART: look for shaded log piles, ore, berry/herb plants, glowcaps, reeds, crystals and resin bark. Broken Caravan is a ruined covered wagon; Silent Watch a scout tent; Ashen Grove a burnt stump with a sprout. Gathering and investigation still work at their existing locations.
+
+THORNWATCH KEEP / EMERALD WILDS:
+Camp > Quests > Explore Emerald Wilds > follow the bearing south of Mossveil Ruins.
+Cross the bridge and marked hillside ramp, then approach the castle gate and tap ENTER.
+Find the armory key and library seal on level 1. Bind the checkpoint on level 2.
+Dodge the Colossus root strikes and ground slam on level 3. Claim the treasury blade.
+Floor-one entrance stairs leave the castle. Upper entrance stairs go back one floor. Final gold stairs return outside.
+FOUR KINGDOMS: Camp > Castle expeditions > choose Thornwatch, Frostspire, Blackmire or Stormbreak. Follow the marked road to its gate. Each has three distinct floors, a checkpoint, warned traps, boss and unique relic spell. Read each new castle archive for its rune puzzle order. Assign earned spells in Spells.

@@ -2,9 +2,15 @@ extends RefCounted
 const Data=preload("res://scripts/data.gd")
 const STRUCTURES=["Campfire","Shelter","Workbench","Wall","Door","Bed","Storage","Roof","Garden"]
 var moving:Dictionary={}
-const FOODS={"Warm tea":{"hp":15,"mp":15},"Roasted berries":{"hp":35,"mp":0},"Herbal stew":{"hp":70,"mp":25},"Roasted meat":{"hp":50,"mp":0},"Bog remedy":{"hp":35,"mp":50},"Trail stew":{"hp":85,"mp":15}}
-const MATERIALS=["Warm tea","Wood","Stone","Fiber","Berries","Herbs","Iron","Plank","Rope","Roasted berries","Herbal stew","Resin","Crystal","Glowcap","Reeds","Frost shard","Pine resin","Raw meat","Hide","Roasted meat","Bog remedy","Trail stew"]
+const FOODS={"Grilled fish":{"hp":55,"mp":0},"Fisher stew":{"hp":80,"mp":15},"Warm tea":{"hp":15,"mp":15},"Roasted berries":{"hp":35,"mp":0},"Herbal stew":{"hp":70,"mp":25},"Roasted meat":{"hp":50,"mp":0},"Bog remedy":{"hp":35,"mp":50},"Trail stew":{"hp":85,"mp":15}}
+const MATERIALS=["Thorn sigil","Rime seal","Mire chain","Stormcore","Raw fish","Grilled fish","Fisher stew","Warm tea","Wood","Stone","Fiber","Berries","Herbs","Iron","Plank","Rope","Roasted berries","Herbal stew","Resin","Crystal","Glowcap","Reeds","Frost shard","Pine resin","Raw meat","Hide","Roasted meat","Bog remedy","Trail stew"]
 const RECIPES={
+ "Briar guard":{"cost":{"Thorn sigil":3,"Resin":6,"Plank":2},"station":"bench","kind":"shield","enchant":4,"castle":"thornwatch","desc":"A runic shield forged from Thornwatch sigils. Reclaim the keep to learn this recipe."},
+ "Rimeguard helm":{"cost":{"Rime seal":3,"Frost shard":6,"Iron":4},"station":"bench","kind":"helmet","enchant":2,"castle":"frostspire","desc":"A frost-bound royal helm. Reclaim Frostspire to learn this recipe."},
+ "Chainweave mantle":{"cost":{"Mire chain":3,"Glowcap":6,"Hide":4},"station":"bench","kind":"armor","enchant":4,"castle":"blackmire","desc":"A reinforced mantle woven from the drowned gaoler's chains. Reclaim Blackmire first."},
+ "Stormcore staff":{"cost":{"Stormcore":3,"Crystal":6,"Plank":3},"station":"bench","kind":"staff","enchant":3,"castle":"stormbreak","desc":"A lightning staff forged with Stormbreak cores. Reclaim the bastion first."},
+ "Grilled fish":{"cost":{"Raw fish":1,"Herbs":1},"station":"fire","desc":"Restores 55 health. In Survival, restores 35 food. Use a reachable lit campfire."},
+ "Fisher stew":{"cost":{"Raw fish":2,"Herbs":2,"Berries":1},"station":"fire","desc":"Restores 80 health and 15 mana. In Survival, restores 55 food and 18 water. Use a reachable lit campfire."},
  "Garden":{"cost":{"Wood":4,"Stone":2,"Fiber":2},"station":"","desc":"An outdoor garden plot. Plant carried berries, herbs or discovered glowcaps. Up to 12 plots; walk over them freely."},
  "Warm tea":{"cost":{"Herbs":2,"Berries":1},"station":"fire","desc":"Restores 15 health and mana, then +1 mana/sec outside combat for 3 minutes. Refreshes rather than stacks."},
  "Resin blade":{"cost":{"Resin":4,"Iron":4},"station":"bench","kind":"sword","enchant":1,"discovery":"forest","desc":"A Rare Ember-enchanted sword using forest resin."},
@@ -65,7 +71,7 @@ func refresh(force:bool=false) -> void:
    var kind=["Wood","Stone","Fiber","Berries","Herbs","Iron"][posmod(x*3+y*5,6)]
    var pos=Vector2(x*160+70+sin(x*13+y*7)*30,y*160+70+cos(x*9-y*11)*30)
    var region_id=game.exploration.region_at(pos)
-   if game.exploration.cave_wall(pos): continue
+   if game.exploration.cave_wall(pos) or game.landscape.solid(pos) or game.landscape.clear_route(pos): continue
    var index=posmod(x*3+y*5,6)
    if region_id=="caves": kind=["Stone","Iron","Crystal","Crystal","Iron","Stone"][index]
    elif region_id=="swamp": kind=["Wood","Reeds","Fiber","Glowcap","Herbs","Berries"][index]
@@ -123,7 +129,7 @@ func tick(dt:float) -> void:
    var was_lit=s.fuel>0
    s.fuel=maxf(0,s.fuel-dt)
    if was_lit and s.fuel==0: revision+=1
- if sheltered(): game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+dt*6)
+ if sheltered() and not game.expedition.deprived(): game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+dt*6)
  refresh_timer-=dt
  if refresh_timer<=0:
   refresh_timer=1
@@ -134,26 +140,84 @@ func cost_text(recipe:String) -> String:
  var parts=PackedStringArray()
  for k in RECIPES[recipe].cost: parts.append("%d %s (%d owned)" % [RECIPES[recipe].cost[k],k,count(k)])
  return ", ".join(parts)
-func reason(recipe:String,check_place:bool=true) -> String:
+func station(kind:String,lit:bool=false) -> Dictionary:
+ if game.hero.dungeon!=null: return {}
+ var best:Dictionary={};var distance=100.0
+ for item in data().structures:
+  var d=at(item).distance_to(game.player_position())
+  if item.kind==kind and d<distance and (not lit or item.fuel>0) and game.line_clear(game.player_position(),at(item)):
+   best=item;distance=d
+ return best
+func station_reason(recipe:String) -> String:
+ var r=RECIPES[recipe]
+ if r.station=="fire" and station("Campfire",true).is_empty():
+  for item in data().structures:
+   if item.kind=="Campfire" and item.fuel>0 and at(item).distance_to(game.player_position())<100: return "Reach the lit campfire without a wall in the way"
+  return "Stand near a lit campfire"
+ if r.station=="bench" and station("Workbench").is_empty():
+  return "Reach the workbench without a wall in the way" if not near("Workbench").is_empty() else "Stand near a workbench"
+ return ""
+func batchable(recipe:String) -> bool:
+ return RECIPES.has(recipe) and recipe not in STRUCTURES and RECIPES[recipe].station!="bench"
+func batch_limit(recipe:String) -> int:
+ if not batchable(recipe) or not moving.is_empty(): return 0
+ var maximum=mini(99,99999-count(RECIPES[recipe].get("product",recipe)))
+ for material in RECIPES[recipe].cost: maximum=mini(maximum,floori(float(count(material))/RECIPES[recipe].cost[material]))
+ if not reason(recipe,false,false).is_empty(): return 0
+ return maxi(0,maximum)
+func batch_cost(recipe:String,quantity:int) -> String:
+ if not RECIPES.has(recipe): return "Unknown recipe"
+ var parts=PackedStringArray()
+ for material in RECIPES[recipe].cost:
+  var needed=int(RECIPES[recipe].cost[material])*quantity
+  parts.append("%s: %d needed · %d carried%s" % [material,needed,count(material)," · short "+str(needed-count(material)) if count(material)<needed else ""])
+ return "\n".join(parts)
+func batch_reason(recipe:String,quantity:int) -> String:
+ if not batchable(recipe): return "Batch cooking and parts only; gear and buildings are made one at a time"
+ if quantity<1 or quantity>99: return "Choose a quantity from 1 to 99"
+ var why=reason(recipe,false,false)
+ if not why.is_empty(): return why
+ if count(RECIPES[recipe].get("product",recipe))+quantity>99999: return "Make room in your carried supplies"
+ for material in RECIPES[recipe].cost:
+  var shortfall=int(RECIPES[recipe].cost[material])*quantity-count(material)
+  if shortfall>0: return "Need %d more %s for this batch" % [shortfall,material]
+ return ""
+func craft_batch(recipe:String,quantity:int) -> bool:
+ var why=batch_reason(recipe,quantity)
+ if not why.is_empty(): game.notify(why,4);return false
+ # Validate the complete request before spending anything; never produce a partial batch.
+ for material in RECIPES[recipe].cost: add(material,-int(RECIPES[recipe].cost[material])*quantity)
+ var product=RECIPES[recipe].get("product",recipe);add(product,quantity)
+ if recipe in FOODS: game.hero.journey.cooked=true
+ game.sound("cook" if recipe in FOODS else "gather")
+ if game.save_game(): game.notify("Made %d %s" % [quantity,product],4)
+ return true
+func reason(recipe:String,check_place:bool=true,check_materials:bool=true) -> String:
  if not RECIPES.has(recipe): return "Unknown recipe"
  var r=RECIPES[recipe]
+ if recipe not in STRUCTURES and not moving.is_empty(): return "Finish or cancel building placement first"
+ if recipe not in STRUCTURES and r.station!="bench" and count(r.get("product",recipe))>=99999: return "Make room in your carried supplies"
  if r.has("discovery") and not game.hero.exploration.discovered.get(r.discovery,false): return "Discover "+game.exploration.REGIONS[r.discovery].landmark+" to learn this recipe"
- if r.station=="fire":
-  var fire=near("Campfire")
-  if fire.is_empty() or fire.fuel<=0: return "Stand near a lit campfire"
- if r.station=="bench" and near("Workbench").is_empty(): return "Stand near a workbench"
+ if r.has("castle") and not game.hero.opened.get(r.castle+"-cleared",false):return "Reclaim "+r.castle.capitalize()+" to learn this recipe"
+ var station_problem=station_reason(recipe)
+ if not station_problem.is_empty(): return station_problem
  if recipe in STRUCTURES:
   if game.hero.dungeon!=null: return "Build in the wilds"
   if data().structures.size()>=64 and moving.is_empty(): return "Camp limit reached (64 structures)"
   if recipe=="Garden":
    if moving.is_empty() and game.farming.plots().size()>=game.farming.MAX_PLOTS: return "Garden limit reached (12 plots)"
-   if game.exploration.region_at(place_position())=="caves": return "Garden plots need outdoor ground"
+   if game.exploration.region_at(place_position())=="caves" and not game.exploration.outdoor_highlands(place_position()): return "Garden plots need outdoor ground"
   if check_place:
    var pos=place_position()
+   for spot in game.fishing.SPOTS.values():
+    if footprint(recipe,pos,game.build_rotation).grow(12).intersects(Rect2(spot.pond-Vector2(85,85),Vector2(170,170))): return "Keep fishing pools and their banks clear"
    if footprint(recipe,pos,game.build_rotation).grow(25).has_point(game.trader.POSITION): return "Keep Mara's trading stall approachable"
    if footprint(recipe,pos,game.build_rotation).grow(25).has_point(game.contracts.BOARD): return "Keep the quest board approachable"
    for region_info in game.exploration.REGIONS.values():
     if pos.distance_to(region_info.point)<240: return "Keep landmark clearings open"
+   for clue in game.chapter.CLUES.values():
+    if footprint(recipe,pos,game.build_rotation).grow(30).has_point(clue.point): return "Keep investigation camps approachable"
+   if game.landscape.clear_route(pos) or game.landscape.raw_solid(pos):return "Keep rivers, bridges, ramps and the castle approach clear"
    if pos.distance_to(game.exploration.RUINS)<100: return "Keep the ruins entrance open"
    for corner in [pos,footprint(recipe,pos,game.build_rotation).position,footprint(recipe,pos,game.build_rotation).end]:
     if game.exploration.cave_wall(corner): return "Build on open cave floor"
@@ -168,7 +232,7 @@ func reason(recipe:String,check_place:bool=true) -> String:
     if not enemy.dead and enemy.pos.distance_to(game.player_position())<180: return "Move away from enemies before building"
  if r.station=="bench" and game.hero.inventory.size()>=40: return "Make room in Gear"
  for k in r.cost:
-  if moving.is_empty() and count(k)<r.cost[k]: return "Gather more materials"
+  if check_materials and moving.is_empty() and count(k)<r.cost[k]: return "Need %d more %s" % [r.cost[k]-count(k),k]
  return ""
 func craft(recipe:String) -> bool:
  var why=reason(recipe)
@@ -205,6 +269,7 @@ func eat(food:String) -> bool:
  game.hero.hp=minf(Data.max_hp(game.hero),game.hero.hp+FOODS[food].hp)
  game.hero.mp=minf(Data.max_mp(game.hero),game.hero.mp+FOODS[food].mp)
  if food=="Warm tea": game.hero.warmUntil=game.hero.worldTime+180
+ game.expedition.on_food(food)
  game.save_game(); game.hud.update_hud()
  return true
 func enemy_direction(e:Dictionary,dt:float) -> Vector2:
@@ -228,10 +293,7 @@ func enemy_direction(e:Dictionary,dt:float) -> Vector2:
   if e.type in ["wolf","frost_wolf"]:
    var flank=pos+Vector2.from_angle(float(e.get("pack_slot",0))*TAU/3)*34
    return e.pos.direction_to(flank) if distance>60 else e.pos.direction_to(pos)
-  if e.type in ["wisp","skeleton","crystal_wisp","archer","ice_archer"]:
-   if distance<110: return -e.pos.direction_to(pos)*.7
-   if distance<190: return Vector2.ZERO
-  return e.pos.direction_to(pos)
+  return game.tactics.firing_direction(e,e.pos.direction_to(pos))
  e.wander_time-=dt
  if e.wander_time<=0:
   e.wander=randf()*TAU; e.wander_time=randf_range(2,5)
@@ -274,24 +336,48 @@ func dismantle(s:Dictionary) -> bool:
   game.hero.respawn={"x":0.0,"y":0.0}
  data().structures.erase(s); revision+=1; game.sound("build"); game.save_game()
  return true
-func transfer(s:Dictionary,deposit:bool) -> bool:
- if s.kind!="Storage" or at(s).distance_to(game.player_position())>110: return false
+func storage_reason(s:Dictionary) -> String:
+ if s.is_empty() or s.get("kind","")!="Storage" or not data().structures.any(func(item):return is_same(item,s)): return "This storage chest is no longer available"
+ if game.hero.dungeon!=null or at(s).distance_to(game.player_position())>110: return "Stand near this storage chest"
+ if not game.line_clear(game.player_position(),at(s)): return "Reach the storage chest without a wall in the way"
+ return ""
+func transfer_amount(s:Dictionary,material:String,deposit:bool) -> int:
+ if not storage_reason(s).is_empty() or material not in MATERIALS: return 0
  var source=data().materials if deposit else s.stash
  var target=s.stash if deposit else data().materials
+ return maxi(0,mini(int(source.get(material,0)),99999-int(target.get(material,0))))
+func transfer_item(s:Dictionary,material:String,quantity:int,deposit:bool) -> bool:
+ var why=storage_reason(s)
+ if not why.is_empty(): game.notify(why,4);return false
+ if material not in MATERIALS or quantity<1 or quantity>99999: return false
+ if transfer_amount(s,material,deposit)<quantity: game.notify("Not enough supplies or destination space for this amount",4);return false
+ var source=data().materials if deposit else s.stash
+ var target=s.stash if deposit else data().materials
+ source[material]-=quantity;target[material]=int(target.get(material,0))+quantity
+ if source[material]==0: source.erase(material)
+ return game.save_game()
+func transfer(s:Dictionary,deposit:bool) -> bool:
+ var why=storage_reason(s)
+ if not why.is_empty(): game.notify(why,4);return false
+ var source=data().materials if deposit else s.stash
+ var target=s.stash if deposit else data().materials
+ var changed=false
  for key in source.keys():
   var amount=mini(int(source[key]),99999-int(target.get(key,0)))
-  target[key]=int(target.get(key,0))+amount
-  source[key]-=amount
+  if amount<=0: continue
+  target[key]=int(target.get(key,0))+amount;source[key]-=amount;changed=true
   if source[key]==0: source.erase(key)
- game.save_game(); return true
+ if changed: game.save_game()
+ return changed
 func rest(s:Dictionary) -> bool:
- if s.kind!="Bed" or at(s).distance_to(game.player_position())>110: return false
+ if s.is_empty() or s.get("kind","")!="Bed" or not s in data().structures or at(s).distance_to(game.player_position())>110 or not game.line_clear(game.player_position(),at(s)): return false
  for e in game.enemies:
-  if not e.dead and e.pos.distance_to(game.player_position())<180:
+  if not e.dead and not e.get("neutral",false) and e.pos.distance_to(game.player_position())<180:
    game.notify("Enemies are too close to rest.",3); return false
  var pos=at(s)+Vector2(0,48)
  if blocked(pos,12): game.notify("Clear space beside the bed first.",3); return false
  game.hero.respawn={"x":pos.x,"y":pos.y}
+ game.expedition.sleep_at_bed()
  game.hero.hp=Data.max_hp(game.hero); game.hero.mp=Data.max_mp(game.hero)
  game.notify("Rested. This bed is now your return point after defeat.",4)
  game.save_game(); return true

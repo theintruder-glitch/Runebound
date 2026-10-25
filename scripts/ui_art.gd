@@ -3,6 +3,28 @@ static func icon(canvas:CanvasItem,at:Vector2,kind:String,color:Color=Color("d8c
  canvas.draw_set_transform(at,0,Vector2.ONE*scale)
  var dark=color.darkened(.45)
  match kind.to_lower():
+  "fish","raw fish","grilled fish","fisher stew":
+   canvas.draw_colored_polygon(PackedVector2Array([Vector2(-15,0),Vector2(-22,-12),Vector2(-22,12)]),dark)
+   canvas.draw_colored_polygon(PackedVector2Array([Vector2(-16,0),Vector2(-6,-11),Vector2(11,-9),Vector2(22,0),Vector2(11,9),Vector2(-6,11)]),color)
+   canvas.draw_circle(Vector2(13,-2),2,dark);canvas.draw_line(Vector2(-5,-8),Vector2(-5,8),dark,2)
+  "fishing rod":
+   canvas.draw_line(Vector2(-19,23),Vector2(8,-22),color,4)
+   canvas.draw_line(Vector2(8,-22),Vector2(21,9),dark,1)
+   canvas.draw_arc(Vector2(17,9),4,0,PI,12,color,2)
+   canvas.draw_circle(Vector2(-11,11),5,dark)
+  "waterskin":
+   canvas.draw_arc(Vector2(0,-9),15,PI,TAU,18,dark,3)
+   canvas.draw_colored_polygon(PackedVector2Array([Vector2(-6,-18),Vector2(6,-18),Vector2(8,-9),Vector2(16,4),Vector2(13,18),Vector2(0,22),Vector2(-13,18),Vector2(-16,4),Vector2(-8,-9)]),color)
+   canvas.draw_rect(Rect2(-7,-23,14,6),dark);canvas.draw_arc(Vector2(0,4),10,.1,PI-.1,14,color.lightened(.3),2)
+  "cloak":
+   canvas.draw_colored_polygon(PackedVector2Array([Vector2(-8,-13),Vector2(-23,21),Vector2(0,16),Vector2(23,21),Vector2(8,-13)]),color)
+   canvas.draw_circle(Vector2(0,-13),10,dark);canvas.draw_arc(Vector2(0,-13),10,PI,TAU,16,color,4)
+   canvas.draw_line(Vector2(0,-2),Vector2(0,14),dark,2)
+  "bedroll":
+   canvas.draw_rect(Rect2(-23,-14,46,28),color.darkened(.2))
+   canvas.draw_arc(Vector2(-17,0),12,-PI/2,PI/2,16,color.lightened(.25),3)
+   canvas.draw_arc(Vector2(-17,0),6,-PI/2,PI/2,16,color.lightened(.25),2)
+   canvas.draw_line(Vector2(5,-14),Vector2(5,14),dark,4);canvas.draw_line(Vector2(14,-14),Vector2(14,14),dark,4)
   "sword","resin blade","iron sword":
    canvas.draw_colored_polygon(PackedVector2Array([Vector2(-4,10),Vector2(-4,-15),Vector2(0,-23),Vector2(4,-15),Vector2(4,10)]),color)
    canvas.draw_line(Vector2(-10,8),Vector2(10,8),dark,4);canvas.draw_line(Vector2(0,8),Vector2(0,21),color,4)

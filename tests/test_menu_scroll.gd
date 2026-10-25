@@ -133,13 +133,13 @@ func run():
 		check(garden.crop=="Berries" and game.survival.count("Berries")==berries-2,"Swipe over Harvest scrolls without collecting crops "+str(dims))
 		hud.show_character("farm");await settle();await tap(find_button("Harvest Berries"))
 		check(garden.crop=="" and game.survival.count("Berries")==berries+4,"A normal tap harvests exactly once "+str(dims))
-		for page in ["camp","classes","realm","quests","trader","farm","guide"]:
+		for page in ["camp","classes","realm","quests","trader","farm","guide","kit","fishing"]:
 			hud.show_character(page);await settle()
 			var target:Control
 			if page=="classes": target=find_button("Current class")
 			elif page=="camp": target=hud.content.get_children().filter(func(n):return n is PanelContainer)[0]
 			elif page=="realm": target=find_button("Build ·")
-			elif page in ["quests","trader","farm"]: target=hud.content.get_children().filter(func(n):return n is PanelContainer)[0]
+			elif page in ["quests","trader","farm","kit","fishing"]: target=hud.content.get_children().filter(func(n):return n is PanelContainer)[0]
 			else: target=hud.content.get_child(1)
 			await reveal(target);before=hud.scroll.scroll_vertical
 			var limit=hud.scroll.get_v_scroll_bar().max_value-hud.scroll.get_v_scroll_bar().page

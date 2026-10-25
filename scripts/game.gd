@@ -1,11 +1,31 @@
 extends Node2D
 
 const Data = preload("res://scripts/data.gd")
+const TacticsScript=preload("res://scripts/enemy_tactics.gd")
+var tactics
+const ChapterScript=preload("res://scripts/chapter.gd")
+var chapter
+const ForgeScript=preload("res://scripts/forge_chapter.gd")
+var forge
+const LandscapeScript=preload("res://scripts/kingdom_landscape.gd")
+const CastleScript=preload("res://scripts/castle.gd")
+var landscape
+var castle
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
 const DesktopScript=preload("res://scripts/desktop.gd")
 var desktop
+const ExpeditionScript=preload("res://scripts/expedition.gd")
+var expedition
+const KitScript=preload("res://scripts/survival_kit.gd")
+var kit
+const FishingScript=preload("res://scripts/fishing.gd")
+var fishing
+const SpellbookScript=preload("res://scripts/spellbook.gd")
+const GraphicsScript=preload("res://scripts/graphics.gd")
+var spellbook
+var graphics
 const SurvivalScript = preload("res://scripts/survival.gd")
 var survival
 const FarmingScript=preload("res://scripts/farming.gd")
@@ -27,6 +47,10 @@ var audio
 var build_recipe=""
 var build_rotation=0
 var swing_time=0.0
+var swing_duration=.24
+var swing_direction=Vector2.DOWN
+var cast_time=0.0
+var cast_color=Color.WHITE
 var hero: Dictionary = {}
 var enemies: Array = []
 var shots: Array = []
@@ -54,13 +78,24 @@ var hud
 var camera: Camera2D
 var saved: Dictionary = {}
 var low_power = true
+var reduced_crowds = true
 var is_walking = false
 var screen_landscape = false
 
 func _ready() -> void:
+	get_window().title="VYRNSPIRE"
+	tactics=TacticsScript.new();tactics.game=self
+	chapter=ChapterScript.new();chapter.game=self
+	forge=ForgeScript.new();forge.game=self
+	landscape=LandscapeScript.new();landscape.game=self
+	castle=CastleScript.new();castle.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
+	kit=KitScript.new();kit.game=self
+	fishing=FishingScript.new();fishing.game=self
+	expedition=ExpeditionScript.new();expedition.game=self
+	spellbook=SpellbookScript.new();spellbook.game=self
 	exploration=ExplorationScript.new()
 	exploration.game=self
 	abilities=AbilitiesScript.new()
@@ -84,6 +119,7 @@ func _ready() -> void:
 	load_performance_settings()
 	world = $World
 	world.game = self
+	graphics=GraphicsScript.new();graphics.game=self;add_child(graphics)
 	camera = $Camera2D
 	get_window().size_changed.connect(adapt_screen)
 	adapt_screen()
@@ -105,6 +141,12 @@ func start_character(character: Dictionary) -> void:
 	weather.tick()
 	forest.boss={}
 	build_recipe=""
+	# Repair invalid collision/precision positions before generating nearby chunks.
+	var recovered_position=false
+	if hero.dungeon==null:
+		var restored=safe_wilds_position(player_position())
+		recovered_position=restored!=player_position()
+		set_player_position(restored)
 	survival.refresh(true)
 	playing = true
 	hero.hp = clampf(hero.hp,1,Data.max_hp(hero))
@@ -121,7 +163,7 @@ func start_character(character: Dictionary) -> void:
 	camera.reset_smoothing()
 	world.refresh(true)
 	hud.resume()
-	notify("Walk near marked resources to collect them. Auto pickup can be changed in Pause.",5)
+	notify("Recovered a blocked or unplayable saved position. Your character progress is intact." if recovered_position else "Walk near marked resources to collect them. Auto pickup can be changed in Pause.",6)
 	save_game()
 
 func player_position() -> Vector2:
@@ -132,10 +174,13 @@ func set_player_position(at: Vector2) -> void:
 	hero.y = at.y
 
 func clear_scene() -> void:
+	if forge!=null: forge.reset()
+	if fishing!=null: fishing.reset()
 	if desktop!=null: desktop.clear_input();desktop.pointer_seen=false
 	build_recipe=""
 	build_rotation=0
 	if abilities!=null: abilities.reset()
+	if spellbook!=null: spellbook.reset()
 	if survival!=null:
 		survival.moving={}
 		survival.pickup_timer=0.0
@@ -148,6 +193,7 @@ func clear_scene() -> void:
 	chest_near = {}
 	chunk_key = Vector2i(999999,999999)
 	attack_cooldown = 0
+	swing_time=0;cast_time=0
 	dash_time = 0
 	dash_cooldown = 0
 	spell_cooldowns = {"fire":0.0,"frost":0.0,"heal":0.0}
@@ -157,8 +203,10 @@ func clear_scene() -> void:
 	attack_held = false
 
 func pause_game() -> void:
+	if fishing!=null: fishing.cancel("Line packed away while paused. Bait was used.")
 	if desktop!=null: desktop.clear_input()
 	playing = false
+	if spellbook!=null: spellbook.cancel_target()
 	move_vector = Vector2.ZERO
 	is_walking = false
 	attack_held = false
@@ -203,16 +251,19 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	elif playing:
 		match code:
 			KEY_E: interact()
-			KEY_1: cast("fire")
-			KEY_2: cast("frost")
-			KEY_3: cast("heal")
+			KEY_1: spellbook.request_slot(0)
+			KEY_2: spellbook.request_slot(1)
+			KEY_3: spellbook.request_slot(2)
 			KEY_Q: abilities.use()
 			KEY_SHIFT: dash()
 
 func _input(event:InputEvent) -> void:
+	if spellbook!=null: spellbook.release_touch(event)
 	if desktop!=null and desktop.enabled: desktop.release_input(event)
 
 func _unhandled_input(event:InputEvent) -> void:
+	if spellbook!=null and spellbook.handle_touch(event):
+		get_viewport().set_input_as_handled();return
 	if desktop!=null: desktop.handle_input(event)
 
 func _physics_process(dt: float) -> void:
@@ -222,18 +273,22 @@ func _physics_process(dt: float) -> void:
 
 func tick(dt: float) -> void:
 	swing_time=maxf(0,swing_time-dt)
+	cast_time=maxf(0,cast_time-dt)
 	forest.reset_if_abandoned()
 	exploration.tick(dt)
+	forge.tick(dt)
 	abilities.tick(dt)
 	contracts.tick(dt)
 	hero.worldTime += dt
 	weather.tick()
 	survival.tick(dt)
 	farming.tick(dt)
+	spellbook.tick(dt)
 	var keyboard = Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)),float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
 	var movement = (move_vector+keyboard).limit_length(1)
 	is_walking = movement.length()>.1 or dash_time>0
 	var speed = 147 if hero.className=="Rogue" else 142 if hero.className=="Ranger" else 130
+	speed*=expedition.speed_factor()
 	if abilities.stealth>0: speed*=1.25
 	var at = player_position()
 	if dash_time>0:
@@ -248,6 +303,7 @@ func tick(dt: float) -> void:
 		if movement.length()>.1:
 			facing = movement.normalized()
 	set_player_position(at)
+	fishing.tick(dt)
 	survival.pickup_tick(dt)
 	update_edge_camera(at)
 	desktop.update_aim()
@@ -259,12 +315,13 @@ func tick(dt: float) -> void:
 		spell_cooldowns[key] = maxf(0,spell_cooldowns[key]-dt)
 	hero.mp = minf(Data.max_mp(hero),hero.mp+dt*(4+hero.int*.07+(1.5 if Data.has_building(hero,"Tavern") else 0)))
 	var manual=attack_held or desktop.mouse_attack or Input.is_physical_key_pressed(KEY_SPACE)
-	if hero.auto or manual:
+	if (hero.auto or manual) and spellbook.targeting.is_empty():
 		attack(not manual)
 	spawn_timer -= dt
 	if spawn_timer<=0 and hero.dungeon==null:
 		spawn_enemy()
-		spawn_timer = randf_range(1.4,2.8)/minf(1.8,1+hero.level*.025)*(.1/Data.spawn_chance(Data.phase(hero.worldTime)))
+		spawn_timer = roaming_spawn_interval()
+	tactics.prepare()
 	var in_combat = false
 	for enemy in enemies.duplicate():
 		if enemy.dead:
@@ -273,6 +330,9 @@ func tick(dt: float) -> void:
 			continue
 		enemy.cooldown -= dt
 		enemy.flash = maxf(0,enemy.flash-dt)
+		enemy["stagger"]=maxf(0,enemy.get("stagger",0.0)-dt)
+		enemy["stagger_guard"]=maxf(0,enemy.get("stagger_guard",0.0)-dt)
+		enemy["attack_pose"]=maxf(0,enemy.get("attack_pose",0.0)-dt)
 		enemy.slow = maxf(0,enemy.slow-dt)
 		enemy.aggro = maxf(0,enemy.aggro-dt)
 		if enemy.burn>0:
@@ -286,21 +346,23 @@ func tick(dt: float) -> void:
 		var distance = enemy.pos.distance_to(at)
 		var direction = Vector2.ZERO
 		if hero.dungeon==null:
-			direction = survival.enemy_direction(enemy,dt)
+			direction = tactics.wilds_direction(enemy,dt)
 			in_combat = in_combat or enemy.aggro>0
 		elif distance<330 or enemy.aggro>0:
 			in_combat = true
 			direction = dungeon_direction(enemy,dt)
+		if hero.dungeon!=null: direction=tactics.direction(enemy,direction)
+		if enemy.stagger>0: direction=Vector2.ZERO
 		enemy["motion"]=direction
-		if (distance>enemy.radius+12 or enemy.get("neutral",false)) and enemy.get("windup",0.0)<=0:
+		if (distance>enemy.radius+12 or enemy.get("neutral",false) or tactics.ranged(enemy)) and enemy.get("windup",0.0)<=0:
 			enemy.pos = move_position(enemy.pos,direction*enemy.speed*(.4 if enemy.slow>0 else 1)*dt,enemy.radius)
 		update_enemy_attack(enemy,dt)
-	if not in_combat:
+	if not in_combat and not expedition.deprived():
 		hero.hp = minf(Data.max_hp(hero),hero.hp+dt*Data.max_hp(hero)*(.018 if Data.has_building(hero,"Tavern") else .009))
 		var comfort=weather.recovery_rate()
 		hero.hp=minf(Data.max_hp(hero),hero.hp+comfort.x*dt)
 		hero.mp=minf(Data.max_mp(hero),hero.mp+comfort.y*dt)
-	if hero.className=="Cleric":
+	if hero.className=="Cleric" and not expedition.deprived():
 		hero.hp = minf(Data.max_hp(hero),hero.hp+dt*1.2)
 	for shot in shots:
 		shot.life -= dt
@@ -316,7 +378,7 @@ func tick(dt: float) -> void:
 				shot.life = 0
 				break
 	shots = shots.filter(func(s): return s.life>0)
-	enemies = enemies.filter(func(e): return not e.dead and (hero.dungeon!=null or e.pos.distance_to(at)<1600))
+	enemies = enemies.filter(func(e): return not e.dead and (hero.dungeon!=null or protected_encounter_enemy(e) or e.aggro>0 or e.burn>0 or e.pos.distance_squared_to(at)<810000))
 	for visual in visuals: visual.life-=dt
 	visuals=visuals.filter(func(v):return v.life>0)
 	for effect in effects:
@@ -326,6 +388,9 @@ func tick(dt: float) -> void:
 	var effect_limit = 80 if low_power else 160
 	if effects.size()>effect_limit:
 		effects = effects.slice(effects.size()-effect_limit)
+	expedition.tick(dt)
+	chapter.tick(dt)
+	castle.tick(dt)
 	if hero.hp<=0:
 		defeated()
 		return
@@ -359,9 +424,25 @@ func update_edge_camera(at: Vector2) -> void:
 		camera.force_update_scroll()
 		world.refresh()
 
+func roaming_limit() -> int: return 6 if reduced_crowds else 12
+
+func protected_encounter_enemy(enemy:Dictionary) -> bool:
+	return enemy.has("named") or enemy.has("trial") or enemy.has("dungeon_id") or enemy.get("chapter_boss",false) or enemy.get("forge_boss",false)
+
+func roaming_spawn_interval() -> float:
+	var base=randf_range(5,8) if reduced_crowds else randf_range(3,5)
+	return clampf(base/minf(1.3,1+hero.level*.01)*(.1/Data.spawn_chance(Data.phase(hero.worldTime))),3.0 if reduced_crowds else 2.0,10.0)
+
+func nearby_hostiles() -> int:
+	var count=0
+	for enemy in enemies:
+		if not enemy.dead and not enemy.get("neutral",false) and enemy.pos.distance_squared_to(player_position())<102400: count+=1
+	return count
+
 func spawn_enemy(boss_force: bool=false) -> Dictionary:
-	if hero.dungeon!=null or forest.active() or exploration.active() or enemies.size()>=(24 if low_power else 38):
+	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or enemies.size()>=roaming_limit():
 		return {}
+	if not boss_force and nearby_hostiles()>=(3 if reduced_crowds else 5): return {}
 	var boss = boss_force or randf()<.035
 	var level_value = maxi(1,int(hero.level*.65+player_position().length()/1900+randf_range(0,2)))
 	var at = player_position()+Vector2.from_angle(randf()*TAU)*randf_range(290,570)
@@ -373,7 +454,7 @@ func spawn_enemy(boss_force: bool=false) -> Dictionary:
 		var pack=randi_range(1,2147483640)
 		enemy.pack=pack
 		for i in range(2):
-			if enemies.size()>=(24 if low_power else 38): break
+			if enemies.size()>=roaming_limit(): break
 			var spot=at+Vector2.from_angle(i*TAU/3)*42
 			if not walkable(spot,12): continue
 			var ally=create_enemy(spot,level_value,kind)
@@ -388,37 +469,52 @@ func closest(range_value: float,from: Vector2,excluded: Dictionary={},hostile_on
 	var best: Dictionary = {}
 	var distance = range_value
 	for enemy in enemies:
-		if (hostile_only and enemy.get("neutral",false)) or enemy.dead or (not excluded.is_empty() and is_same(enemy,excluded)) or not line_clear(from,enemy.pos):
+		if (hostile_only and enemy.get("neutral",false)) or enemy.dead or (not excluded.is_empty() and is_same(enemy,excluded)):
 			continue
 		var value = from.distance_to(enemy.pos)
-		if value<distance:
+		if value<distance and line_clear(from,enemy.pos):
 			distance = value
 			best = enemy
 	return best
 
 func attack(auto_only:bool=false) -> bool:
-	if attack_cooldown>0 or survival.sheltered():
+	if fishing.active():
+		if auto_only: return false
+		fishing.cancel()
+	if not playing or hero.is_empty() or attack_cooldown>0 or survival.sheltered() or not spellbook.targeting.is_empty() or not build_recipe.is_empty():
 		return false
 	if desktop.enabled and desktop.mouse_aim and not auto_only: return desktop.manual_attack()
 	var weapon = Data.equipped(hero,"weapon")
 	var kind = "bow" if weapon.get("kind")=="bow" else "magic" if weapon.get("kind")=="staff" else "melee"
 	var target = closest(72 if kind=="melee" else 430,player_position(),{},auto_only)
-	if target.is_empty():
-		return false
-	if auto_only and hero.dungeon==null and target.aggro<=0:
-		return false
-	abilities.stealth=0
-	swing_time=.22
-	sound("attack")
-	attack_cooldown = .65 if kind=="bow" else .72 if kind=="magic" else .52
-	facing = player_position().direction_to(target.pos)
+	if auto_only and (target.is_empty() or (hero.dungeon==null and target.aggro<=0)): return false
+	var direction=facing
+	if not target.is_empty() and (auto_only or kind!="melee" or facing.dot(player_position().direction_to(target.pos))>.25): direction=player_position().direction_to(target.pos)
+	return directional_attack(direction,auto_only)
+
+func start_swing(direction:Vector2,duration:float=.24) -> void:
+	swing_direction=direction.normalized() if direction.length_squared()>.01 else Vector2.DOWN
+	swing_duration=duration;swing_time=duration
+
+func cast_feedback(color:Color) -> void:
+	cast_time=.35;cast_color=color
+
+func directional_attack(direction:Vector2,auto_only:bool=false) -> bool:
+	if not playing or hero.is_empty() or attack_cooldown>0 or survival.sheltered() or not spellbook.targeting.is_empty() or not build_recipe.is_empty(): return false
+	direction=direction.normalized() if direction.length_squared()>.01 else Vector2.DOWN
+	var weapon=Data.equipped(hero,"weapon")
+	var kind="bow" if weapon.get("kind")=="bow" else "magic" if weapon.get("kind")=="staff" else "melee"
+	abilities.stealth=0;start_swing(direction);sound("attack")
+	attack_cooldown=.65 if kind=="bow" else .72 if kind=="magic" else .52
+	if dash_time<=0: facing=direction
 	if kind=="melee":
 		for enemy in enemies.duplicate():
-			if not enemy.dead and (not auto_only or not enemy.get("neutral",false)) and enemy.pos.distance_to(player_position())<72 and line_clear(player_position(),enemy.pos):
+			var delta=enemy.pos-player_position()
+			if not enemy.dead and (not auto_only or not enemy.get("neutral",false)) and delta.length()<72 and (delta.length()<12 or delta.normalized().dot(direction)>.25) and line_clear(player_position(),enemy.pos):
 				hurt(enemy,Data.damage(hero,kind),kind,int(weapon.get("enchant",0)))
-		burst(player_position()+facing*32,Color("fff0c8"),8)
+		burst(player_position()+direction*32,Color("fff0c8"),8)
 	else:
-		shoot(target,kind,Data.damage(hero,kind),int(weapon.get("enchant",0)))
+		desktop.shoot(direction,kind,Data.damage(hero,kind),int(weapon.get("enchant",0)))
 	return true
 
 func shoot(target: Dictionary,kind: String,amount: float,enchant: int=0) -> void:
@@ -438,6 +534,10 @@ func hurt(enemy: Dictionary,amount: float,kind: String,enchant: int=0,no_chain: 
 	exploration.pack_alert(enemy)
 	enemy.aggro = 6
 	enemy.flash = .12
+	if kind=="melee" and not no_chain and not enemy.get("boss",false) and not enemy.has("named") and enemy.get("stagger_guard",0.0)<=0:
+		enemy["stagger"]=.14;enemy["stagger_guard"]=.9
+		enemy["recoil_direction"]=player_position().direction_to(enemy.pos)
+		enemy.windup=0;enemy.cooldown=maxf(.4,enemy.get("cooldown",0.0))
 	floating(enemy.pos+Vector2(-10,-enemy.radius-7),str(int(amount))+("!" if critical else ""),Color("ffdf87") if critical else Color("f8e8c8"))
 	if enchant==4 or hero.className=="Reaper":
 		hero.hp = minf(Data.max_hp(hero),hero.hp+maxf(1,amount*.07))
@@ -470,6 +570,8 @@ func kill_enemy(enemy: Dictionary,kind: String) -> void:
 	enemy.dead = true
 	forest.defeated(enemy)
 	exploration.on_kill(enemy)
+	forge.on_kill(enemy)
+	castle.defeated(enemy)
 	contracts.on_kill(enemy)
 	if enemy.get("neutral",false):
 		survival.add("Raw meat",2); survival.add("Hide",1)
@@ -515,8 +617,11 @@ func add_renown(amount: int) -> void:
 	if before!=Data.title(hero.kingdom.renown):
 		notify("Your title is now "+Data.title(hero.kingdom.renown)+"!",4)
 
-func cast(spell: String) -> bool:
-	if not playing or spell_cooldowns[spell]>0 or (spell!="heal" and survival.sheltered()):
+func cast(spell:String) -> bool:
+	return spellbook.cast(spell,spellbook.target_point())
+
+func cast_legacy(spell: String) -> bool:
+	if not playing or float(spell_cooldowns.get(spell,0.0))>0 or (spell!="heal" and survival.sheltered()):
 		return false
 	var cost = {"fire":12,"frost":20,"heal":25}[spell]
 	if hero.mp<cost:
@@ -528,6 +633,7 @@ func cast(spell: String) -> bool:
 		notify("No enemy in Firebolt range.",2)
 		return false
 	sound("spell")
+	cast_feedback(Color({"fire":"ffb077","frost":"9edff4","heal":"aedfb6"}[spell]))
 	if spell!="heal": abilities.stealth=0
 	hero.mp -= cost
 	spell_cooldowns[spell] = {"fire":1.3,"frost":5.5,"heal":9.0}[spell]
@@ -549,6 +655,8 @@ func cast(spell: String) -> bool:
 func dash() -> void:
 	if not playing or dash_cooldown>0:
 		return
+	fishing.cancel()
+	spellbook.cancel_target()
 	if exploration.active(): exploration.dodged=true
 	dash_cooldown = 2.4 if hero.className=="Rogue" else 3.8
 	dash_time = .23
@@ -580,6 +688,7 @@ func populate_chests(force: bool=false) -> void:
 			var id = "g:%d,%d:0" % [x,y]
 			var spot=Vector2(x*640+100+WorldScript.tile_hash(x,y,8)*440,y*640+100+WorldScript.tile_hash(x,y,13)*440)
 			if exploration.cave_wall(spot): spot+=Vector2(72,72)
+			if not walkable(spot,10):continue
 			if not exploration.cave_wall(spot): chests.append({"id":id,"pos":spot,"level":maxi(1,int(Vector2(x,y).length()*.55+hero.level*.65))})
 
 func open_chest() -> bool:
@@ -641,14 +750,17 @@ func salvage(item: Dictionary) -> bool:
 	save_game()
 	return true
 
-func enter_dungeon() -> void:
+func enter_dungeon(story:bool=false) -> void:
 	if hero.dungeon!=null:
 		return
+	if story and (chapter.stage()!=3 or player_position().distance_to(exploration.RUINS)>=80): return
 	hero.journey.dungeon_entered=true
 	hero.dungeon = {"floor":1,"seed":randi_range(1,2147483640),"run":str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":hero.x,"returnY":hero.y}
+	hero.dungeon["story"]=story
 	build_floor(true)
 	save_game()
-	notify("ENDLESS DUNGEON · Defeat enemies to unlock the gold stairs.",5)
+	if story: notify("THE HOLLOW ROOT · Three floors. Purple runes warn before striking. Seek the Hollow Heart.",7);return
+	notify("SURVIVAL EXPEDITION · Five floors. Defeat the final lord and return home." if expedition.enabled() else "ENDLESS DUNGEON · Defeat enemies to unlock the gold stairs.",5)
 
 func cell_center(cell: Vector2i) -> Vector2:
 	return Vector2(cell)*TILE+Vector2.ONE*TILE/2
@@ -656,7 +768,7 @@ func cell_center(cell: Vector2i) -> Vector2:
 func build_floor(reset_position: bool=true) -> void:
 	clear_scene()
 	var dungeon = hero.dungeon
-	dungeon_map = Data.make_dungeon(int(dungeon.seed))
+	dungeon_map = castle.layout() if castle.active() else Data.make_dungeon(int(dungeon.seed))
 	astar = AStarGrid2D.new()
 	astar.region = Rect2i(0,0,dungeon_map.size,dungeon_map.size)
 	astar.cell_size = Vector2(TILE,TILE)
@@ -668,6 +780,8 @@ func build_floor(reset_position: bool=true) -> void:
 	if reset_position or not walkable(player_position(),10):
 		set_player_position(cell_center(dungeon_map.start))
 	hero.highestFloor = maxi(hero.highestFloor,dungeon.floor)
+	if castle.active():
+		castle.setup();camera.position=player_position();camera.reset_smoothing();world.refresh(true);check_floor_clear();return
 	var places = dungeon_map.floors.filter(func(c):return Vector2(c).distance_to(Vector2(dungeon_map.start))>2.2 and c!=dungeon_map.exit)
 	var rng = RandomNumberGenerator.new()
 	rng.seed = int(dungeon.seed)^0x1234abcd
@@ -694,18 +808,23 @@ func build_floor(reset_position: bool=true) -> void:
 		enemies.append(enemy)
 	for i in range(mini(3,places.size())):
 		chests.append({"id":"gd:%s:%d:%d" % [dungeon.run,dungeon.floor,i],"pos":cell_center(places[places.size()-1-i]),"level":dungeon.floor})
+	chapter.floor_setup()
 	camera.position = player_position()
 	camera.reset_smoothing()
 	world.refresh(true)
 	check_floor_clear()
 
 func floor_clear() -> bool:
+	if castle.active():return castle.required_clear()
 	return not enemies.any(func(e):return not e.dead)
 
 func check_floor_clear() -> bool:
 	if hero.dungeon==null or not floor_clear():
 		return false
+	if castle.active() and castle.has("floor-reward"):hero.dungeon.rewarded=true
 	if not hero.dungeon.rewarded:
+		if castle.active():hero.opened[castle.token("floor-reward")]=true
+		chapter.floor_cleared()
 		hero.dungeon.rewarded = true
 		hero.floorsCleared += 1
 		contracts.advance("delve")
@@ -713,13 +832,22 @@ func check_floor_clear() -> bool:
 		forest.check_opening_reward()
 		add_renown(15+mini(100,hero.dungeon.floor*2))
 		hero.gold += 10+hero.dungeon.floor*5
-		notify("FLOOR CLEARED · Find the gold staircase to descend.",5)
+		if chapter.story_run() and hero.dungeon.floor==3:
+			notify("THE HOLLOW ROOT COMPLETE · Gold stairs return you to Mara.",6)
+		elif expedition.enabled() and hero.dungeon.floor>=5:
+			hero.needs.ruins=true
+			notify("EXPEDITION COMPLETE · Use the gold stairs to return home.",5)
+		elif castle.active():notify("CASTLE LEVEL CLEARED · Explore the optional rooms or take the gold stairs.",5)
+		else: notify("FLOOR CLEARED · Find the gold staircase to descend.",5)
 		save_game()
 	return true
 
 func advance_floor() -> bool:
+	if castle.active():return castle.advance()
 	if hero.dungeon==null or not floor_clear():
 		return false
+	if (chapter.story_run() and hero.dungeon.floor>=3) or (expedition.enabled() and hero.dungeon.floor>=5):
+		leave_dungeon();return true
 	hero.dungeon.floor += 1
 	hero.dungeon.seed = posmod(int(hero.dungeon.seed)*1664525+1013904223,2147483647)
 	hero.dungeon.cleared = []
@@ -746,6 +874,7 @@ func leave_dungeon() -> void:
 func walkable(at: Vector2,radius: float=0) -> bool:
 	if hero.dungeon==null or dungeon_map.is_empty():
 		for offset in [Vector2(-radius,-radius),Vector2(radius,-radius),Vector2(-radius,radius),Vector2(radius,radius)]:
+			if landscape.solid(at+offset):return false
 			if exploration.cave_wall(at+offset): return false
 		return not survival.blocked(at,radius)
 	for offset in [Vector2(-radius,-radius),Vector2(radius,-radius),Vector2(-radius,radius),Vector2(radius,radius)]:
@@ -764,7 +893,7 @@ func move_position(at: Vector2,delta: Vector2,radius: float) -> Vector2:
 	return at
 
 func line_clear(a: Vector2,b: Vector2) -> bool:
-	if hero.dungeon==null and hero.survival.structures.is_empty() and exploration.region_at(a)!="caves" and exploration.region_at(b)!="caves":
+	if hero.dungeon==null and hero.survival.structures.is_empty() and exploration.region_at(a)!="caves" and exploration.region_at(b)!="caves" and not landscape.intersects_authored(a,b):
 		return true
 	var steps = maxi(1,ceili(a.distance_to(b)/8.0))
 	for i in range(steps+1):
@@ -799,9 +928,10 @@ func update_interaction() -> void:
 
 	if hero.dungeon!=null:
 		if player_position().distance_to(cell_center(dungeon_map.start))<38:
-			label_value = "LEAVE DUNGEON"
+			label_value = "STAIRS · PREVIOUS CASTLE LEVEL" if castle.active() and hero.dungeon.floor>1 else "LEAVE DUNGEON"
 		elif player_position().distance_to(cell_center(dungeon_map.exit))<38:
-			label_value = "DESCEND · FLOOR %d" % (hero.dungeon.floor+1) if floor_clear() else "STAIRS LOCKED"
+			label_value = ("RETURN HOME · EXPEDITION COMPLETE" if (chapter.story_run() and hero.dungeon.floor>=3) or (expedition.enabled() and hero.dungeon.floor>=5) else "DESCEND · FLOOR %d" % (hero.dungeon.floor+1)) if floor_clear() else "STAIRS LOCKED"
+			if castle.active() and floor_clear():label_value="RETURN OUTSIDE · KEEP RECLAIMED" if hero.dungeon.floor==3 else "STAIRS · NEXT CASTLE LEVEL"
 	if hero.dungeon==null:
 		var door=survival.near("Door",65)
 		if not door.is_empty(): label_value="CLOSE DOOR" if door.open else "OPEN DOOR"
@@ -809,17 +939,32 @@ func update_interaction() -> void:
 		if not garden.is_empty(): label_value="GARDEN / HARVEST" if farming.ready(garden) else "TEND GARDEN"
 		if not forest.interaction().is_empty(): label_value=forest.interaction()
 		if not exploration.interaction().is_empty(): label_value=exploration.interaction()
+	if expedition.enabled() and expedition.near_spring(): label_value="SPRING / REFILL FLASK"
 	if contracts.near_board(): label_value="QUEST BOARD"
 	if trader.near(): label_value="TRADE WITH MARA"
+	if not fishing.interaction().is_empty(): label_value=fishing.interaction()
+	if not chapter.interaction().is_empty(): label_value=chapter.interaction()
+	if not forge.interaction().is_empty(): label_value=forge.interaction()
+	if not landscape.feature_near().is_empty():label_value=landscape.feature_near()
+	if not castle.interaction().is_empty():label_value=castle.interaction()
 	if not build_recipe.is_empty(): label_value="PLACE "+build_recipe.to_upper()
 	hud.set_interaction(label_value)
 
 func interact() -> void:
 	if not playing:
 		return
+	if not spellbook.targeting.is_empty(): return
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
+	if not castle.interaction().is_empty():castle.use_feature();return
+	if not landscape.feature_near().is_empty():landscape.interact();return
+	if not forge.interaction().is_empty(): forge.interact();return
+	if not chapter.interaction().is_empty(): chapter.interact();return
+	if not fishing.interaction().is_empty():
+		fishing.interact();return
+	if expedition.enabled() and expedition.near_spring():
+		expedition.drink(true);notify("Fresh water · thirst restored and flask filled",3);return
 	if trader.near():
 		hud.show_character("trader");return
 	if contracts.near_board():
@@ -835,7 +980,8 @@ func interact() -> void:
 		survival.toggle_door(door); return
 	if hero.dungeon!=null:
 		if player_position().distance_to(cell_center(dungeon_map.start))<38:
-			leave_dungeon()
+			if castle.active():castle.retreat()
+			else:leave_dungeon()
 			return
 		if player_position().distance_to(cell_center(dungeon_map.exit))<38:
 			if not advance_floor():
@@ -850,7 +996,9 @@ func interact() -> void:
 	update_interaction()
 
 func defeated() -> void:
+	if castle.checkpoint_defeat():return
 	hero.deaths += 1
+	expedition.reset_after_defeat()
 	var loss = int(hero.gold*.15)
 	hero.gold -= loss
 	hero.dungeon = null
@@ -878,9 +1026,12 @@ func burst(at: Vector2,color: Color,count: int) -> void:
 
 func load_performance_settings() -> void:
 	var config = ConfigFile.new()
+	reduced_crowds=true
 	low_power=not desktop.enabled
 	if config.load("user://performance.cfg")==OK:
 		low_power = bool(config.get_value("display","low_power",true))
+		var crowd_value=config.get_value("display","reduced_crowds",true)
+		reduced_crowds=crowd_value if crowd_value is bool else true
 	if desktop.enabled and "--safe-mode" in OS.get_cmdline_user_args():
 		low_power=true;weather.particles_enabled=false
 	Engine.max_fps = 30 if low_power else 60
@@ -889,10 +1040,20 @@ func set_low_power(enabled: bool) -> void:
 	low_power = enabled
 	Engine.max_fps = 30 if low_power else 60
 	var config = ConfigFile.new()
+	config.load("user://performance.cfg")
 	config.set_value("display","low_power",low_power)
 	config.save("user://performance.cfg")
 	if world!=null:
 		world.queue_redraw()
+
+func set_reduced_crowds(enabled:bool) -> void:
+	reduced_crowds=enabled
+	var config=ConfigFile.new();config.load("user://performance.cfg")
+	config.set_value("display","reduced_crowds",enabled);config.save("user://performance.cfg")
+	# Only recycle distant, idle ambient enemies. Active fights and quest foes stay.
+	if enabled and not hero.is_empty() and hero.dungeon==null:
+		enemies=enemies.filter(func(e):return protected_encounter_enemy(e) or e.aggro>0 or e.burn>0 or e.get("windup",0.0)>0 or e.pos.distance_squared_to(player_position())<422500)
+	spawn_timer=maxf(spawn_timer,3.0)
 
 func adapt_screen() -> void:
 	var window=get_window()
@@ -903,6 +1064,7 @@ func adapt_screen() -> void:
 	if hud!=null:
 		hud.reset_stick()
 		attack_held=false
+	if spellbook!=null: spellbook.cancel_target()
 	if landscape!=screen_landscape and not hero.is_empty():
 		camera.position=player_position()
 		camera.force_update_scroll()
@@ -912,6 +1074,8 @@ func adapt_screen() -> void:
 func sound(cue:String) -> void:
 	if audio!=null: audio.play_cue(cue)
 func begin_build(recipe:String,move_source:Dictionary={}) -> void:
+	fishing.cancel()
+	spellbook.cancel_target()
 	survival.moving=move_source
 	build_recipe=recipe
 	build_rotation=int(move_source.get("rotation",0))
@@ -922,20 +1086,26 @@ func cancel_build() -> void:
 	survival.moving={}
 	if hud!=null: hud.build_tools.visible=false
 func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
-	if enemy.get("neutral",false): return
-	if abilities.stealth>0:
+	if not playing or dt<=0 or enemy.dead or enemy.get("neutral",false): return
+	if enemy.get("stagger",0.0)>0: return
+	if abilities.stealth>0 or survival.sheltered() or enemy.get("returning",false):
 		enemy.windup=0
 		return
 	var pos=player_position()
 	var named=enemy.has("named")
 	if enemy.get("windup",0.0)>0:
+		if not tactics.attack_reachable(enemy,pos):
+			enemy.windup=0;enemy.cooldown=maxf(.3,enemy.cooldown)
+			return
 		enemy.windup=maxf(0,enemy.windup-dt)
 		if enemy.windup==0:
+			enemy["attack_pose"]=.18
 			burst(enemy.strike,Color("f29875"),12)
 			if pos.distance_to(enemy.strike)<enemy.strike_radius+9 and dash_time<=0 and not survival.sheltered() and line_clear(enemy.pos,pos):
 				var mitigation=Data.power(hero,"armor")*.045+Data.power(hero,"shield")*.18+Data.power(hero,"helmet")*.1
 				var amount=maxf(1,floor(enemy.contact_damage*(.9 if Data.has_building(hero,"Barracks") else 1)-mitigation))
 				visual_fx("impact",pos+Vector2(0,-8),28,Color("e8a49a"),.25)
+				if spellbook.ward_time>0: amount*=.4
 				hero.hp-=amount
 				floating(pos+Vector2(-12,-30),"-"+str(int(amount)),Color("ff9895"))
 				sound("hurt")
@@ -948,16 +1118,46 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 		enemy.windup=1.1 if named else .85 if ranged else .65
 		enemy.strike=pos if named or ranged else enemy.pos+enemy.pos.direction_to(pos)*22
 		enemy.strike_radius=(95.0 if enemy.hp<enemy.max_hp*.5 else 72.0) if named else 30.0 if ranged else 38.0
+		if enemy.get("chapter_boss",false):
+			enemy.windup=.8 if enemy.hp<enemy.max_hp*.5 else 1.2
+			enemy.strike_radius=100.0 if enemy.hp<enemy.max_hp*.5 else 55.0
+		if enemy.get("forge_boss",false):
+			enemy.windup=.85 if enemy.hp<enemy.max_hp*.5 else 1.3
+			enemy.strike_radius=82.0 if enemy.hp<enemy.max_hp*.5 else 58.0
+		if enemy.get("thornwatch_boss",false):
+			enemy["thorn_pattern"]=enemy.get("thorn_pattern",0)+1
+			enemy.windup=.85 if enemy.hp<enemy.max_hp*.5 else 1.35
+			enemy.strike_radius=110.0 if enemy.thorn_pattern%2==0 else 55.0
+			if enemy.thorn_pattern%2==0:enemy.strike=enemy.pos
+		if enemy.has("realm_boss"):castle.regional.prepare_attack(enemy)
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 
+func movement_precision_ok(at:Vector2) -> bool:
+	return at.is_finite() and (at+Vector2(.5,0)).x!=at.x and (at+Vector2(0,.5)).y!=at.y
+
 func safe_wilds_position(at:Vector2) -> Vector2:
+	# Single-precision world coordinates can swallow movement at extreme values.
+	if not movement_precision_ok(at): at=Vector2.ZERO
 	if walkable(at,12): return at
-	for ring in range(1,13):
+	for ring in range(1,49):
 		for direction in [Vector2.UP,Vector2.RIGHT,Vector2.DOWN,Vector2.LEFT,Vector2(1,1),Vector2(-1,1),Vector2(1,-1),Vector2(-1,-1)]:
 			var candidate=at+direction*48*ring
 			if walkable(candidate,12): return candidate
 	return Vector2(at.x,0) if exploration.region_at(at)=="caves" else Vector2.ZERO
+
+func recover_stuck_character() -> bool:
+	if hero.is_empty() or hero.dungeon!=null or hero.hp<=0: return false
+	# Explicit emergency action: keep the character, camp, rewards and needs intact.
+	cancel_build();clear_scene()
+	set_player_position(safe_wilds_position(Vector2.ZERO))
+	exploration.tick(0)
+	survival.refresh(true);populate_chests(true)
+	camera.position=player_position();camera.reset_smoothing();camera.force_update_scroll()
+	world.refresh(true);hud.reset_stick()
+	# Stay paused so an injured/freezing character can review supplies before resuming.
+	hud.show_pause("Position recovered · Back at the original camp. Gear and progress kept. Check supplies, then Resume journey.")
+	return true
 
 func visual_fx(kind:String,at:Vector2,radius:float,color:Color,duration:float=.4) -> Dictionary:
 	var effect={"kind":kind,"pos":at,"radius":radius,"color":color,"life":duration,"duration":duration}
