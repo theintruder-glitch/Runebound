@@ -1,6 +1,8 @@
 extends Node2D
 
 const Data = preload("res://scripts/data.gd")
+const TacticsScript=preload("res://scripts/enemy_tactics.gd")
+var tactics
 const ChapterScript=preload("res://scripts/chapter.gd")
 var chapter
 const WorldScript = preload("res://scripts/world.gd")
@@ -74,6 +76,7 @@ var is_walking = false
 var screen_landscape = false
 
 func _ready() -> void:
+	tactics=TacticsScript.new();tactics.game=self
 	chapter=ChapterScript.new();chapter.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
@@ -299,6 +302,7 @@ func tick(dt: float) -> void:
 	if spawn_timer<=0 and hero.dungeon==null:
 		spawn_enemy()
 		spawn_timer = randf_range(1.4,2.8)/minf(1.8,1+hero.level*.025)*(.1/Data.spawn_chance(Data.phase(hero.worldTime)))
+	tactics.prepare()
 	var in_combat = false
 	for enemy in enemies.duplicate():
 		if enemy.dead:
@@ -328,9 +332,10 @@ func tick(dt: float) -> void:
 		elif distance<330 or enemy.aggro>0:
 			in_combat = true
 			direction = dungeon_direction(enemy,dt)
+		direction=tactics.direction(enemy,direction)
 		if enemy.stagger>0: direction=Vector2.ZERO
 		enemy["motion"]=direction
-		if (distance>enemy.radius+12 or enemy.get("neutral",false)) and enemy.get("windup",0.0)<=0:
+		if (distance>enemy.radius+12 or enemy.get("neutral",false) or tactics.ranged(enemy)) and enemy.get("windup",0.0)<=0:
 			enemy.pos = move_position(enemy.pos,direction*enemy.speed*(.4 if enemy.slow>0 else 1)*dt,enemy.radius)
 		update_enemy_attack(enemy,dt)
 	if not in_combat and not expedition.deprived():
@@ -1012,7 +1017,7 @@ func cancel_build() -> void:
 	survival.moving={}
 	if hud!=null: hud.build_tools.visible=false
 func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
-	if enemy.dead or enemy.get("neutral",false): return
+	if not playing or dt<=0 or enemy.dead or enemy.get("neutral",false): return
 	if enemy.get("stagger",0.0)>0: return
 	if abilities.stealth>0 or survival.sheltered() or enemy.get("returning",false):
 		enemy.windup=0
@@ -1020,6 +1025,9 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 	var pos=player_position()
 	var named=enemy.has("named")
 	if enemy.get("windup",0.0)>0:
+		if not tactics.attack_reachable(enemy,pos):
+			enemy.windup=0;enemy.cooldown=maxf(.3,enemy.cooldown)
+			return
 		enemy.windup=maxf(0,enemy.windup-dt)
 		if enemy.windup==0:
 			enemy["attack_pose"]=.18

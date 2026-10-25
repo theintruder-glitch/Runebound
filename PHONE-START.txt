@@ -1,7 +1,7 @@
-RUNEBOUND 0.18.0 — ANDROID
+RUNEBOUND 0.19.0 — ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Runebound-Godot-v0.18.0.apk and install it over the existing app.
+2. Download Runebound-Godot-v0.19.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 25 and the original prototype certificate.
+This update uses app.runebound.godot, version code 26 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -33,3 +33,9 @@ Open Camp > Chapter I, then visit Mara to begin. Investigate the three camps, re
 then choose the story expedition at Mossveil Ruins. It has three floors and a named final boss.
 Purple rune circles warn before they strike; move away or dodge. Return to Mara to claim Hearthcall.
 Your old tutorial, shrine and regular dungeons stay available.
+
+ENEMY TACTICS:
+Dungeon archers and wisps hold their firing distance. Close in to force them back; cornered shooters
+stand their ground. A gold dashed line connects a shooter to its locked warning circle.
+Move out of the circle or dodge. Walls interrupt pending attacks; melee enemies spread as they approach.
+Chapter I and your existing character remain available.

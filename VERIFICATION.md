@@ -1,3 +1,27 @@
+# 0.19.0 Enemy Tactics verification
+
+Incremental update from v0.18.0. Package app.runebound.godot, original signing identity, application name and user://character.json are retained. Android version code 26. Enemy steering is transient and changes no saved character fields.
+
+## Current evidence
+
+- Final signed ARM64 APK export succeeds; eight focused suites / **650 checks** pass against its actual extracted resources, including all 50 enemy-tactics/version checks.
+- Windows x64 export succeeds; eight suites / **442 checks** pass against the actual exported PCK with the matching Linux engine. This does not execute the Windows PE binary.
+- APK ZIP integrity, manifest code/name/ABI, ELF and ZIP 16 KB alignment, actual v2/v3 signature blocks and cryptographic signature verification pass. The downloadable copy independently verifies with original certificate SHA-256 `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`.
+- APK SHA-256: `c3584515b358994c77ff5cd5e72b044ec3ab73a0fd6b8bb6f696263374cb1404`.
+- Portrait/landscape ranged-warning renders were inspected using Godot Compatibility / Mesa software rendering with dummy audio. Warning line, target circle and mobile controls fit both orientations. These captures do not measure phone FPS.
+- Title/pause version labels now use project metadata, fixing the stale v0.15.0 label.
+- Shell syntax and Python compilation pass. Source-suite totals and GitHub CI state are recorded with the verification bundle after completion. No native Windows execution or physical Android playtest is claimed.
+
+## Behavior covered
+
+All five ranged types hold/retreat/approach at appropriate distances; blocked retreats stand ground and blocked sight uses the existing route. Real wilds and dungeon ticks exercise movement, including newly detected enemies before their first hit. Melee spacing, deterministic coincident spawns, speed bounds, dead neighbors, idle/returning/wildlife behavior and boss exclusions are checked. Locked shots do not retarget, moving out avoids damage, cover and disengagement cancel windups, hits still damage/animate, dodge/stealth protect, menus freeze timers and zero-time updates cannot resolve attacks. A dense 48-enemy steering fixture stays finite. Character JSON roundtrips unchanged.
+
+## Still needs device playtesting
+
+Motorola Edge 2025 / Android 16 install-over-existing-app, real multi-touch, readability during mixed encounters, chapter difficulty, sustained FPS/heat/battery/RAM, hardware audio and native Windows EXE startup remain unverified here. Prior user reports established basic v0.17 playability, not this update's hardware results. See PLAYTEST.md.
+
+## Previous milestones
+
 # 0.18.0 The Hollow Root verification
 
 This update adds a first playable Mossveil story chapter to v0.17.0. It preserves app.runebound.godot, the original signing certificate and save location. Android version code is 25.

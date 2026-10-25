@@ -190,6 +190,9 @@ func _draw() -> void:
 	game.chapter.draw(self)
 	for enemy in game.enemies:
 		if not enemy.dead and enemy.get("windup",0.0)>0 and draw_bounds.has_point(enemy.strike):
+			if game.tactics.ranged(enemy):
+				draw_dashed_line(enemy.pos,enemy.strike,Color("e9c47b99"),1.5,7)
+				draw_circle(enemy.pos,enemy.radius+5,Color("e9c47b"),false,1.5)
 			draw_circle(enemy.strike,enemy.strike_radius,Color("e77a6844"))
 			draw_arc(enemy.strike,enemy.strike_radius,0,TAU,48,Color("ff9b7f"),2)
 			var progress=1-clampf(enemy.windup/maxf(.1,enemy.get("windup_max",enemy.windup)),0,1)

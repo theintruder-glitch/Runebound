@@ -1,3 +1,10 @@
+# v0.19.0 Enemy Tactics — next phone checks
+
+Install over the current app, keep its data, and confirm the same character and Chapter I state load.
+Fight ranged enemies in a regular dungeon: they should hold range, back off when approached, and remain reachable in corners. Follow the gold line to identify a shooter. Walk out of a warning circle, dodge through one, then break sight behind a wall. Check that only standing in an unobstructed warning at impact takes damage.
+Approach a mixed group: melee enemies should spread without walking through walls. Confirm wolves still flank and The Hollow Heart retains both phases. Pause during a warning and resume; it should continue from the paused point. Test portrait and landscape on the phone, then repeat a mixed encounter with battery saver enabled.
+Report unexpected hits, stuck enemies, small-screen warning visibility and measured FPS/heat. Automated Linux runs do not establish these device outcomes.
+
 # Final playtest checklist — 0.18.0
 
 Record device, OS, prior app version, test date, outcome and any exact error. These are pending hardware checks, not completed tests.

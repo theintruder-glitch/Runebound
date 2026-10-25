@@ -1,6 +1,12 @@
-# RUNEBOUND 0.18.0 — The Hollow Root
+# RUNEBOUND 0.19.0 — Enemy Tactics
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Enemy tactics
+
+Ranged enemies now keep a firing distance in dungeons as well as the wilds. They back away from a close hero when the floor allows it and stand their ground when cornered. Clear a room by using cover, closing the gap and dodging the locked warning circle. A gold dashed line identifies which ranged enemy is preparing the shot; it does not track your new position.
+
+Approaching ordinary enemies spread slightly around nearby allies while retaining collision, the dungeon pathfinder and wolf flanking. Named bosses keep their existing approach and phase behavior. Pending attacks cancel if cover breaks line of sight or the target disengages beyond reach. Menus freeze attack timers. The steering cache is transient; no character/save schema changes are required.
 
 ## Chapter I — The Hollow Root
 
@@ -18,7 +24,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.18.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **25**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.19.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **26**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
@@ -35,7 +41,7 @@ export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
 python3 tools/run_tests.py
 ```
 
-The runner selects each suite's required desktop flags, covers both movement orientations, checks exit codes and script/assertion errors, and requires a completion marker. Every suite gets a disposable XDG save/config directory, protecting developer characters. `--suite test_touch_combat` selects the new touch/combat checks; `test_stability` retains the prior save/Survival checks. Tests do not establish physical-phone FPS or touch feel.
+The runner selects each suite's required desktop flags, covers both movement orientations, checks exit codes and script/assertion errors, and requires a completion marker. Every suite gets a disposable XDG save/config directory, protecting developer characters. `--suite test_enemy_tactics` selects the new steering/attack checks; `--suite test_touch_combat` selects touch/combat checks; `test_stability` retains the prior save/Survival checks. Tests do not establish physical-phone FPS or touch feel.
 
 ## Build
 

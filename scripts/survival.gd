@@ -237,10 +237,7 @@ func enemy_direction(e:Dictionary,dt:float) -> Vector2:
   if e.type in ["wolf","frost_wolf"]:
    var flank=pos+Vector2.from_angle(float(e.get("pack_slot",0))*TAU/3)*34
    return e.pos.direction_to(flank) if distance>60 else e.pos.direction_to(pos)
-  if e.type in ["wisp","skeleton","crystal_wisp","archer","ice_archer"]:
-   if distance<110: return -e.pos.direction_to(pos)*.7
-   if distance<190: return Vector2.ZERO
-  return e.pos.direction_to(pos)
+  return game.tactics.firing_direction(e,e.pos.direction_to(pos))
  e.wander_time-=dt
  if e.wander_time<=0:
   e.wander=randf()*TAU; e.wander_time=randf_range(2,5)

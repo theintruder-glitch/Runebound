@@ -470,7 +470,7 @@ func show_title(has_save: bool) -> void:
 	clear_content("RUNEBOUND",false)
 	paragraph("THE HEART OF MOSSVEIL",13,Color("89d7b0"))
 	paragraph("Build your home beneath the trees. Follow the call of an ancient shrine. Face the Root Warden and awaken your hidden power.",21,Color("ece2c4"))
-	paragraph("Survival chapter · Classic adventure · Offline\nVersion 0.15.0 · Wild Waters",13)
+	paragraph("Survival chapter · Classic adventure · Offline\nVersion "+str(ProjectSettings.get_setting("application/config/version")),13)
 	if has_save:
 		action(content,"Continue journey",func():game.start_character(Data.read_save()))
 	action(content,"Begin a new journey",func():advanced.show_modes(true))
@@ -496,7 +496,7 @@ func show_pause(message: String="") -> void:
 	clear_content("A moment of rest",false)
 	if not message.is_empty():
 		paragraph(message,17,Color("e5bd8d"))
-	paragraph("Version 0.15.0 · Wild Waters",12)
+	paragraph("Version "+str(ProjectSettings.get_setting("application/config/version")),12)
 	paragraph(game.weather.summary(),13)
 	paragraph("Level %d %s · %d kills · %d chests" % [game.hero.level,game.hero.className,game.hero.kills,game.hero.stats.chests])
 	action(content,"Resume journey",resume)
