@@ -518,11 +518,21 @@ func show_pause(message: String="") -> void:
 	action(content,"Trader Mara",func():show_character("trader"))
 	action(content,"Quest board and active jobs",func():show_character("quests"))
 	action(content,"World map",func():show_character("map"))
+	action(content,"Recover stuck character",show_position_recovery)
 	action(content,"Equipment and character",func():show_character("gear"))
 	action(content,"Realm and dungeons",func():show_character("realm"))
 	action(content,"Copy save to clipboard",func():DisplayServer.clipboard_set(JSON.stringify(game.hero));toast("Save copied. Paste it into a text file to back it up.",5))
 	action(content,"Export character save",choose_export)
 	action(content,"Save and title screen",func():game.save_game();show_title(true))
+
+func show_position_recovery() -> void:
+	game.pause_game();current_page="recovery";clear_content("Recover position",false)
+	var at=game.player_position()
+	paragraph("Position: %.0f, %.0f · %s" % [at.x,at.y,game.exploration.REGIONS[game.exploration.region_at(at)].name],14)
+	paragraph("If movement is stuck, return to the original Mossveil camp. Your levels, gear, gold, camp and quest progress are kept. Health, mana and survival supplies are not refilled. An active wilds trial is abandoned.",15)
+	if game.hero.dungeon!=null: paragraph("Inside a dungeon, use the entrance stairs to leave. Position recovery is available in the wilds.",14)
+	action(content,"Return to original camp · keep my character",func():game.recover_stuck_character(),game.hero.dungeon!=null or game.hero.hp<=0)
+	action(content,"Cancel · stay here",show_pause)
 
 func back() -> void:
 	if game.playing and not game.spellbook.targeting.is_empty():
@@ -914,6 +924,7 @@ func show_map() -> void:
 	var landscape=get_viewport_rect().size.x>get_viewport_rect().size.y
 	var layout_box=HBoxContainer.new() if landscape else VBoxContainer.new();content.add_child(layout_box)
 	map_widget=MapScript.new();map_widget.game=game;map_widget.selected=map_selection
+	map_widget.local_view=not map_widget.OVERVIEW.has_point(map_widget.position_in_wilds())
 	map_widget.custom_minimum_size.y=260 if landscape else 330
 	layout_box.add_child(map_widget)
 	var details=VBoxContainer.new();details.custom_minimum_size.x=180 if landscape else 0;details.size_flags_horizontal=Control.SIZE_FILL;layout_box.add_child(details)
@@ -923,6 +934,7 @@ func show_map() -> void:
 	action(details,"World overview",func():map_widget.local_view=false;map_widget.queue_redraw())
 	action(details,"Around me",func():map_widget.local_view=true;map_widget.queue_redraw())
 	action(details,"Resume journey",resume)
+	paragraph("Map opens around you beyond the central regions. Around me centers your location; World overview includes you and home. In a dungeon the arrow marks your wilds entrance.",12)
 	paragraph("White arrow: you · Gold squares: your camp
 Gold rings: completed · Gray markers: undiscovered
 Tap a marker, then Track selected.",11)

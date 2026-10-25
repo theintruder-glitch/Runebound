@@ -1,3 +1,8 @@
+# v0.20.1 — recover the affected character
+
+Keep the current app/data and install the patch over it. Continue the same character. Open Pause → Recover stuck character → Return to original camp · keep my character. Confirm you are paused back in Mossveil with the same gear, gold, levels, camp and quest state. Review survival supplies before resuming. The saved bed stays where you placed it.
+Move in all four directions, then open World map. Around me should center your arrow; World overview should include your actual location and home. Travel across the snow boundary, pause/resume, rotate, then save/reopen and check movement again. If movement still fails, provide the recovery screen's Position coordinates and whether the joystick knob moves. The exact cause of the reported movement lock has not been confirmed from the user's actual save.
+
 # v0.20.0 Dreadwood — graphics phone checks
 
 Install over the existing app; keep its data. Confirm the same character and chapter state load. Compare skeletons, archers, wolves and The Hollow Heart with the last build. Check that silhouettes/eyes are visible on your phone and that warning circles, health bars, attacks, dropped items and touch controls remain readable.

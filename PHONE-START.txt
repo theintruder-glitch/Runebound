@@ -1,7 +1,7 @@
-RUNEBOUND 0.20.0 — ANDROID
+RUNEBOUND 0.20.1 — ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Runebound-Godot-v0.20.0.apk and install it over the existing app.
+2. Download Runebound-Godot-v0.20.1.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 27 and the original prototype certificate.
+This update uses app.runebound.godot, version code 28 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -46,3 +46,10 @@ Pause > Graphics: Performance is the phone default. Try Balanced for soft dungeo
 Rich adds detail; return to Performance if your phone feels warm or slow.
 Low power still caps the game at 30 FPS and limits soft lights to two.
 Bosses look larger; their hitboxes and warning/dodge rules have not changed.
+
+STUCK IN SNOW / MAP CORNER FIX:
+Install over the current app. Continue the same character.
+Pause > Recover stuck character > Return to original camp - keep my character.
+You stay paused at camp: review supplies if needed, then Resume journey.
+Gear, level, quests, camp and gold remain. No health/mana/survival refill is granted.
+Maps now center on distant characters. Around me centers on you; World overview shows you and home.

@@ -1,6 +1,14 @@
-# RUNEBOUND 0.20.0 — Dreadwood
+# RUNEBOUND 0.20.1 — Position Recovery
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Stuck character and map fix
+
+Install this patch over the existing app and continue the same character. If movement is stuck, open **Pause → Recover stuck character → Return to original camp · keep my character**. This explicitly returns to original Mossveil camp rather than a bed in snow. Gear, levels, quests, camp, gold, saved bed location, health/mana and survival gauges are retained. A wilds trial is abandoned. Recovery stays paused so you can review supplies before choosing Resume journey. It cannot discard an active dungeon.
+
+The endless wilds had outgrown the map's fixed central rectangle: distant positions were clamped to a corner. Maps now open centered around distant characters; World overview expands in stable blocks to include the actual player and home, and Around me centers on you. The arrow rotates with your facing. Inside a dungeon it marks the wilds entrance rather than dungeon-local coordinates. Viewing the map never moves your character.
+
+Blocked saved positions are checked before nearby terrain/resources are generated. Extreme finite coordinates that cannot represent ordinary movement are recovered to playable ground without wiping the character. Valid distant snow saves stay in snow; this is not a blanket region reset. The cause of the user's particular movement lock is not confirmed without their save or device reproduction; touch movement in snow and the recovery path are covered by new tests.
 
 ## Dreadwood graphics
 
@@ -34,7 +42,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.20.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **27**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.20.1.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **28**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

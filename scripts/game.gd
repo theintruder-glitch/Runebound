@@ -130,6 +130,12 @@ func start_character(character: Dictionary) -> void:
 	weather.tick()
 	forest.boss={}
 	build_recipe=""
+	# Repair invalid collision/precision positions before generating nearby chunks.
+	var recovered_position=false
+	if hero.dungeon==null:
+		var restored=safe_wilds_position(player_position())
+		recovered_position=restored!=player_position()
+		set_player_position(restored)
 	survival.refresh(true)
 	playing = true
 	hero.hp = clampf(hero.hp,1,Data.max_hp(hero))
@@ -146,7 +152,7 @@ func start_character(character: Dictionary) -> void:
 	camera.reset_smoothing()
 	world.refresh(true)
 	hud.resume()
-	notify("Walk near marked resources to collect them. Auto pickup can be changed in Pause.",5)
+	notify("Recovered a blocked or unplayable saved position. Your character progress is intact." if recovered_position else "Walk near marked resources to collect them. Auto pickup can be changed in Pause.",6)
 	save_game()
 
 func player_position() -> Vector2:
@@ -1055,13 +1061,31 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 
+func movement_precision_ok(at:Vector2) -> bool:
+	return at.is_finite() and (at+Vector2(.5,0)).x!=at.x and (at+Vector2(0,.5)).y!=at.y
+
 func safe_wilds_position(at:Vector2) -> Vector2:
+	# Single-precision world coordinates can swallow movement at extreme values.
+	if not movement_precision_ok(at): at=Vector2.ZERO
 	if walkable(at,12): return at
-	for ring in range(1,13):
+	for ring in range(1,49):
 		for direction in [Vector2.UP,Vector2.RIGHT,Vector2.DOWN,Vector2.LEFT,Vector2(1,1),Vector2(-1,1),Vector2(1,-1),Vector2(-1,-1)]:
 			var candidate=at+direction*48*ring
 			if walkable(candidate,12): return candidate
 	return Vector2(at.x,0) if exploration.region_at(at)=="caves" else Vector2.ZERO
+
+func recover_stuck_character() -> bool:
+	if hero.is_empty() or hero.dungeon!=null or hero.hp<=0: return false
+	# Explicit emergency action: keep the character, camp, rewards and needs intact.
+	cancel_build();clear_scene()
+	set_player_position(safe_wilds_position(Vector2.ZERO))
+	exploration.tick(0)
+	survival.refresh(true);populate_chests(true)
+	camera.position=player_position();camera.reset_smoothing();camera.force_update_scroll()
+	world.refresh(true);hud.reset_stick()
+	# Stay paused so an injured/freezing character can review supplies before resuming.
+	hud.show_pause("Position recovered · Back at the original camp. Gear and progress kept. Check supplies, then Resume journey.")
+	return true
 
 func visual_fx(kind:String,at:Vector2,radius:float,color:Color,duration:float=.4) -> Dictionary:
 	var effect={"kind":kind,"pos":at,"radius":radius,"color":color,"life":duration,"duration":duration}

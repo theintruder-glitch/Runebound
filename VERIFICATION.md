@@ -1,3 +1,27 @@
+# 0.20.1 Position Recovery verification
+
+Patch from v0.20.0; package app.runebound.godot, app name, original signing key and user://character.json retained. Android code 28 / 0.20.1-position-recovery. No save-schema change and no art/content removal.
+
+## Reproduced and addressed
+
+The world map used fixed bounds (-3200,-3000 to 3200,3000) despite an endless world. A distant snowy position such as (-5200,-6200) projected outside it and the player arrow was explicitly clamped to a corner. The patch opens around distant players and expands the overview in stable blocks, showing actual position/home. Around me centers the arrow; it follows facing. Dungeon maps use the saved wilds entrance.
+
+The user's specific movement lock has not been reproduced from their actual device/save. Engine checks demonstrate functional touch movement in all four directions at Winter Oath and far-northwest snow, in both orientations. A separate reproducible failure occurs at extreme finite coordinates where single-precision vectors swallow normal frame movement; those positions are now repaired before nearby chunk generation. Blocked saved coordinates are also relocated; ordinary valid snowy saves keep their position.
+
+An explicit Pause recovery action returns to original camp while retaining inventory, equipped gear, level/XP, gold/essence/points, chapter/journey/stats, structures/materials, needs, HP/mana, bed location, deaths and play time. Confirmation/cancel, released input, actual save reload and subsequent movement are covered. Recovery stays paused so an injured/freezing character can review supplies. Active dungeons cannot be discarded by recovery.
+
+## Validation
+
+- Full source: 29 suite runs / **1,892 checks**, pass.
+- Actual signed APK extracted resources: 10 suites / **805 checks**, pass, including 93 new position/map/recovery checks.
+- Actual exported Windows PCK: 10 suites / **597 checks**, pass using matching Linux Godot 4.5.1; this does not execute the Windows EXE.
+- Signed ARM64 APK and Windows x64 package exported. APK manifest, original v2/v3 certificate/signatures, ZIP CRC and ELF/ZIP 16 KB alignment pass.
+- APK SHA-256: `88a8f808af6475c151802e94dbddbf6c2519ad3b147eebf5a1b6297d1dd21d6e`.
+- Native Godot/Mesa portrait/landscape distant-snow maps and recovery screen inspected; controls fit the native scrolling menu. Dummy audio/software renderer; captured fixture FPS does not measure phone performance.
+- CI status and downloadable-copy/readback evidence are recorded in the verification bundle when available. Automated touch dispatch is not a physical-phone test. The actual affected character, phone FPS/heat/audio and native Windows EXE startup still require player/device validation.
+
+## Previous milestones
+
 # 0.20.0 Dreadwood verification
 
 Continues v0.19.0. App name Runebound Godot, package app.runebound.godot, original release certificate and user://character.json are retained; Android code 27 / 0.20.0-dreadwood. No save schema, hitbox, combat damage, quest or enemy AI change.
