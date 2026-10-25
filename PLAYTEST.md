@@ -1,3 +1,8 @@
+# v0.22.0 — VYRNSPIRE rename and camp stores
+
+Install Vyrnspire-Godot-v0.22.0.apk over the existing Runebound app without uninstalling/clearing data. Confirm the launcher/title show VYRNSPIRE and Continue loads the same character, chapter, camp and settings. Export a JSON and confirm its filename uses VYRNSPIRE; old JSON exports should still import.
+Near a Storage chest open Camp → Choose supplies to store or take. Store five Wood while keeping Berries carried, take one back, then test maximum and stack limits. Reopen the app and check both carried/stored counts. Try a chest behind a wall/closed door, then open it and retry. Check native scrolling/controls in both orientations. On Windows launch Vyrnspire.exe and verify the old character remains; keep the existing historical user-data folder.
+
 # v0.21.0 — camp provisioning
 
 Install over the existing app and keep the same character. Camp → Craft → Parts: Choose quantity on Plank, select 5 and confirm. Check ten Wood were spent and five Planks added. Cancel another preview and check nothing is spent. Try Maximum and a shortage preset. Repeat with food beside a lit campfire; cooking should put food in Supplies without eating/healing/refilling needs. Eat a portion separately.

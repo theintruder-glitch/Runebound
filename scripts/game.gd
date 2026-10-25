@@ -76,6 +76,7 @@ var is_walking = false
 var screen_landscape = false
 
 func _ready() -> void:
+	get_window().title="VYRNSPIRE"
 	tactics=TacticsScript.new();tactics.game=self
 	chapter=ChapterScript.new();chapter.game=self
 	desktop=DesktopScript.new()

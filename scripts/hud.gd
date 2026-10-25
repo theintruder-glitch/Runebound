@@ -156,7 +156,7 @@ func _ready() -> void:
 	panel.add_child(column)
 	var head = HBoxContainer.new()
 	column.add_child(head)
-	panel_title = label(head,"Runebound",25,Color("efe5c6"))
+	panel_title = label(head,"VYRNSPIRE",25,Color("efe5c6"))
 	panel_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action(head,"X",back)
 	tabs = HBoxContainer.new()
@@ -173,16 +173,16 @@ func _ready() -> void:
 	import_dialog = FileDialog.new()
 	import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	import_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	import_dialog.filters = PackedStringArray(["*.json;Runebound save;application/json,text/plain,application/octet-stream"])
+	import_dialog.filters = PackedStringArray(["*.json;VYRNSPIRE save;application/json,text/plain,application/octet-stream"])
 	import_dialog.use_native_dialog = true
 	import_dialog.file_selected.connect(import_save)
 	add_child(import_dialog)
 	export_dialog=FileDialog.new()
 	export_dialog.file_mode=FileDialog.FILE_MODE_SAVE_FILE
 	export_dialog.access=FileDialog.ACCESS_FILESYSTEM
-	export_dialog.filters=PackedStringArray(["*.json;Runebound character;application/json"])
+	export_dialog.filters=PackedStringArray(["*.json;VYRNSPIRE character;application/json"])
 	export_dialog.use_native_dialog=true
-	export_dialog.current_file="Runebound-Character.json"
+	export_dialog.current_file="VYRNSPIRE-Character.json"
 	export_dialog.file_selected.connect(export_save)
 	add_child(export_dialog)
 	desktop_hint=label(buttons,"WASD move · E use · V survival supplies · C camp · I gear · M map · F11 fullscreen",12,Color("bbcbb1"))
@@ -467,8 +467,8 @@ func show_title(has_save: bool) -> void:
 	current_page = "title"
 	top.hide()
 	buttons.hide()
-	clear_content("RUNEBOUND",false)
-	paragraph("THE HEART OF MOSSVEIL",13,Color("89d7b0"))
+	clear_content("VYRNSPIRE",false)
+	paragraph("FORGE YOUR LEGEND",13,Color("89d7b0"))
 	paragraph("Build your home beneath the trees. Follow the call of an ancient shrine. Face the Root Warden and awaken your hidden power.",21,Color("ece2c4"))
 	paragraph("Survival chapter · Classic adventure · Offline\nVersion "+str(ProjectSettings.get_setting("application/config/version")),13)
 	if has_save:
@@ -703,7 +703,7 @@ func choose_import() -> void:
 func choose_export() -> void:
 	if game.hero.is_empty(): return
 	game.save_game()
-	export_dialog.current_file="Runebound-Character.json"
+	export_dialog.current_file="VYRNSPIRE-Character.json"
 	export_dialog.popup_centered_ratio(.85)
 
 func export_save(path:String) -> bool:
@@ -754,11 +754,11 @@ func import_save(path: String) -> void:
 	var error = parser.parse(FileAccess.get_file_as_string(path))
 	var data = parser.data if error==OK else null
 	if not data is Dictionary:
-		paragraph("That file is not a valid Runebound save.",15,Color("efad98"))
+		paragraph("That file is not a valid VYRNSPIRE save.",15,Color("efad98"))
 		return
 	var converted = Data.migrate(data)
 	if converted.is_empty():
-		paragraph("That file is not a supported Runebound character.",15,Color("efad98"))
+		paragraph("That file is not a supported VYRNSPIRE character.",15,Color("efad98"))
 		return
 	game.start_character(converted)
 	toast("Character imported. Your Godot journey is ready.",5)
@@ -808,6 +808,7 @@ func show_camp() -> void:
 			var stored=PackedStringArray()
 			for material in nearby.get("stash",{}): stored.append("%s: %d" % [material,nearby.stash[material]])
 			text_in(body,"Stored: "+("Empty" if stored.is_empty() else " · ".join(stored)),12)
+			action(body,"Choose supplies to store or take",func():show_storage(nearby))
 			action(body,"Deposit carried materials",func():camp.transfer(nearby,true);show_character("camp"))
 			action(body,"Withdraw stored materials",func():camp.transfer(nearby,false);show_character("camp"))
 	match camp_page:
@@ -889,6 +890,41 @@ func show_farm() -> void:
 		action(row,"Dismantle",func():game.survival.dismantle(plot);show_character("farm"),not close or not plot.get("crop","").is_empty())
 		if not plot.get("crop","").is_empty(): text_in(body,"Moving keeps this crop. Harvest or clear it before dismantling.",11)
 	action(content,"Return to the wilds",resume)
+
+func show_storage(chest:Dictionary) -> void:
+	game.pause_game();current_page="storage";clear_content("Camp storage",false)
+	var why=game.survival.storage_reason(chest)
+	if not why.is_empty(): paragraph(why,15)
+	else:
+		paragraph("Choose a supply to store or take. You keep control of food, building materials and ingredients; nothing moves until you press a transfer button.",14)
+		var found=false
+		for material in game.survival.MATERIALS:
+			var carried=game.survival.count(material);var stored=int(chest.stash.get(material,0))
+			if carried==0 and stored==0: continue
+			found=true
+			var selected=material
+			action(content,"%s · carry %d / stored %d" % [selected,carried,stored],func():show_storage_item(chest,selected))
+		if not found: paragraph("Both your supplies and this chest are empty.",14)
+	action(content,"Back to camp",func():show_character("camp"))
+
+func show_storage_item(chest:Dictionary,material:String,quantity:int=1) -> void:
+	game.pause_game();current_page="storage_item";clear_content(material+" · Storage",false)
+	var camp=game.survival;var why=camp.storage_reason(chest)
+	if not why.is_empty():
+		paragraph(why,15);action(content,"Back to camp",func():show_character("camp"));return
+	paragraph("Carried: %d · In this chest: %d" % [camp.count(material),int(chest.stash.get(material,0))],16)
+	paragraph("Transfer quantity: %d" % quantity,15)
+	var row=HBoxContainer.new();content.add_child(row)
+	for amount in [1,5,10]:
+		var chosen=amount
+		action(row,str(chosen),func():show_storage_item(chest,material,chosen),quantity==chosen)
+	action(content,"Store %d %s" % [quantity,material],func():camp.transfer_item(chest,material,quantity,true);show_storage_item(chest,material,quantity),camp.transfer_amount(chest,material,true)<quantity)
+	action(content,"Take %d %s" % [quantity,material],func():camp.transfer_item(chest,material,quantity,false);show_storage_item(chest,material,quantity),camp.transfer_amount(chest,material,false)<quantity)
+	var deposit=camp.transfer_amount(chest,material,true);var withdraw=camp.transfer_amount(chest,material,false)
+	action(content,"Store maximum · %d" % deposit,func():camp.transfer_item(chest,material,deposit,true);show_storage_item(chest,material,quantity),deposit<=0)
+	action(content,"Take maximum · %d" % withdraw,func():camp.transfer_item(chest,material,withdraw,false);show_storage_item(chest,material,quantity),withdraw<=0)
+	paragraph("Transfers respect each stack's 99,999 limit. Ingredients stay in the chest until you take them; crafting uses carried supplies.",13)
+	action(content,"Back to chest",func():show_storage(chest))
 
 func recipe_card(recipe:String) -> void:
 	var camp=game.survival

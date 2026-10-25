@@ -1,6 +1,14 @@
-# RUNEBOUND 0.21.0 — Camp Provisions
+# VYRNSPIRE 0.22.0 — Camp Stores
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## VYRNSPIRE and camp storage
+
+The game is now **VYRNSPIRE**, formerly Runebound. The title/window, Android launcher label, Windows product/executable, export filenames and save-transfer labels use the new brand, with a new V rune icon. Install the APK over the old game. Package `app.runebound.godot` and the original signing key deliberately remain unchanged. Public branding is separate from this technical update identity.
+
+Existing character/settings/backup paths stay fixed. Linux uses `godot/app_userdata/Runebound Godot` beneath its app-data directory; Windows keeps `%APPDATA%\Godot\app_userdata\Runebound Godot`. Android retains the original private package data location and equivalent legacy user-directory identity. The project uses explicit custom-user-directory settings, including platform-specific capitalization, so changing its display name does not create an empty new desktop save folder. The automated rename probe writes a legacy character/backup/settings fixture, launches VYRNSPIRE, and verifies the exact same directory and contents. Old JSON exports remain importable; new exports are named VYRNSPIRE-Character.json. Do not delete the historical data folder.
+
+Stand near a built **Storage** chest, open **Camp → Choose supplies to store or take**, and select a material. Transfer 1, 5, 10 or the maximum that fits. Food and other supplies stay where you leave them. Existing bulk actions remain, with stack-capacity and reachable-chest checks. Removed, remote, lookalike or wall-blocked chests cannot be used. Crafting still uses carried ingredients; take items from storage before crafting.
 
 ## Camp Provisions
 
@@ -50,9 +58,9 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.21.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **29**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.22.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **30**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
-**Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
+**Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
 The original non-Godot v0.2 Android app has a separate package and private save directory; it still needs its existing save-transfer procedure. Do not uninstall it to move a character.
 

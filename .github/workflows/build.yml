@@ -1,4 +1,4 @@
-name: Test and build RUNEBOUND
+name: Test and build VYRNSPIRE
 on:
   push:
   pull_request:
@@ -37,15 +37,16 @@ jobs:
           export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
           "$GODOT_BIN" --headless --path . --import 2>&1 | tee import.log
           ! grep -Eq 'SCRIPT ERROR:|(^|[[:space:]])ERROR:' import.log
+          python3 tools/test_rename_save_path.py
           python3 tools/run_tests.py
       - name: Export Windows and exercise compiled pack
         run: bash BUILD-WINDOWS-CODEX.sh
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Runebound-tests-and-Windows
+          name: Vyrnspire-tests-and-Windows
           path: |
-            builds/Runebound-Windows-*.zip
+            builds/Vyrnspire-Windows-*.zip
             builds/test-results/
             builds/windows-pack-tests/
             builds/logs/
@@ -91,14 +92,14 @@ jobs:
         run: bash BUILD-ANDROID-CODEX.sh --accept-sdk-licenses --skip-test
       - uses: actions/upload-artifact@v4
         with:
-          name: Runebound-Android-release
+          name: Vyrnspire-Android-release
           path: builds/Runebound-Godot-*.apk
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Runebound-Android-diagnostics
+          name: Vyrnspire-Android-diagnostics
           path: |
             builds/logs/
             builds/android-pack-tests/

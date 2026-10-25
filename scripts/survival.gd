@@ -330,16 +330,39 @@ func dismantle(s:Dictionary) -> bool:
   game.hero.respawn={"x":0.0,"y":0.0}
  data().structures.erase(s); revision+=1; game.sound("build"); game.save_game()
  return true
-func transfer(s:Dictionary,deposit:bool) -> bool:
- if s.kind!="Storage" or at(s).distance_to(game.player_position())>110: return false
+func storage_reason(s:Dictionary) -> String:
+ if s.is_empty() or s.get("kind","")!="Storage" or not data().structures.any(func(item):return is_same(item,s)): return "This storage chest is no longer available"
+ if game.hero.dungeon!=null or at(s).distance_to(game.player_position())>110: return "Stand near this storage chest"
+ if not game.line_clear(game.player_position(),at(s)): return "Reach the storage chest without a wall in the way"
+ return ""
+func transfer_amount(s:Dictionary,material:String,deposit:bool) -> int:
+ if not storage_reason(s).is_empty() or material not in MATERIALS: return 0
  var source=data().materials if deposit else s.stash
  var target=s.stash if deposit else data().materials
+ return maxi(0,mini(int(source.get(material,0)),99999-int(target.get(material,0))))
+func transfer_item(s:Dictionary,material:String,quantity:int,deposit:bool) -> bool:
+ var why=storage_reason(s)
+ if not why.is_empty(): game.notify(why,4);return false
+ if material not in MATERIALS or quantity<1 or quantity>99999: return false
+ if transfer_amount(s,material,deposit)<quantity: game.notify("Not enough supplies or destination space for this amount",4);return false
+ var source=data().materials if deposit else s.stash
+ var target=s.stash if deposit else data().materials
+ source[material]-=quantity;target[material]=int(target.get(material,0))+quantity
+ if source[material]==0: source.erase(material)
+ return game.save_game()
+func transfer(s:Dictionary,deposit:bool) -> bool:
+ var why=storage_reason(s)
+ if not why.is_empty(): game.notify(why,4);return false
+ var source=data().materials if deposit else s.stash
+ var target=s.stash if deposit else data().materials
+ var changed=false
  for key in source.keys():
   var amount=mini(int(source[key]),99999-int(target.get(key,0)))
-  target[key]=int(target.get(key,0))+amount
-  source[key]-=amount
+  if amount<=0: continue
+  target[key]=int(target.get(key,0))+amount;source[key]-=amount;changed=true
   if source[key]==0: source.erase(key)
- game.save_game(); return true
+ if changed: game.save_game()
+ return changed
 func rest(s:Dictionary) -> bool:
  if s.is_empty() or s.get("kind","")!="Bed" or not s in data().structures or at(s).distance_to(game.player_position())>110 or not game.line_clear(game.player_position(),at(s)): return false
  for e in game.enemies:

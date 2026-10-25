@@ -13,7 +13,7 @@ TEMPLATE_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/godot/export_templates/4.5.1.
 EDITOR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/godot"
 EDITOR_CFG="$EDITOR_DIR/editor_settings-4.5.tres"
 VERSION="$(python3 -c 'import re,pathlib; print(re.search(r"config/version=\"([^\"]+)\"",pathlib.Path("project.godot").read_text())[1])')"
-OUTPUT="$ROOT/builds/Runebound-Godot-v$VERSION.apk"
+OUTPUT="$ROOT/builds/Vyrnspire-Godot-v$VERSION.apk"
 KEYSTORE="${GODOT_ANDROID_KEYSTORE_RELEASE_PATH:-$ROOT/signing/runebound-local.jks}"
 GODOT_URL="https://github.com/godotengine/godot-builds/releases/download/${GODOT_TAG}/Godot_v4.5.1-stable_linux.x86_64.zip"
 GODOT_SHA="02ec53d1cc7dbb9cc6355393c61b9ab43d1244751a124f10248a4802830788cd"
@@ -23,9 +23,9 @@ ANDROID_CLI_URL="https://dl.google.com/android/repository/commandlinetools-linux
 ANDROID_CLI_SHA="4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583"
 
 fail(){ echo >&2 "[ERROR] $*"; exit 1; }
-msg(){ printf '\n[Runebound] %s\n' "$*"; }
+msg(){ printf '\n[VYRNSPIRE] %s\n' "$*"; }
 usage(){ cat <<'EOF'
-Runebound native APK export on 64-bit Linux (including Codex cloud workspaces).
+VYRNSPIRE native APK export on 64-bit Linux (including Codex cloud workspaces).
 Usage: bash BUILD-ANDROID-CODEX.sh [--check-only] [--engine-only] [--skip-test] [--accept-sdk-licenses]
   --check-only           Print detected dependencies; download/build nothing.
   --engine-only          Install pinned engine/templates without SDK or signing.

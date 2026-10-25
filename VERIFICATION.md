@@ -1,3 +1,23 @@
+# 0.22.0 VYRNSPIRE / Camp Stores verification
+
+Public game branding is VYRNSPIRE. Android package app.runebound.godot, original signing certificate, character filename/schema and fixed historical user directory are retained. Android code 30 / 0.22.0-camp-stores. Original icon artwork remains as an editable historical asset; active icon uses a new V rune.
+
+- Full source: 31 suite runs / **1,984 checks**, pass.
+- Actual APK resources: 12 suites / **897 checks**, pass.
+- Actual Windows exported PCK: 12 suites / **689 checks**, pass using matching Linux Godot; this does not launch the Windows EXE.
+- Additional rename probe passes: create real legacy character/backup/graphics settings in an isolated profile, then launch the renamed project and verify identical OS user directory and retained contents. Linux runtime evidence; Windows path override follows the documented legacy capitalization and still requires native validation.
+- Signed ARM64 APK exports with actual application-label VYRNSPIRE, original certificate/v2-v3 signatures, code/name/ABI/API checks, ZIP CRC and ELF/ZIP 16 KB alignment. Windows x64 export uses Vyrnspire.exe/Vyrnspire.pck, new product metadata and updated launchers; stale generated Runebound executables are removed before packaging.
+- APK SHA-256: `032e754a4b7ca210a5a0ad6b5f08e04f809f861968f062a965cc39066d8814b2`.
+- Native Godot/Mesa title and storage menus inspected in portrait/landscape with dummy audio; this is not phone GPU/performance or Windows EXE evidence.
+
+Forty-two new checks cover public branding, export name, legacy directory settings, selective deposit/withdrawal, retaining carried food, validation without partial transfer, stack limits, bulk compatibility, actual saved chest contents, stale/remote/lookalike/removed/wall-blocked chest rejection and native UI transfer/maximum/capacity revalidation in both orientations. No save-schema change.
+
+Physical Android install-over-old, launcher icon caching/name refresh, actual existing-phone character continuity, native Windows EXE/save continuity, real touch feel and sustained FPS/heat/audio remain to be playtested. No commercial readiness conclusion is made by this implementation. The domain/site and repository name are not changed by this game rename.
+
+Godot path references used in implementation: https://docs.godotengine.org/en/4.5/tutorials/io/data_paths.html and the pinned 4.5.1-stable core/os/os.cpp and platform/android/os_android.cpp. Local engine probe is the direct Linux runtime evidence. CI/download-copy status is recorded in the verification bundle when available.
+
+## Previous milestones
+
 # 0.21.0 Camp Provisions verification
 
 Incremental update from v0.20.1. Original package app.runebound.godot, signing identity, app name and user://character.json remain. Android code 29 / 0.21.0-camp-provisions. No character-schema change.

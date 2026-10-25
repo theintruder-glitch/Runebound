@@ -1,7 +1,7 @@
-RUNEBOUND 0.21.0 — ANDROID
+VYRNSPIRE 0.22.0 — ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Runebound-Godot-v0.21.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.22.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 29 and the original prototype certificate.
+This update uses app.runebound.godot, version code 30 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -60,3 +60,11 @@ Choose an exact amount with plus/minus, a 1/5/10 preset, or Maximum (up to 99).
 Review carried ingredients and shortages, then tap Make. Back spends nothing.
 Use a reachable lit fire for cooking and a reachable bench for gear. Walls block station access.
 Cooking creates food for your bag; eat it separately under Supplies.
+
+VYRNSPIRE RENAME / CAMP STORES:
+Install over the old Runebound app; the launcher name becomes VYRNSPIRE. Do not clear data.
+The original package/key and old save directory are retained for compatibility.
+Near a built Storage chest: Camp > Choose supplies to store or take > select a supply.
+Store/take 1, 5, 10 or the maximum. Food and other materials stay where you leave them.
+Reach the chest without a wall or closed door in the way. Old bulk transfer buttons remain.
+New exported saves use VYRNSPIRE-Character.json; old exported saves still import.

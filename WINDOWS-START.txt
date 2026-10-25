@@ -1,13 +1,15 @@
-RUNEBOUND 0.18.0 — WINDOWS x64
+VYRNSPIRE 0.22.0 — WINDOWS x64
 
-Extract all files, then open Runebound.exe beside Runebound.pck.
-Keep any exported DLLs in the same directory.
-WASD/arrows: move. Mouse: aim. Space/left mouse: attack. Shift/right mouse: dodge.
-1/2/3: spells. Q: class skill. E: interact. C: camp. I: inventory. M: map.
+Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
+WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
+1/2/3: spells. Q: class skill. E: interact. C: camp. I: gear. M: map.
 V: Survival supplies. B: spellbook. Escape: pause/back. F11: fullscreen.
-Start-Low-Power.bat selects safe settings. Start-OpenGL.bat selects native OpenGL.
+Start-Low-Power.bat selects safe settings; Start-OpenGL.bat selects native OpenGL.
 
-Your existing save directory and application name remain unchanged.
-Pause > Export character save makes a transferable JSON backup for Windows or Android.
-Gameplay content matches the Android build. Windows executable startup, graphics drivers,
-audio and long-session performance still require testing on Windows hardware.
+Formerly Runebound. Existing Windows characters/settings remain in
+%APPDATA%\Godot\app_userdata\Runebound Godot. Keep that historical folder.
+Public application branding is VYRNSPIRE; the fixed old data path preserves your existing saves.
+Android uses the same original package/signing identity for updates.
+Pause > Export character save produces VYRNSPIRE-Character.json; old JSON exports still import.
+Camp > nearby Storage > Choose supplies to store or take adds selective transfers.
+Physical Windows executable startup, drivers/audio and sustained performance still need testing.
