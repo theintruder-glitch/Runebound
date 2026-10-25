@@ -1,3 +1,23 @@
+# 0.24.0 Fieldcraft verification
+
+Replaces prototype field props with sixteen original shaded SVG designs: twelve gathering materials, Broken Caravan wagon wreck, Silent Watch scout tent, Ashen Grove charred stump/sprout and a carved runic cache. Existing coordinates, resource IDs/yields/regrowth, auto pickup, walk-through behavior, clue data, story text and one-time rewards remain. Android package app.runebound.godot, original release certificate and pinned legacy save/settings directory remain. Version code 33 / 0.24.0-fieldcraft. Crowd Relief remains included.
+
+- Full source: 34 suite runs / **2,114 checks**, pass. Final label-placement refinement also passes chapter/Fieldcraft suites (107 checks).
+- Actual signed APK resources: 15 suites / **1,027 checks**, pass.
+- Actual Windows PCK: 15 suites / **819 checks**, pass under matching Linux Godot 4.5.1; this does not launch Windows EXE.
+- Signed ARM64 export: manifest/name/package/version/API/ABI, ZIP CRC, v2/v3 signing blocks and cryptographic signatures/original certificate, ELF and ZIP 16 KB alignment pass.
+- Additional legacy-name to VYRNSPIRE isolated save/settings directory probe passes.
+- Native Godot/Mesa Compatibility renderer inspected the atlas, caravan in portrait/landscape and other two story camps. Labels moved above the props after review. Dummy audio; initial-frame FPS counters in fixtures are not phone performance evidence.
+- Generator repeat produces identical SVG bytes; --check also runs in CI before the engine suites. Shell/Python syntax checks pass.
+
+Forty-eight new engine checks cover atlas dimensions/base texture budget, sixteen visible/distinct/clipped/padded designs, actual twelve-kind biome coverage, original gathering yield and harvested ID for every kind, all graphics qualities/no added Performance lights, unchanged character data, retained stationary scenery commands, unchanged caravan investigation location/one-time progress/immediate cached marker update, JSON persistence, readable larger wagon scale, both orientations and story-cache entry/position/one-time reward.
+
+One shared 512×512 texture adds 1 MiB base RGBA. Field props use one cached texture command each; outdoor story sites now draw in retained scenery instead of per-frame World primitives, with view culling. No new per-prop scene nodes, lights, shaders, collisions or animations. This bounds implementation cost; no Motorola FPS or memory profiler claim is made. Artwork remains editable in assets/field_props.svg and tools/build_gathering_assets.py; no external art was imported.
+
+Pending: physical-phone recognition/readability in mixed biomes, remaining overlaps, smoothness/heat/audio and actual Android install-over-old, native Windows EXE startup. CI is observed separately after commit. No commercial-ready or photorealistic rendering claim.
+
+## Previous milestones
+
 # 0.23.1 Crowd Relief verification
 
 User reported whole-screen slowdown when enemies accumulate. The source allowed 24/38 wilds enemies with rapid level/night-scaled spawns, and target queries checked expensive sight paths before rejecting out-of-range targets. This patch reduces ambient load and repeated decisions without changing the save schema, package app.runebound.godot, original signing identity or pinned legacy save/settings directory. Android code 32 / 0.23.1-crowd-relief.

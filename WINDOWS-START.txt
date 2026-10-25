@@ -1,4 +1,4 @@
-VYRNSPIRE 0.23.1 — WINDOWS x64
+VYRNSPIRE 0.24.0 — WINDOWS x64
 
 Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
 WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
@@ -17,3 +17,5 @@ Physical Windows executable startup, drivers/audio and sustained performance sti
 Ash and Oath: after claiming Chapter I, speak with Mara in the Story journal. Complete the Emberforge sword + magic trial (prior wins count), read its inscription, defeat the Keeper and both embers, then return to Mara. Android/Windows use the same quest logic.
 
 Crowd Relief: Reduced crowds defaults ON, capping ambient wilds population at 6. Pause > Enemy crowds offers Standard (12). The frame cap is separate. Story/trial/dungeon objectives retain their enemies.
+
+Fieldcraft: all regional resource nodes and three story camps have distinct shaded artwork. Same art and gathering/quest behavior on Android and Windows. The atlas SVG and its deterministic generator are editable in the source.

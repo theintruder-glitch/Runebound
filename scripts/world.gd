@@ -6,6 +6,8 @@ const SpriteAtlas = preload("res://assets/sprites.svg")
 const EnvironmentAtlas=preload("res://assets/environment.svg")
 const EnemyVisuals=preload("res://scripts/enemy_visuals.gd")
 var enemy_visuals=EnemyVisuals.new()
+const FieldVisuals=preload("res://scripts/field_visuals.gd")
+var field_visuals=FieldVisuals.new()
 const SceneryScript = preload("res://scripts/scenery.gd")
 var game
 var terrain: TileMapLayer
@@ -143,7 +145,7 @@ func refresh_scenery(force: bool=false) -> void:
 	var at = game.camera.position
 	var view = get_viewport_rect().size
 	var cell = Vector2i(floori(at.x/TILE),floori(at.y/TILE))
-	var key = str(cell)+":"+str(view)+":"+str(game.chunk_key)+":"+str(game.hero.opened.size())+":"+str(game.hero.kingdom.buildings.size())+":"+last_mode+":"+str(game.survival.revision)
+	var key = str(cell)+":"+str(view)+":"+str(game.chunk_key)+":"+str(game.hero.opened.size())+":"+str(game.hero.kingdom.buildings.size())+":"+last_mode+":"+str(game.survival.revision)+":"+str(game.hero.chapter.clues.size())
 	if key==scenery_key and not force:
 		return
 	scenery_key = key

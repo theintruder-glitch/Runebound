@@ -23,7 +23,7 @@ func objective() -> String:
  if not game.hero.exploration.target.is_empty(): return game.exploration.objective()
  if not game.chapter.objective().is_empty(): return game.chapter.objective()
  match step():
-  0: return "Gather 6 Wood · Approach a labeled tree"
+  0: return "Gather 6 Wood · Approach a labeled woodpile"
   1: return "Build a Campfire · Open Camp"
   2: return "Cook berries · Stand by a lit fire"
   3: return "Build a Shelter · Make 6 Planks and 2 Rope"

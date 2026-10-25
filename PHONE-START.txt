@@ -1,7 +1,7 @@
-VYRNSPIRE 0.23.1 — CROWD RELIEF / ANDROID
+VYRNSPIRE 0.24.0 — FIELDCRAFT / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.23.1.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.24.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 32 and the original prototype certificate.
+This update uses app.runebound.godot, version code 33 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -72,3 +72,5 @@ New exported saves use VYRNSPIRE-Character.json; old exported saves still import
 NEW: Finish Chapter I and return to Mara. Camp > Story journal > Ask Mara about Emberforge begins Chapter II. Earlier Emberforge trial wins count. Read the inscription, break the ashen binding, then return to Mara.
 
 LAG PATCH: Reduced crowds is ON by default (6 roaming enemies). Pause > Enemy crowds changes this separately from Low power/30 FPS. Keep Reduced selected on the phone. Named/story/trial/dungeon encounters remain intact.
+
+NEW ART: look for shaded log piles, ore, berry/herb plants, glowcaps, reeds, crystals and resin bark. Broken Caravan is a ruined covered wagon; Silent Watch a scout tent; Ashen Grove a burnt stump with a sprout. Gathering and investigation still work at their existing locations.

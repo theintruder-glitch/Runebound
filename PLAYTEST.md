@@ -1,3 +1,12 @@
+# Fieldcraft 0.24.0 — graphics checks
+
+- Install over the prior app; retain character and settings. Reduced crowds should stay selected.
+- Visit Broken Caravan, Silent Watch and Ashen Grove. Check that wagon/tent/burnt stump are recognizable and investigation still pays once.
+- Gather wood, plants, ore, resin, crystals, glowcaps and reeds in each biome; confirm auto pickup, quantities and regrowth still work.
+- Try Performance graphics, rotate portrait/landscape, and inspect nearby labels. New art should remain visible at every quality without added per-prop lights.
+- Open a story runic cache once; check its artwork, mana/gold reward and closed/used state.
+- Report any remaining ambiguity, overlap or sustained phone slowdown. Native phone rendering/FPS/heat/audio and Windows startup require hardware playtesting.
+
 # Crowd Relief 0.23.1 — urgent phone checks
 
 The player reported severe slowdown when many enemies accumulate. This is user evidence of a performance problem, not an FPS measurement.

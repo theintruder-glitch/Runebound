@@ -1,3 +1,7 @@
+# 0.24.0 Fieldcraft rendering bounds
+
+Sixteen detailed field props share one 512 × 512 SVG imported texture, 1,048,576 bytes of base RGBA texels, with sixteen clipped AtlasTextures. Each resource draws one texture into the retained scenery canvas instead of rebuilding its primitive shapes; outdoor story sites move from per-frame World drawing to that same cached scenery. View bounds cull sites. Clue discovery refreshes the retained marker; generation/collision/pickup work is unchanged. No new lights, shaders, per-prop nodes, animation or physics bodies. This is a rendering-cost bound, not measured phone FPS. The prior six-enemy default and AI/targeting optimization remain unchanged.
+
 # 0.23.1 crowd-load patch
 
 User reports that accumulated enemies slow the entire screen. The previous wilds cap was 24 with low-power enabled and 38 otherwise, spawning roughly every 1.4–2.8 seconds before level/night scaling and allowing three-wolf packs. Target selection performed line-of-sight checks before rejecting enemies outside weapon range.

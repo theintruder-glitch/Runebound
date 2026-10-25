@@ -34,6 +34,7 @@ func _draw() -> void:
 			draw_string(ThemeDB.fallback_font,at+Vector2(-40,-60),game.hero.kingdom.buildings[i],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e8d8b2"))
 	if game.hero.dungeon==null:
 		draw_survival(game)
+		game.chapter.draw_sites(self,bounds)
 		draw_landmarks(game)
 		draw_quest_board(game)
 		draw_trader(game)
@@ -49,27 +50,7 @@ func draw_survival(game) -> void:
 	for node in game.survival.nodes:
 		var pos:Vector2=node.pos
 		if not bounds.has_point(pos): continue
-		draw_circle(pos,18,Color("274c41"))
-		match node.kind:
-			"Wood":
-				draw_texture_rect(world.textures.tree,Rect2(pos-Vector2(32,64),Vector2(64,96)),false)
-			"Crystal","Frost shard":
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-14,5),pos+Vector2(-6,-35),pos+Vector2(3,-16),pos+Vector2(12,-28),pos+Vector2(17,6)]),Color("b7a3ed") if node.kind=="Crystal" else Color("a6e9f3"))
-			"Glowcap":
-				draw_rect(Rect2(pos+Vector2(-3,-16),Vector2(6,20)),Color("ced6a5"))
-				draw_circle(pos+Vector2(0,-20),14,Color("97c4b2"))
-				draw_circle(pos+Vector2(4,-23),3,Color("f2e6a9"))
-			"Resin","Pine resin":
-				draw_rect(Rect2(pos+Vector2(-8,-30),Vector2(16,35)),Color("916c46"))
-				draw_circle(pos+Vector2(0,-15),6,Color("ecc16d"))
-			"Stone","Iron":
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-19,4),pos+Vector2(-15,-18),pos+Vector2(5,-28),pos+Vector2(22,-3)]),Color("96adb2") if node.kind=="Stone" else Color("b79a83"))
-				if node.kind=="Iron": draw_line(pos+Vector2(-8,-14),pos+Vector2(9,-4),Color("e6c28c"),4)
-			_:
-				for dx in [-10,0,10]:
-					draw_line(pos+Vector2(dx,2),pos+Vector2(dx*1.5,-22),Color("91c783"),3)
-					if node.kind=="Berries": draw_circle(pos+Vector2(dx,-15),4,Color("ed909d"))
-					elif node.kind=="Herbs": draw_circle(pos+Vector2(dx,-22),4,Color("cab0ee"))
+		world.field_visuals.draw_prop(self,node.kind,pos)
 		if pos.distance_to(game.player_position())<230:
 			draw_string(ThemeDB.fallback_font,pos+Vector2(-22,25),node.kind.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("d7eac1"))
 	var shrine=game.forest.SHRINE

@@ -1,6 +1,14 @@
-# VYRNSPIRE 0.23.1 — Crowd Relief
+# VYRNSPIRE 0.24.0 — Fieldcraft
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Fieldcraft — recognizable supplies and story sites
+
+The Broken Caravan is now a damaged covered wagon with a wooden chassis, torn canvas, visible wheels, a detached rim and spilled cargo. Silent Watch has a ruined scout tent, journal and shield; Ashen Grove has a charred stump and living sprout. The Hollow Root's runic cache has its own carved chest artwork.
+
+All twelve regional gathering kinds now use distinct shaded artwork: cut logs/woodpiles, stone clusters, iron-veined rock, fiber, berry bushes, flowering herbs, resin stumps, cave crystals, glowcap clusters, cattail reeds, frost crystals and pine-resin bark. The opening guide says woodpile to match its new appearance. Existing gathering positions, IDs, yields, respawn timers and auto-pickup remain; sites keep their clue locations, story text, one-time progress and rewards. Props remain walk-through as before.
+
+Sixteen original editable designs share a single **512 × 512 transparent atlas** (1 MiB base RGBA). `assets/field_props.svg` and `tools/build_gathering_assets.py` are included; the generator reproduces the SVG without external art/dependencies. Resources and outdoor story sites use cached scenery texture commands with view culling; finding a clue refreshes its marker. No new per-prop nodes, dynamic lights, shaders, collision or ongoing animation. All graphics qualities use the new art, and the six-enemy crowd patch remains included.
 
 ## Crowd Relief
 
@@ -76,7 +84,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.23.1.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **32**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.24.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **33**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

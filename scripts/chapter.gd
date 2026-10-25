@@ -45,7 +45,7 @@ func nearby_clue() -> String:
 	return ""
 func investigate(id:String) -> bool:
 	if nearby_clue()!=id or id.is_empty(): return false
-	data().clues[id]=true;game.grant_xp(25);game.notify(CLUES[id].text,8);game.sound("reward");game.save_game();return true
+	data().clues[id]=true;game.world.refresh_scenery(true);game.grant_xp(25);game.notify(CLUES[id].text,8);game.sound("reward");game.save_game();return true
 func begin() -> bool:
 	if stage()!=3 or game.hero.dungeon!=null or game.player_position().distance_to(game.exploration.RUINS)>=80: return false
 	game.enter_dungeon(true);return true
@@ -115,16 +115,23 @@ func draw(canvas:CanvasItem) -> void:
 			canvas.draw_circle(pos,27,Color("bd82dc44") if warning else Color("795e8e22"))
 			canvas.draw_arc(pos,27,0,TAU,20,Color("e1b0ff") if warning else Color("866a9e"),2)
 		if not game.hero.opened.has(cache_key()):
-			var pos=cache_position();canvas.draw_rect(Rect2(pos-Vector2(13,13),Vector2(26,26)),Color("ba9ae8"),false,3)
-			canvas.draw_string(ThemeDB.fallback_font,pos+Vector2(-40,-20),"RUNIC CACHE",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("dcc5fa"))
+			var pos=cache_position();game.world.field_visuals.draw_prop(canvas,"cache",pos)
+			canvas.draw_string(ThemeDB.fallback_font,pos+Vector2(-40,-65),"RUNIC CACHE",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("dcc5fa"))
 		return
-	if game.hero.dungeon!=null: return
+func draw_sites(canvas:CanvasItem,bounds:Rect2) -> void:
+	if game.hero.dungeon!=null:return
 	for id in CLUES:
-		var pos=CLUES[id].point;var found=data().clues.has(id)
-		canvas.draw_line(pos+Vector2(-25,13),pos+Vector2(25,-13),Color("80614c"),6)
-		canvas.draw_line(pos+Vector2(-24,-13),pos+Vector2(24,13),Color("80614c"),6)
-		canvas.draw_circle(pos,8,Color("99bba2") if found else Color("e4cc91"))
-		canvas.draw_string(ThemeDB.fallback_font,pos+Vector2(-52,-30),CLUES[id].name.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("ddcca8"))
+		var pos=CLUES[id].point
+		if not bounds.grow(160).has_point(pos):continue
+		var found=data().clues.has(id)
+		game.world.field_visuals.draw_prop(canvas,id,pos)
+		var color=Color("a8c8ac") if found else Color("e4cc91")
+		canvas.draw_circle(pos+Vector2(0,37),4,color)
+		var label=CLUES[id].name.to_upper()
+		var width=ThemeDB.fallback_font.get_string_size(label,HORIZONTAL_ALIGNMENT_LEFT,-1,11).x
+		var label_at=pos+Vector2(-width*.5,-game.world.field_visuals.size_for(id).y*.78-8)
+		canvas.draw_rect(Rect2(label_at+Vector2(-5,-12),Vector2(width+10,17)),Color("142526d9"))
+		canvas.draw_string(ThemeDB.fallback_font,label_at,label,HORIZONTAL_ALIGNMENT_LEFT,-1,11,color)
 func show_menu() -> void:
 	var hud=game.hud
 	hud.section("Chapter I · The Hollow Root")

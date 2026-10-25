@@ -34,6 +34,7 @@ jobs:
         run: bash BUILD-ANDROID-CODEX.sh --engine-only
       - name: Import and run isolated regression suites
         run: |
+          python3 tools/build_gathering_assets.py --check
           export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
           "$GODOT_BIN" --headless --path . --import 2>&1 | tee import.log
           ! grep -Eq 'SCRIPT ERROR:|(^|[[:space:]])ERROR:' import.log
