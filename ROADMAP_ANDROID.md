@@ -1,11 +1,11 @@
 # Android-first completion roadmap
 
-Current source: **0.20.1**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.21.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
 
 ## Completed in this milestone
 
 - [x] Install pinned Godot 4.5.1 engine/templates, JDK 17 and Android SDK/build tools; produce signed ARM64 APK and Windows x64 package locally.
-- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 28.
+- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 29.
 - [x] Isolate automated tests from developer saves and detect silent script errors, assertion failures, missing completion and timeouts.
 - [x] Repair touch lifecycle/dead zone and save recovery; verify rotation/scrolling and existing combat/magic in engine checks.
 - [x] Expand existing Survival mode with persisted wetness and cover/fire drying; fix heat/bed wall checks and stale enemy windups.
@@ -17,13 +17,21 @@ Current source: **0.20.1**, built incrementally from supplied **0.15.0**. The ol
 - [x] Shared forward melee, visible misses, directional weapon sweeps, spell glow and guarded ordinary-enemy stagger.
 - [x] Add real touch-event tests and compiled Android/Windows regression coverage.
 
+## Camp Provisions milestone
+
+- [x] Food/parts batches with exact quantities, full-cost preview, maximum/stack bounds and execution revalidation.
+- [x] Preserve single-item gear/building actions and existing recipe/food progression.
+- [x] Reachable lit-fire/workbench selection, all-recipe wall checks and building-move cost-bypass repair.
+- [x] Native scrolling batch controls, both orientations and compiled-resource/save checks.
+- [ ] Tune Survival resource availability and batch limits through player feedback.
+
 ## Position recovery patch
 
 - [x] Replace fixed world-map arrow clamping with player/home-inclusive stable bounds and automatic local view for distant positions.
 - [x] Add explicit paused camp recovery that keeps progression, supplies and saved bed location intact.
 - [x] Repair blocked/extreme saved coordinates before chunk generation; keep valid snow positions.
 - [x] Exercise real touch movement in both orientations, map movement and recovery/save reload.
-- [ ] Confirm the affected user's save is movable after the patch/recovery; original movement-lock cause remains unconfirmed.
+- [x] User reports v0.20.1 recovery works; original movement-lock cause remains unconfirmed.
 
 ## Dreadwood art milestone
 

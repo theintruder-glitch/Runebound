@@ -902,6 +902,28 @@ func recipe_card(recipe:String) -> void:
 	action(body,("Place " if recipe in camp.STRUCTURES else "Make ")+recipe,func():
 		if recipe in camp.STRUCTURES: game.begin_build(recipe)
 		else: camp.craft(recipe);show_character("camp"),not why.is_empty())
+	if camp.batchable(recipe): action(body,"Choose quantity · "+recipe,func():show_craft_batch(recipe))
+
+func show_craft_batch(recipe:String,quantity:int=1) -> void:
+	var camp=game.survival
+	if not camp.batchable(recipe): return
+	game.pause_game();current_page="craft_batch";clear_content("Make "+recipe,false)
+	paragraph(camp.RECIPES[recipe].desc,14)
+	paragraph("Batch quantity: %d · Can make now: %d (limit 99)" % [quantity,camp.batch_limit(recipe)],15)
+	var row=HBoxContainer.new();content.add_child(row)
+	action(row,"−",func():show_craft_batch(recipe,quantity-1),quantity<=1)
+	for amount in [1,5,10]:
+		var chosen=amount
+		action(row,str(chosen),func():show_craft_batch(recipe,chosen),quantity==chosen)
+	action(row,"+",func():show_craft_batch(recipe,quantity+1),quantity>=99)
+	var maximum=camp.batch_limit(recipe)
+	action(content,"Use maximum available · %d" % maximum,func():show_craft_batch(recipe,maximum),maximum<1 or maximum==quantity)
+	paragraph(camp.batch_cost(recipe,quantity),14)
+	var why=camp.batch_reason(recipe,quantity)
+	if not why.is_empty(): paragraph(why,14,Color("efb392"))
+	paragraph("Only carried ingredients are used. Crafting does not eat the food or refill survival gauges. Nothing is spent until you confirm the full batch.",13)
+	action(content,"Make %d · %s" % [quantity,recipe],func():camp.craft_batch(recipe,quantity);show_craft_batch(recipe,quantity),not why.is_empty())
+	action(content,"Back to crafting",func():camp_page="Craft";show_character("camp"))
 
 func visual_panel(title:String,subtitle:String,kind:String,tint:Color) -> VBoxContainer:
 	var frame=PanelContainer.new()

@@ -136,16 +136,66 @@ func cost_text(recipe:String) -> String:
  var parts=PackedStringArray()
  for k in RECIPES[recipe].cost: parts.append("%d %s (%d owned)" % [RECIPES[recipe].cost[k],k,count(k)])
  return ", ".join(parts)
-func reason(recipe:String,check_place:bool=true) -> String:
+func station(kind:String,lit:bool=false) -> Dictionary:
+ if game.hero.dungeon!=null: return {}
+ var best:Dictionary={};var distance=100.0
+ for item in data().structures:
+  var d=at(item).distance_to(game.player_position())
+  if item.kind==kind and d<distance and (not lit or item.fuel>0) and game.line_clear(game.player_position(),at(item)):
+   best=item;distance=d
+ return best
+func station_reason(recipe:String) -> String:
+ var r=RECIPES[recipe]
+ if r.station=="fire" and station("Campfire",true).is_empty():
+  for item in data().structures:
+   if item.kind=="Campfire" and item.fuel>0 and at(item).distance_to(game.player_position())<100: return "Reach the lit campfire without a wall in the way"
+  return "Stand near a lit campfire"
+ if r.station=="bench" and station("Workbench").is_empty():
+  return "Reach the workbench without a wall in the way" if not near("Workbench").is_empty() else "Stand near a workbench"
+ return ""
+func batchable(recipe:String) -> bool:
+ return RECIPES.has(recipe) and recipe not in STRUCTURES and RECIPES[recipe].station!="bench"
+func batch_limit(recipe:String) -> int:
+ if not batchable(recipe) or not moving.is_empty(): return 0
+ var maximum=mini(99,99999-count(RECIPES[recipe].get("product",recipe)))
+ for material in RECIPES[recipe].cost: maximum=mini(maximum,floori(float(count(material))/RECIPES[recipe].cost[material]))
+ if not reason(recipe,false,false).is_empty(): return 0
+ return maxi(0,maximum)
+func batch_cost(recipe:String,quantity:int) -> String:
+ if not RECIPES.has(recipe): return "Unknown recipe"
+ var parts=PackedStringArray()
+ for material in RECIPES[recipe].cost:
+  var needed=int(RECIPES[recipe].cost[material])*quantity
+  parts.append("%s: %d needed · %d carried%s" % [material,needed,count(material)," · short "+str(needed-count(material)) if count(material)<needed else ""])
+ return "\n".join(parts)
+func batch_reason(recipe:String,quantity:int) -> String:
+ if not batchable(recipe): return "Batch cooking and parts only; gear and buildings are made one at a time"
+ if quantity<1 or quantity>99: return "Choose a quantity from 1 to 99"
+ var why=reason(recipe,false,false)
+ if not why.is_empty(): return why
+ if count(RECIPES[recipe].get("product",recipe))+quantity>99999: return "Make room in your carried supplies"
+ for material in RECIPES[recipe].cost:
+  var shortfall=int(RECIPES[recipe].cost[material])*quantity-count(material)
+  if shortfall>0: return "Need %d more %s for this batch" % [shortfall,material]
+ return ""
+func craft_batch(recipe:String,quantity:int) -> bool:
+ var why=batch_reason(recipe,quantity)
+ if not why.is_empty(): game.notify(why,4);return false
+ # Validate the complete request before spending anything; never produce a partial batch.
+ for material in RECIPES[recipe].cost: add(material,-int(RECIPES[recipe].cost[material])*quantity)
+ var product=RECIPES[recipe].get("product",recipe);add(product,quantity)
+ if recipe in FOODS: game.hero.journey.cooked=true
+ game.sound("cook" if recipe in FOODS else "gather")
+ if game.save_game(): game.notify("Made %d %s" % [quantity,product],4)
+ return true
+func reason(recipe:String,check_place:bool=true,check_materials:bool=true) -> String:
  if not RECIPES.has(recipe): return "Unknown recipe"
  var r=RECIPES[recipe]
+ if recipe not in STRUCTURES and not moving.is_empty(): return "Finish or cancel building placement first"
  if recipe not in STRUCTURES and r.station!="bench" and count(r.get("product",recipe))>=99999: return "Make room in your carried supplies"
  if r.has("discovery") and not game.hero.exploration.discovered.get(r.discovery,false): return "Discover "+game.exploration.REGIONS[r.discovery].landmark+" to learn this recipe"
- if r.station=="fire":
-  var fire=near("Campfire")
-  if fire.is_empty() or fire.fuel<=0: return "Stand near a lit campfire"
-  if recipe in ["Grilled fish","Fisher stew"] and not game.line_clear(game.player_position(),at(fire)): return "Reach the campfire without a wall in the way"
- if r.station=="bench" and near("Workbench").is_empty(): return "Stand near a workbench"
+ var station_problem=station_reason(recipe)
+ if not station_problem.is_empty(): return station_problem
  if recipe in STRUCTURES:
   if game.hero.dungeon!=null: return "Build in the wilds"
   if data().structures.size()>=64 and moving.is_empty(): return "Camp limit reached (64 structures)"
@@ -176,7 +226,7 @@ func reason(recipe:String,check_place:bool=true) -> String:
     if not enemy.dead and enemy.pos.distance_to(game.player_position())<180: return "Move away from enemies before building"
  if r.station=="bench" and game.hero.inventory.size()>=40: return "Make room in Gear"
  for k in r.cost:
-  if moving.is_empty() and count(k)<r.cost[k]: return "Gather more materials"
+  if check_materials and moving.is_empty() and count(k)<r.cost[k]: return "Need %d more %s" % [r.cost[k]-count(k),k]
  return ""
 func craft(recipe:String) -> bool:
  var why=reason(recipe)

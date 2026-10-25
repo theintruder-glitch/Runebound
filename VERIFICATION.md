@@ -1,3 +1,17 @@
+# 0.21.0 Camp Provisions verification
+
+Incremental update from v0.20.1. Original package app.runebound.godot, signing identity, app name and user://character.json remain. Android code 29 / 0.21.0-camp-provisions. No character-schema change.
+
+## Behavior covered
+
+Fifty new engine checks cover exact batch costs/output, entire-request failure without partial crafting, full-quantity shortages, zero/negative/excess quantities, unknown/gear/building rejection, aliased Reed rope output, 99-item/output-stack limits, food production without free healing/needs/time, tutorial cooking flag, actual save reload and existing food use. Every campfire cooking family and bench crafting is blocked through walls; usable alternative stations are found despite a closer blocked/unlit one. A moving structure cannot bypass single/batch recipe costs. Regional discovery gates remain. Native UI plus/minus, preset/maximum, cancel, paused preview, both orientations and stale confirmation revalidation pass.
+
+## Evidence and limits
+
+Final source/compiled APK/Windows-pack results, artifact hashes/signatures and CI state are recorded in the verification bundle. Portrait/landscape Godot/Mesa batch previews were inspected with dummy audio; this is not phone GPU/FPS evidence. User reports v0.20.1 recovery works; v0.21.0 physical install/upgrade, real touch feel, balance, sustained heat/battery/FPS, audio and native Windows EXE startup still require playtesting.
+
+## Previous milestones
+
 # 0.20.1 Position Recovery verification
 
 Patch from v0.20.0; package app.runebound.godot, app name, original signing key and user://character.json retained. Android code 28 / 0.20.1-position-recovery. No save-schema change and no art/content removal.

@@ -1,3 +1,8 @@
+# v0.21.0 — camp provisioning
+
+Install over the existing app and keep the same character. Camp → Craft → Parts: Choose quantity on Plank, select 5 and confirm. Check ten Wood were spent and five Planks added. Cancel another preview and check nothing is spent. Try Maximum and a shortage preset. Repeat with food beside a lit campfire; cooking should put food in Supplies without eating/healing/refilling needs. Eat a portion separately.
+Check station access through an open/closed door, extinguish the fire and check cooking disables. Try the quantity controls and scrolling in both orientations. Save/reopen and confirm ingredients/output persist. Existing single Make, building placement/movement and regional discovery recipes should still work. User already reported the v0.20.1 character recovery works; retain that recovery menu for future stuck positions.
+
 # v0.20.1 — recover the affected character
 
 Keep the current app/data and install the patch over it. Continue the same character. Open Pause → Recover stuck character → Return to original camp · keep my character. Confirm you are paused back in Mossveil with the same gear, gold, levels, camp and quest state. Review survival supplies before resuming. The saved bed stays where you placed it.

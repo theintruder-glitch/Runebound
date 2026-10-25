@@ -1,6 +1,14 @@
-# RUNEBOUND 0.20.1 — Position Recovery
+# RUNEBOUND 0.21.0 — Camp Provisions
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Camp Provisions
+
+Open **Camp → Craft → Food or Parts → Choose quantity** on a recipe. Use plus/minus for an exact quantity, the 1/5/10 presets, or Maximum (up to 99). The preview shows full ingredient costs, carried quantities, shortages and remaining output capacity. Confirm spends the complete cost once and produces the complete batch; unaffordable or stale requests spend nothing. Leaving the preview spends nothing. The existing single-item Make actions remain.
+
+Cooking requires a reachable lit campfire; gear requires a reachable workbench. Walls/closed doors now block all station recipes, not only fish. A closer blocked or extinguished station no longer hides a second usable station. Moving a building cannot bypass ingredient costs for other recipes. Buildings/gear remain one-at-a-time. Batches use carried ingredients only; storage is not automatically emptied. Cooking makes food, rather than eating it or refilling needs. Existing food, discoveries, tutorial milestones and save formats remain.
+
+The user reported that v0.20.1's recovery worked. Camp recovery/map fixes and Dreadwood graphics remain included.
 
 ## Stuck character and map fix
 
@@ -42,7 +50,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.20.1.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **28**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.21.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **29**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
