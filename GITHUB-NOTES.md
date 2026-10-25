@@ -1,11 +1,7 @@
-# Runebound Android repository
+# RUNEBOUND v0.18.0 — The Hollow Root
 
-This repository contains the recovered **v0.12.0 editable Godot game source**, configured for **Android ARM64** with touchscreen controls and an Android-only export preset.
+Continues the supplied v0.15 source and v0.16/v0.17 development. The new chapter connects Mara, three investigation camps, a persistent journal and a separate three-floor expedition. Warning runes, optional caches and a two-phase Hollow Heart boss give the expedition distinct encounters. The one-time reward unlocks safe Hearthcall and points toward the existing Emberforge adventure.
 
-The source was previously described as the "Laptop Edition" because that version also added Windows-specific functionality. This repository is now Android-focused. Desktop-related helper code stays only where it is still referenced by the game; it does not turn Android exports into Windows builds.
+Original tutorial/shrine, other regions, regular Classic/Survival dungeons, crafting/building, fishing, combat and save recovery are retained. App ID and certificate remain unchanged, version code is 25. Existing saves receive default chapter state.
 
-**Not included:** Android signing keys, prior APKs, the historical legacy-Android migration bundle, or a completed v0.13.0 project.
-
-Do not commit `.jks` files or credentials. Keep your original Android signing key secure to preserve update compatibility with the app already installed on your phone.
-
-Building and testing the APK is a separate step; changing the export preset does **not** automatically create an installable APK.
+See VERIFICATION.md for exact checks and limits. This is the first playable chapter; actual pacing and difficulty require player feedback. No keys, passwords or player saves are committed.

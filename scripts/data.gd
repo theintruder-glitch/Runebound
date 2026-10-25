@@ -115,6 +115,42 @@ static func migrate(hero: Dictionary) -> Dictionary:
 			if not structure.crop is String or structure.crop not in ["","Berries","Herbs","Glowcap"]: return {}
 			if not (structure.growth is int or structure.growth is float) or not is_finite(float(structure.growth)): return {}
 			if structure.growth<0 or structure.growth>{"":0,"Berries":180,"Herbs":210,"Glowcap":240}[structure.crop]: return {}
+	hero.chapter=hero.get("chapter",{"accepted":false,"clues":{},"translated":false,"cleared":false,"claimed":false,"tracking":false,"return_until":0.0})
+	var chapter=hero.chapter
+	if not chapter is Dictionary or chapter.size()!=7: return {}
+	for key in ["accepted","translated","cleared","claimed","tracking"]:
+		if not chapter.get(key) is bool: return {}
+	if not chapter.get("clues") is Dictionary or chapter.clues.size()>3: return {}
+	for key in chapter.clues:
+		if key not in ["watch","cart","grove"] or not chapter.clues[key] is bool or not chapter.clues[key]: return {}
+	if not (chapter.get("return_until") is int or chapter.get("return_until") is float) or not is_finite(float(chapter.return_until)) or chapter.return_until<0 or chapter.return_until>hero.worldTime+120.01: return {}
+	if not chapter.accepted and (not chapter.clues.is_empty() or chapter.translated): return {}
+	if chapter.translated and chapter.clues.size()!=3: return {}
+	if chapter.cleared and not chapter.translated: return {}
+	if chapter.claimed and not chapter.cleared: return {}
+	if chapter.return_until>0 and not chapter.claimed: return {}
+	if hero.dungeon!=null:
+		if not hero.dungeon.get("castle","") is String or hero.dungeon.get("castle","") not in ["","thornwatch","frostspire","blackmire","stormbreak"]:return {}
+		if hero.dungeon.get("castle","") in ["thornwatch","frostspire","blackmire","stormbreak"]:
+			for key in ["floor","seed","returnX","returnY"]:
+				var value=hero.dungeon.get(key)
+				if not (value is int or value is float) or not is_finite(float(value)):return {}
+			if hero.dungeon.floor<1 or hero.dungeon.floor>3 or floor(hero.dungeon.floor)!=hero.dungeon.floor or hero.dungeon.get("story",false):return {}
+			if not hero.dungeon.get("run") is String or hero.dungeon.run.is_empty() or hero.dungeon.run.length()>80:return {}
+			if not hero.dungeon.get("cleared") is Array or not hero.dungeon.get("rewarded") is bool:return {}
+			for flag in hero.opened:
+				if str(flag).split(":")[0] in ["thornwatch","frostspire","blackmire","stormbreak"] and not hero.opened[flag] is bool:return {}
+		if not hero.dungeon.get("story",false) is bool: return {}
+		if hero.dungeon.get("story",false) and (not chapter.translated or hero.dungeon.floor<1 or hero.dungeon.floor>3): return {}
+	hero.forge_chapter=hero.get("forge_chapter",{"accepted":false,"inspected":false,"cleared":false,"claimed":false})
+	var forge=hero.forge_chapter
+	if not forge is Dictionary or forge.size()!=4: return {}
+	for key in ["accepted","inspected","cleared","claimed"]:
+		if not forge.get(key) is bool: return {}
+	if forge.accepted and not chapter.claimed: return {}
+	if forge.inspected and not forge.accepted: return {}
+	if forge.cleared and not forge.inspected: return {}
+	if forge.claimed and not forge.cleared: return {}
 	hero.journey=hero.get("journey",{})
 	if not hero.journey is Dictionary: return {}
 	for key in ["wood","cooked","warden","reward","dungeon_entered","first_floor","opening_reward"]: hero.journey[key]=bool(hero.journey.get(key,false))
@@ -128,10 +164,11 @@ static func migrate(hero: Dictionary) -> Dictionary:
 		for region in hero.exploration[key]:
 			if region not in ["forest","caves","swamp","snow"]: return {}
 			hero.exploration[key][region]=bool(hero.exploration[key][region])
+	if forge.inspected and not hero.exploration.challenges.get("caves",false): return {}
 	hero.exploration.visited.forest=true
 	hero.exploration.discovered.forest=true
 	hero.exploration.target=str(hero.exploration.get("target",""))
-	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader"]: hero.exploration.target=""
+	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak"]: hero.exploration.target=""
 	hero.respawn=hero.get("respawn",{"x":0.0,"y":0.0})
 	if not hero.respawn is Dictionary: return {}
 	for key in ["x","y"]:
@@ -187,6 +224,58 @@ static func migrate(hero: Dictionary) -> Dictionary:
 		if item.level<1 or item.rarity>4 or item.enchant>4: return {}
 		if not (entry.get("price") is int or entry.get("price") is float) or not is_finite(float(entry.price)) or entry.price<1 or entry.price>1000000000 or floor(entry.price)!=entry.price: return {}
 		entry.price=int(entry.price)
+	hero.mode=hero.get("mode","classic")
+	if hero.mode not in ["classic","survival"]: return {}
+	hero.kit=hero.get("kit",{})
+	if not hero.kit is Dictionary or hero.kit.size()>5: return {}
+	for key in hero.kit:
+		if key not in ["waterskin","cloak","bedroll","cloak_worn","rest_until"]: return {}
+	for key in ["waterskin","cloak","bedroll","cloak_worn"]:
+		hero.kit[key]=hero.kit.get(key,false)
+		if not hero.kit[key] is bool: return {}
+	if hero.kit.cloak_worn and not hero.kit.cloak: return {}
+	hero.kit.rest_until=hero.kit.get("rest_until",0.0)
+	if not (hero.kit.rest_until is int or hero.kit.rest_until is float) or not is_finite(float(hero.kit.rest_until)) or hero.kit.rest_until<0 or hero.kit.rest_until>hero.worldTime+120.01: return {}
+	if not hero.kit.bedroll and hero.kit.rest_until>0: return {}
+	hero.needs=hero.get("needs",{})
+	if not hero.needs is Dictionary: return {}
+	for key in ["hunger","water","sleep","temperature","elapsed","flask","wetness"]:
+		var default_value=50.0 if key=="temperature" else 0.0 if key in ["elapsed","wetness"] else 3 if key=="flask" else 100.0
+		var value=hero.needs.get(key,default_value)
+		if not (value is int or value is float) or not is_finite(float(value)) or value<0: return {}
+		if key=="flask" and (value>(6 if hero.kit.waterskin else 3) or floor(value)!=value): return {}
+		if key not in ["elapsed","flask"] and value>100: return {}
+		hero.needs[key]=int(value) if key=="flask" else float(value)
+	for key in ["harvested","ruins","won"]:
+		hero.needs[key]=hero.needs.get(key,false)
+		if not hero.needs[key] is bool: return {}
+	hero.spells=hero.get("spells",{"known":{"fire":1,"frost":1,"heal":1},"slots":["fire","frost","heal"]})
+	if not hero.spells is Dictionary or not hero.spells.get("known") is Dictionary or not hero.spells.get("slots") is Array: return {}
+	if hero.spells.slots.size()!=3 or hero.spells.known.size()>13: return {}
+	for id in hero.spells.known:
+		if id not in ["fire","frost","heal","arc","lance","ward","meteor","sunburst","blizzard","briarheart","wintercrown","mireward","stormlance"]: return {}
+		var value=hero.spells.known[id]
+		if not (value is int or value is float) or not is_finite(float(value)) or value<1 or value>3 or floor(value)!=value: return {}
+		hero.spells.known[id]=int(value)
+	for id in ["fire","frost","heal"]: hero.spells.known[id]=1
+	for castle_id in ["thornwatch","frostspire","blackmire","stormbreak"]:
+		if hero.opened.get(castle_id+"-relic",false)==true:hero.spells.known[{"thornwatch":"briarheart","frostspire":"wintercrown","blackmire":"mireward","stormbreak":"stormlance"}[castle_id]]=1
+	var unique=[]
+	for id in hero.spells.slots:
+		if not id is String or not hero.spells.known.has(id) or id in unique: return {}
+		unique.append(id)
+	hero.angler=hero.get("angler",{"rod":false,"records":{},"rewarded":false,"target":""})
+	var angler=hero.angler
+	if not angler is Dictionary or angler.size()>4 or not angler.get("rod") is bool or not angler.get("rewarded") is bool or not angler.get("records") is Dictionary: return {}
+	for key in angler:
+		if key not in ["rod","records","rewarded","target"]: return {}
+	if not angler.get("target","") is String or angler.get("target","") not in ["","forest","swamp","snow"] or angler.records.size()>4: return {}
+	angler.target=angler.get("target","")
+	for key in angler.records:
+		var value=angler.records[key]
+		if key not in ["Silver trout","Marsh eel","Frost salmon","Starfin"] or not (value is int or value is float) or not is_finite(float(value)) or value<0 or value>1000000 or floor(value)!=value: return {}
+		angler.records[key]=int(value)
+	if angler.rewarded and ["Silver trout","Marsh eel","Frost salmon"].any(func(name):return int(angler.records.get(name,0))<1): return {}
 	hero.engine = "godot"
 	return hero
 
@@ -297,20 +386,22 @@ static func write_save(hero: Dictionary,path: String=SAVE_PATH) -> bool:
 	file.close()
 	if error!=OK:
 		return false
-	if FileAccess.file_exists(path):
-		DirAccess.copy_absolute(path,path+".bak")
+	# Never replace a good recovery copy with an unreadable primary after recovery.
+	if not read_candidate(path).is_empty():
+		if DirAccess.copy_absolute(path,path+".bak.tmp")!=OK:
+			return false
+		if DirAccess.rename_absolute(path+".bak.tmp",path+".bak")!=OK:
+			return false
 	return DirAccess.rename_absolute(path+".tmp",path)==OK
+
+static func read_candidate(path:String) -> Dictionary:
+	if not FileAccess.file_exists(path): return {}
+	var parser=JSON.new()
+	if parser.parse(FileAccess.get_file_as_string(path))!=OK: return {}
+	return migrate(parser.data) if parser.data is Dictionary else {}
 
 static func read_save(path: String=SAVE_PATH) -> Dictionary:
 	for candidate in [path,path+".bak"]:
-		if not FileAccess.file_exists(candidate):
-			continue
-		var parser = JSON.new()
-		if parser.parse(FileAccess.get_file_as_string(candidate))!=OK:
-			continue
-		var data = parser.data
-		if data is Dictionary:
-			var converted = migrate(data)
-			if not converted.is_empty():
-				return converted
+		var converted=read_candidate(candidate)
+		if not converted.is_empty(): return converted
 	return {}

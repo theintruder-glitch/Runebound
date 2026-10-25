@@ -28,12 +28,12 @@ static func sky_at(time:float,region:String,in_dungeon:bool=false) -> String:
 	return "Rain" if roll<30 else "Fog" if roll<55 else "Clear"
 
 func season() -> String: return season_at(game.hero.worldTime)
-func sky() -> String: return sky_at(game.hero.worldTime,game.exploration.region_at(game.player_position()),game.hero.dungeon!=null)
+func sky() -> String: return sky_at(game.hero.worldTime,"forest" if game.exploration.outdoor_highlands(game.player_position()) else game.exploration.region_at(game.player_position()),game.hero.dungeon!=null)
 func day() -> int: return floori(game.hero.worldTime/DAY_SECONDS)+1
 func day_in_season() -> int: return posmod(day()-1,2)+1
 
 func covered_at(pos:Vector2) -> bool:
-	if game.hero.dungeon!=null or game.exploration.region_at(pos)=="caves": return true
+	if game.hero.dungeon!=null or game.exploration.region_at(pos)=="caves" and not game.exploration.outdoor_highlands(pos): return true
 	for structure in game.hero.survival.structures:
 		if structure.kind=="Shelter" and pos.distance_to(game.survival.at(structure))<60: return true
 		if structure.kind=="Roof" and game.survival.footprint("Roof",game.survival.at(structure),structure.rotation).has_point(pos): return true
@@ -42,14 +42,14 @@ func covered_at(pos:Vector2) -> bool:
 func near_fire() -> bool:
 	if game.hero.dungeon!=null: return false
 	for structure in game.hero.survival.structures:
-		if structure.kind=="Campfire" and structure.fuel>0 and game.survival.at(structure).distance_to(game.player_position())<100:
+		if structure.kind=="Campfire" and structure.fuel>0 and game.survival.at(structure).distance_to(game.player_position())<100 and game.line_clear(game.player_position(),game.survival.at(structure)):
 			return true
 	return false
 
 func tea_remaining() -> float: return maxf(0,game.hero.warmUntil-game.hero.worldTime)
 
 func comfort() -> String:
-	if game.hero.dungeon!=null or game.exploration.region_at(game.player_position())=="caves": return "Underground"
+	if game.hero.dungeon!=null or game.exploration.region_at(game.player_position())=="caves" and not game.exploration.outdoor_highlands(game.player_position()): return "Underground"
 	var cover=covered_at(game.player_position())
 	if near_fire(): return "Cozy camp" if cover else "By the fire"
 	if tea_remaining()>0: return "Warm tea · %ds" % ceili(tea_remaining())
@@ -84,6 +84,8 @@ func toggle_particles() -> void:
 	config.set_value("weather","particles",particles_enabled)
 	config.save("user://weather.cfg")
 
+func blizzard() -> bool:
+	return game.hero.dungeon==null and game.exploration.region_at(game.player_position())=="snow" and sky()=="Snow" and fposmod(game.hero.worldTime,240)>180
 func particle_count() -> int:
 	if not particles_enabled or sky() not in ["Rain","Snow"]: return 0
 	return 18 if game.low_power else 42

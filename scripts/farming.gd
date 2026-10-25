@@ -102,6 +102,7 @@ func harvest(plot:Dictionary) -> bool:
 	var why=harvest_reason(plot)
 	if not why.is_empty(): game.notify(why,3);return false
 	var crop=plot.crop;var amount=CROPS[crop].yield
+	if game.expedition.enabled(): game.hero.needs.harvested=true
 	plot.crop="";plot.growth=0.0
 	game.survival.add(crop,amount);game.survival.revision+=1
 	game.sound("gather");game.notify("Harvested +%d %s. This plot can be planted again." % [amount,crop],3)

@@ -1,11 +1,12 @@
 extends RefCounted
 const Data=preload("res://scripts/data.gd")
+const Catalog=preload("res://scripts/realm_catalog.gd")
 const RUINS=Vector2(520,320)
 const REGIONS={
- "forest":{"name":"Mossveil Forest","point":Vector2(760,-520),"landmark":"Elder Shrine","material":"Resin","class":"Arcane Archer"},
- "caves":{"name":"Hollowdeep Caves","point":Vector2(2050,0),"landmark":"Emberforge","material":"Crystal","class":"Spellblade"},
- "swamp":{"name":"Whisperfen Swamp","point":Vector2(-2050,0),"landmark":"Veil Altar","material":"Glowcap","class":"Reaper"},
- "snow":{"name":"Frostfall Reach","point":Vector2(0,-2050),"landmark":"Winter Oath","material":"Frost shard","class":"Arcane Archer"}
+ "forest":{"name":"Emerald Wilds · Mossveil","point":Vector2(760,-520),"landmark":"Elder Shrine","material":"Resin","class":"Arcane Archer"},
+ "caves":{"name":"Shattered Highlands · Hollowdeep","point":Vector2(2050,0),"landmark":"Emberforge","material":"Crystal","class":"Spellblade"},
+ "swamp":{"name":"Drowned Mire · Whisperfen","point":Vector2(-2050,0),"landmark":"Veil Altar","material":"Glowcap","class":"Reaper"},
+ "snow":{"name":"Frostbound Peaks · Frostfall","point":Vector2(0,-2050),"landmark":"Winter Oath","material":"Frost shard","class":"Arcane Archer"}
 }
 var game
 var trial=""
@@ -19,9 +20,11 @@ static func region_at(pos:Vector2) -> String:
  if pos.x< -1400: return "swamp"
  return "forest"
 static func cave_wall(pos:Vector2) -> bool:
+ if Catalog.zone_at(pos)=="stormbreak" and Catalog.distance_to_trail(pos,Catalog.ZONES.stormbreak.trail)<74:return false
  if region_at(pos)!="caves" or absf(pos.y)<95 or pos.distance_to(REGIONS.caves.point)<220: return false
  var cell=Vector2i(floori(pos.x/48),floori(pos.y/48))
  return (posmod(cell.x,10)==0 and posmod(cell.y,10)>2) or (posmod(cell.y,10)==0 and posmod(cell.x,10)>2)
+static func outdoor_highlands(pos:Vector2) -> bool:return Catalog.zone_at(pos)=="stormbreak" and pos.distance_to(REGIONS.caves.point)>340
 static func terrain_id(pos:Vector2) -> int:
  match region_at(pos):
   "caves": return 7 if cave_wall(pos) else 4
@@ -53,9 +56,15 @@ func objective() -> String:
  var target=data().get("target","")
  if target=="trader": return "Mara · Leave dungeon via entrance stairs" if game.hero.dungeon!=null else "Trader Mara · "+bearing(game.trader.POSITION)
  if target=="ruins": return "Mossveil Ruins · "+bearing(RUINS)
+ if Catalog.ZONES.has(target):return Catalog.ZONES[target].castle+" · "+bearing(Catalog.ZONES[target].gate)
+ if target=="keep":return "Thornwatch Keep · "+bearing(game.landscape.KEEP)
  if target=="home": return "Home · "+bearing(Vector2(game.hero.respawn.x,game.hero.respawn.y))
  if not REGIONS.has(target): return "Explore · Track a regional landmark from Camp"
  return REGIONS[target].landmark+" · "+bearing(REGIONS[target].point)
+func track(id:String) -> void:
+ if id not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak"]: return
+ data().target=id;game.hero.contracts.target="";game.hero.angler.target=""
+ game.save_game();game.hud.resume()
 func nearby() -> String:
  if game.hero.dungeon!=null: return ""
  for id in ["caves","swamp","snow"]:
@@ -63,7 +72,7 @@ func nearby() -> String:
  return ""
 func interaction() -> String:
  var id=nearby()
- if id.is_empty() or active(): return ""
+ if id.is_empty() or active() or game.forge.active(): return ""
  if not data().discovered.get(id,false): return "DISCOVER "+REGIONS[id].landmark.to_upper()
  if data().pending.get(id,false): return "CLAIM TRIAL RELIC"
  if data().challenges.get(id,false): return REGIONS[id].landmark.to_upper()+" · COMPLETED"
@@ -76,7 +85,7 @@ func instructions(id:String) -> String:
  return "Defeat the Root Warden at the Elder Shrine."
 func interact() -> void:
  var id=nearby()
- if id.is_empty(): return
+ if id.is_empty() or game.forge.active(): return
  if not data().discovered.get(id,false):
   data().discovered[id]=true
   game.hero.gold+=30; game.hero.essence+=2
@@ -86,6 +95,7 @@ func interact() -> void:
  if data().challenges.get(id,false) or active(): return
  begin_trial(id)
 func begin_trial(id:String) -> void:
+ if game.forge.active(): return
  trial=id; foes.clear(); hits.clear(); dodged=false
  var center=REGIONS[id].point
  for i in range(3 if id=="swamp" else 1):

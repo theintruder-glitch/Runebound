@@ -11,6 +11,9 @@ func _draw() -> void:
 	if world==null or world.game.hero.is_empty():
 		return
 	var game = world.game
+	game.graphics.details(self,bounds)
+	if game.hero.dungeon==null:game.landscape.draw(self,bounds)
+	else:game.castle.draw_rooms(self,bounds)
 	for decoration in decorations:
 		var region=decoration.get("biome","forest")
 		var tint=Color(.85,1,1.15) if region=="snow" else Color(.8,.9,.85) if region=="swamp" else Color(.8,.8,1) if region=="caves" else Color.WHITE
@@ -18,9 +21,14 @@ func _draw() -> void:
 			if game.weather.season()=="Summer": tint=Color(1.05,1.08,.85)
 			elif game.weather.season()=="Autumn": tint=Color(1.6,.85,.55)
 			elif game.weather.season()=="Winter": tint=Color(.9,1.05,1.2)
-		draw_texture(world.textures[decoration.kind],decoration.pos-Vector2(32,64),tint)
+		if game.landscape.inside(decoration.pos) or not game.landscape.realms.zone_at(decoration.pos).is_empty():
+			var kind="boulders" if decoration.kind=="rock" else "snow-pine" if region=="snow" else "swamp-tree" if region=="swamp" else "oak"
+			game.landscape.realms.props.draw(self,kind,decoration.pos,Vector2(82,64) if decoration.kind=="rock" else Vector2(104,132))
+			continue
+		draw_texture_rect(world.textures[decoration.kind],Rect2(decoration.pos-Vector2(32,64),Vector2(64,96)),false,tint)
 		if (region=="snow" or (region in ["forest","swamp"] and game.weather.season()=="Winter")) and decoration.kind=="tree":
-			draw_colored_polygon(PackedVector2Array([decoration.pos+Vector2(-15,-32),decoration.pos+Vector2(0,-57),decoration.pos+Vector2(15,-32)]),Color("d4e5e4"))
+			for dx in [-12,0,12]:
+				draw_arc(decoration.pos+Vector2(dx,-37-abs(dx)*.3),8,PI,TAU,10,Color("d4e5e4"),3,true)
 	if game.hero.dungeon==null:
 		for i in range(game.hero.kingdom.buildings.size()):
 			var at = Vector2(-160+i*150,-150)
@@ -32,12 +40,15 @@ func _draw() -> void:
 			draw_string(ThemeDB.fallback_font,at+Vector2(-40,-60),game.hero.kingdom.buildings[i],HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e8d8b2"))
 	if game.hero.dungeon==null:
 		draw_survival(game)
+		game.chapter.draw_sites(self,bounds)
 		draw_landmarks(game)
 		draw_quest_board(game)
 		draw_trader(game)
+		draw_spring(game)
+		game.fishing.draw_pools(self,bounds)
 	for chest in visible_chests:
 		var opened = game.hero.opened.has(chest.id)
-		draw_texture(world.textures["chest_open" if opened else "chest"],chest.pos-Vector2(32,64))
+		draw_texture_rect(world.textures["chest_open" if opened else "chest"],Rect2(chest.pos-Vector2(32,64),Vector2(64,96)),false)
 		if not opened:
 			draw_string(ThemeDB.fallback_font,chest.pos+Vector2(-20,-23),"CHEST",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("e1c98f"))
 
@@ -45,28 +56,7 @@ func draw_survival(game) -> void:
 	for node in game.survival.nodes:
 		var pos:Vector2=node.pos
 		if not bounds.has_point(pos): continue
-		draw_circle(pos,18,Color("274c41"))
-		match node.kind:
-			"Wood":
-				draw_rect(Rect2(pos+Vector2(-4,-23),Vector2(8,28)),Color("ab8052"))
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-21,-12),pos+Vector2(0,-49),pos+Vector2(21,-12)]),Color("78a564"))
-			"Crystal","Frost shard":
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-14,5),pos+Vector2(-6,-35),pos+Vector2(3,-16),pos+Vector2(12,-28),pos+Vector2(17,6)]),Color("b7a3ed") if node.kind=="Crystal" else Color("a6e9f3"))
-			"Glowcap":
-				draw_rect(Rect2(pos+Vector2(-3,-16),Vector2(6,20)),Color("ced6a5"))
-				draw_circle(pos+Vector2(0,-20),14,Color("97c4b2"))
-				draw_circle(pos+Vector2(4,-23),3,Color("f2e6a9"))
-			"Resin","Pine resin":
-				draw_rect(Rect2(pos+Vector2(-8,-30),Vector2(16,35)),Color("916c46"))
-				draw_circle(pos+Vector2(0,-15),6,Color("ecc16d"))
-			"Stone","Iron":
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-19,4),pos+Vector2(-15,-18),pos+Vector2(5,-28),pos+Vector2(22,-3)]),Color("96adb2") if node.kind=="Stone" else Color("b79a83"))
-				if node.kind=="Iron": draw_line(pos+Vector2(-8,-14),pos+Vector2(9,-4),Color("e6c28c"),4)
-			_:
-				for dx in [-10,0,10]:
-					draw_line(pos+Vector2(dx,2),pos+Vector2(dx*1.5,-22),Color("91c783"),3)
-					if node.kind=="Berries": draw_circle(pos+Vector2(dx,-15),4,Color("ed909d"))
-					elif node.kind=="Herbs": draw_circle(pos+Vector2(dx,-22),4,Color("cab0ee"))
+		world.field_visuals.draw_prop(self,node.kind,pos)
 		if pos.distance_to(game.player_position())<230:
 			draw_string(ThemeDB.fallback_font,pos+Vector2(-22,25),node.kind.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("d7eac1"))
 	var shrine=game.forest.SHRINE
@@ -201,3 +191,11 @@ func draw_trader(game) -> void:
 	draw_line(person+Vector2(-11,-15),person+Vector2(-14,-4),Color("dfbb98"),4)
 	draw_line(person+Vector2(11,-15),person+Vector2(17,-19),Color("dfbb98"),4)
 	draw_string(ThemeDB.fallback_font,pos+Vector2(-47,-79),"TRADER MARA",HORIZONTAL_ALIGNMENT_LEFT,-1,12,Color("e9d89f"))
+
+func draw_spring(game) -> void:
+	var pos:Vector2=game.expedition.SPRING
+	if not bounds.grow(90).has_point(pos): return
+	draw_circle(pos,36,Color("233c4a"));draw_circle(pos,29,Color("4a91a5"));draw_circle(pos-Vector2(5,4),21,Color("68b9c4"))
+	for i in range(9): draw_circle(pos+Vector2.from_angle(i*TAU/9)*34,7,Color("93a69c"))
+	draw_arc(pos,18,.4,2.8,20,Color("ceeee7"),2,true)
+	draw_string(ThemeDB.fallback_font,pos+Vector2(-48,56),"FRESH SPRING",HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("c8e9e4"))

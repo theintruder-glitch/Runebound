@@ -1,0 +1,22 @@
+RUNEBOUND 0.18.0 — BUILD START
+
+Read README.md for current setup. This source continues supplied Godot v0.15.0.
+
+Linux x86_64:
+  bash BUILD-ANDROID-CODEX.sh --engine-only
+  export GODOT_BIN="$HOME/.local/bin/runebound-godot-4.5.1"
+  "$GODOT_BIN" --headless --path . --import
+  python3 tools/run_tests.py
+  bash BUILD-WINDOWS-CODEX.sh
+
+Android additionally needs JDK 17 and the original signing key/password supplied
+through the environment. Then run:
+  bash BUILD-ANDROID-CODEX.sh --accept-sdk-licenses
+
+No keystore/password is included in the GitHub checkout or new editable ZIP.
+Retain the privately supplied v0.15.0 archive for the original prototype identity.
+Never generate a new key as a substitute for an installed-app update.
+
+Outputs live in builds/. Scripts validate real outputs and compiled resources.
+Hardware install, native Windows startup and device performance are separate
+playtest requirements. Read VERIFICATION.md and PLAYTEST.md.

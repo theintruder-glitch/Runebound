@@ -3,6 +3,11 @@ extends Node2D
 const Data = preload("res://scripts/data.gd")
 const TILE = 48
 const SpriteAtlas = preload("res://assets/sprites.svg")
+const EnvironmentAtlas=preload("res://assets/environment.svg")
+const EnemyVisuals=preload("res://scripts/enemy_visuals.gd")
+var enemy_visuals=EnemyVisuals.new()
+const FieldVisuals=preload("res://scripts/field_visuals.gd")
+var field_visuals=FieldVisuals.new()
 const SceneryScript = preload("res://scripts/scenery.gd")
 var game
 var terrain: TileMapLayer
@@ -28,6 +33,9 @@ func _ready() -> void:
 		texture.atlas = SpriteAtlas
 		texture.region = Rect2(i*64,0,64,96)
 		textures[["tree","rock","chest","chest_open","slime","goblin","skeleton","wisp","guardian"][i]] = texture
+	for i in range(4):
+		var texture=AtlasTexture.new();texture.atlas=EnvironmentAtlas;texture.region=Rect2(i*128,0,128,192);texture.filter_clip=true
+		textures[["tree","rock","chest","chest_open"][i]]=texture
 	scenery = SceneryScript.new()
 	scenery.world = self
 	scenery.z_index = -5
@@ -35,27 +43,42 @@ func _ready() -> void:
 	terrain = TileMapLayer.new()
 	add_child(terrain)
 	terrain.z_index = -10
+	terrain.texture_filter=CanvasItem.TEXTURE_FILTER_NEAREST
 	build_palette("Spring")
 
 func build_palette(season:String) -> void:
 	palette_season=season
 	var image = Image.create(TILE*12,TILE,false,Image.FORMAT_RGBA8)
-	var colors = [Color("1b3b32"),Color("203f34"),Color("17352d"),Color("203d3b"),Color("303443"),Color("b2c8d0"),Color("354348"),Color("19232f"),Color("23312c"),Color("c6d9dc"),Color("443a55"),Color("31503b")]
+	var colors = [Color("293e35"),Color("2c4136"),Color("273b32"),Color("263e3e"),Color("313443"),Color("a3b9bd"),Color("384347"),Color("1a242d"),Color("23312c"),Color("c6d9dc"),Color("443a55"),Color("31503b")]
 	if season=="Summer":
 		colors[0]=Color("294a32");colors[1]=Color("345236");colors[2]=Color("24432c")
 	elif season=="Autumn":
 		colors[0]=Color("514331");colors[1]=Color("5c4933");colors[2]=Color("483d30");colors[11]=Color("6a5540")
 	elif season=="Winter":
 		colors[0]=Color("8ba4a6");colors[1]=Color("98afb0");colors[2]=Color("829da0");colors[11]=Color("728c8a");colors[3]=Color("50696a");colors[8]=Color("425c61")
+	var noise=FastNoiseLite.new();noise.seed=1594;noise.frequency=.13
 	var rng = RandomNumberGenerator.new()
 	rng.seed = 1594
 	for tile in range(12):
 		image.fill_rect(Rect2i(tile*TILE,0,TILE,TILE),colors[tile])
-		for i in range(35):
+		for px in range(TILE):
+			for py in range(TILE):
+				var variation=noise.get_noise_2d(px,py)*.045
+				image.set_pixel(tile*TILE+px,py,colors[tile].lightened(variation) if variation>0 else colors[tile].darkened(-variation))
+		for i in range(22):
 			var px = tile*TILE+rng.randi_range(2,45)
 			var py = rng.randi_range(2,45)
-			image.fill_rect(Rect2i(px,py,2,3),colors[tile].lightened(rng.randf_range(.03,.14)))
+			image.fill_rect(Rect2i(px,py,2,3),colors[tile].lightened(rng.randf_range(.015,.055)))
+		if tile==6:
+			# Stone joints are baked once, rather than redrawn each frame.
+			for y in [0,23,46]: image.fill_rect(Rect2i(tile*TILE,y,TILE,2),Color("28333b"))
+			for x in [0,23,46]: image.fill_rect(Rect2i(tile*TILE+x,0,2,24),Color("28333b"))
+			for x in [11,35]: image.fill_rect(Rect2i(tile*TILE+x,24,2,24),Color("28333b"))
 		if tile==7:
+			image.fill_rect(Rect2i(tile*TILE,21,TILE,3),Color("101b25"))
+			image.fill_rect(Rect2i(tile*TILE+23,0,3,23),Color("101b25"))
+			image.fill_rect(Rect2i(tile*TILE+10,24,3,24),Color("101b25"))
+			image.fill_rect(Rect2i(tile*TILE+35,24,3,24),Color("101b25"))
 			image.fill_rect(Rect2i(tile*TILE,0,TILE,3),colors[tile].lightened(.14))
 			image.fill_rect(Rect2i(tile*TILE,0,2,TILE),colors[tile].darkened(.2))
 			image.fill_rect(Rect2i(tile*TILE,TILE-2,TILE,2),colors[tile].darkened(.2))
@@ -112,7 +135,7 @@ func refresh(force: bool=false) -> void:
 				var cell = Vector2i(x,y)
 				if terrain_cells.has(cell):
 					continue
-				var id = game.exploration.terrain_id(Vector2(cell)*TILE+Vector2.ONE*24)
+				var id = game.landscape.terrain_id(Vector2(cell)*TILE+Vector2.ONE*24,game.exploration.terrain_id(Vector2(cell)*TILE+Vector2.ONE*24))
 				terrain.set_cell(cell-tile_origin,0,Vector2i(id,0))
 				terrain_cells[cell] = true
 	refresh_scenery(true)
@@ -122,7 +145,7 @@ func refresh_scenery(force: bool=false) -> void:
 	var at = game.camera.position
 	var view = get_viewport_rect().size
 	var cell = Vector2i(floori(at.x/TILE),floori(at.y/TILE))
-	var key = str(cell)+":"+str(view)+":"+str(game.chunk_key)+":"+str(game.hero.opened.size())+":"+str(game.hero.kingdom.buildings.size())+":"+last_mode+":"+str(game.survival.revision)
+	var key = str(cell)+":"+str(view)+":"+str(game.chunk_key)+":"+str(game.hero.opened.size())+":"+str(game.hero.kingdom.buildings.size())+":"+last_mode+":"+str(game.survival.revision)+":"+str(game.hero.chapter.clues.size())
 	if key==scenery_key and not force:
 		return
 	scenery_key = key
@@ -136,7 +159,7 @@ func refresh_scenery(force: bool=false) -> void:
 		for x in range(begin.x,end.x+1):
 			for y in range(begin.y,end.y+1):
 				var h = tile_hash(x,y,2)
-				if h<.055 or h>.974:
+				if (h<.055 or h>.974) and not game.landscape.clear_route(Vector2(x*TILE+24,y*TILE+24)) and not game.landscape.raw_solid(Vector2(x*TILE+24,y*TILE+24)):
 					var spot=Vector2(x*TILE+24,y*TILE+24)
 					var region_id=game.exploration.region_at(spot)
 					scenery.decorations.append({"kind":"rock" if region_id=="caves" else "tree" if h<.055 else "rock","pos":spot,"biome":region_id})
@@ -152,6 +175,7 @@ static func tile_hash(x: int,y: int,salt: int=0) -> float:
 func _process(dt: float) -> void:
 	if game==null or game.hero.is_empty():
 		return
+	texture_filter=CanvasItem.TEXTURE_FILTER_LINEAR
 	refresh_scenery()
 	if game.playing:
 		clock += dt
@@ -160,6 +184,7 @@ func _process(dt: float) -> void:
 func _draw() -> void:
 	if game==null or game.hero.is_empty():
 		return
+	game.fishing.draw_line(self)
 	var hero_position = Vector2(game.hero.x,game.hero.y)
 	var profile_start = Time.get_ticks_usec() if profile_enabled else 0
 	draw_bounds = Rect2(game.camera.position-get_viewport_rect().size/2-Vector2(80,80),get_viewport_rect().size+Vector2(160,160))
@@ -171,7 +196,7 @@ func _draw() -> void:
 			var color = Color("a6e5c1") if key=="start" else Color("e8cc7f") if game.floor_clear() else Color("8b8799")
 			for i in range(4):
 				draw_rect(Rect2(at+Vector2(-17+i*2,-12+i*7),Vector2(34-i*4,4)),color)
-			label(at+Vector2(-26,-21),"WILDS" if key=="start" else "DOWN" if game.floor_clear() else "LOCKED",10,color)
+			label(at+Vector2(-26,-21),("BACK" if game.castle.active() and game.hero.dungeon.floor>1 else "WILDS") if key=="start" else "DOWN" if game.floor_clear() else "LOCKED",10,color)
 	if not game.build_recipe.is_empty() and game.hero.dungeon==null:
 		var pos=game.survival.place_position()
 		var rect=game.survival.footprint(game.build_recipe,pos,game.build_rotation)
@@ -180,13 +205,20 @@ func _draw() -> void:
 		draw_rect(rect,Color("9cf7c2") if valid else Color("ff928e"),false,2)
 		draw_line(pos,pos+Vector2.UP.rotated(game.build_rotation*PI/2)*27,Color("f6e5b5"),3)
 		label(pos+Vector2(-25,-40),game.build_recipe,12,Color("f4e7c7"))
+	game.chapter.draw(self)
+	game.castle.draw_traps(self)
+	if game.hero.dungeon==null:game.landscape.atmosphere(self,draw_bounds,clock)
 	for enemy in game.enemies:
 		if not enemy.dead and enemy.get("windup",0.0)>0 and draw_bounds.has_point(enemy.strike):
+			if game.tactics.ranged(enemy):
+				draw_dashed_line(enemy.pos,enemy.strike,Color("e9c47b99"),1.5,7)
+				draw_circle(enemy.pos,enemy.radius+5,Color("e9c47b"),false,1.5)
 			draw_circle(enemy.strike,enemy.strike_radius,Color("e77a6844"))
 			draw_arc(enemy.strike,enemy.strike_radius,0,TAU,48,Color("ff9b7f"),2)
 			var progress=1-clampf(enemy.windup/maxf(.1,enemy.get("windup_max",enemy.windup)),0,1)
 			draw_arc(enemy.strike,enemy.strike_radius-5,-PI/2,-PI/2+TAU*progress,32,Color("ffe1aa"),3)
 			label(enemy.strike+Vector2(-5,-8),"!",24,Color("ffe1a1"))
+			if enemy.has("castle_attack"):label(enemy.strike+Vector2(-55,-enemy.strike_radius-12),enemy.castle_attack,11,Color("e9d29b"))
 	if game.abilities.sanctuary>0:
 		draw_circle(game.abilities.sanctuary_at,105,Color("a6dfac22"))
 		draw_arc(game.abilities.sanctuary_at,105,clock,clock+TAU,48,Color("c9e8b5"),2)
@@ -205,7 +237,9 @@ func _draw() -> void:
 			continue
 		var color = Color("e4cf9b") if shot.kind=="bow" else Color("ffb077") if shot.kind=="fire" else Color("c9adf8")
 		if shot.get("enchant",0)>0: color=[color,Color("ffbc80"),Color("9fe0f0"),Color("cdb4f4"),Color("edabc0")][int(shot.enchant)]
+		color=shot.get("color",color)
 		var direction = shot.velocity.normalized()
+		if shot.get("lance",false): draw_line(shot.pos-direction*30,shot.pos+direction*9,color,5,true)
 		if shot.kind!="bow":
 			var trail=color;trail.a=.35
 			draw_line(shot.pos-direction*26,shot.pos,trail,8)
@@ -227,6 +261,8 @@ func _draw() -> void:
 		else:
 			draw_circle(effect.pos,2,color)
 
+	game.spellbook.draw(self)
+	game.graphics.atmosphere(self)
 	draw_weather()
 	game.desktop.draw_reticle(self)
 	if profile_enabled:
@@ -245,7 +281,7 @@ func draw_tree(at: Vector2) -> void:
 func draw_hero(at: Vector2) -> void:
 	draw_set_transform(at)
 	var cls=game.hero.className
-	var facing=game.facing
+	var facing=game.swing_direction if game.swing_time>0 else game.facing
 	var angle=facing.angle()
 	var bob=sin(clock*13)*4 if game.is_walking else 0.0
 	var color=Color(Data.CLASSES[cls].color)
@@ -258,7 +294,11 @@ func draw_hero(at: Vector2) -> void:
 		var foot=Vector2(side*5,15)+Vector2(facing.x,facing.y*.7)*bob*side
 		draw_line(Vector2(side*5,5),foot,Color("29383b"),6)
 		draw_rect(Rect2(foot-Vector2(3,0),Vector2(7,4)),Color("baa381"))
-	draw_rect(Rect2(-10,-9,20,19),color)
+	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(-15,13),Vector2(0,19),Vector2(13,12),Vector2(8,-10)]),color.darkened(.55))
+	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(7,-10),Vector2(11,8),Vector2(4,13),Vector2(-10,8)]),color)
+	draw_line(Vector2(-7,-7),Vector2(-7,6),color.lightened(.25),2,true)
+	draw_line(Vector2(2,-7),Vector2(2,8),color.darkened(.3),2,true)
+	draw_rect(Rect2(-10,4,20,4),Color("514437"));draw_rect(Rect2(-2,3,5,6),Color("e7c37f"))
 	draw_line(Vector2(-12,-5),Vector2(-14,6)+facing*bob*.4,Color("d6b494"),5)
 	draw_line(Vector2(12,-5),Vector2(14,6)-facing*bob*.4,Color("d6b494"),5)
 	draw_rect(Rect2(-7,-23,14,14),Color("e5c39f"))
@@ -283,7 +323,8 @@ func draw_hero(at: Vector2) -> void:
 	var enchant=int(weapon.get("enchant",0))
 	var metal=[Color("e3d6b4"),Color("ffab6b"),Color("9cddf7"),Color("c4a0f1"),Color("e999ac")][enchant]
 	var hand=Vector2(12 if facing.x>=0 else -12,0)+facing*3
-	var swing=(1-game.swing_time/.3) if game.swing_time>0 else .5
+	var swing=(1-game.swing_time/game.swing_duration) if game.swing_time>0 else .5
+	if game.swing_time>0 and weapon.get("kind") in ["bow","staff"]: hand-=facing*6*sin(swing*PI)
 	draw_set_transform(at+hand,angle+(-.8+swing*1.6 if game.swing_time>0 and weapon.get("kind")=="sword" else 0))
 	match weapon.get("kind","sword"):
 		"bow":
@@ -293,44 +334,38 @@ func draw_hero(at: Vector2) -> void:
 		"staff": draw_line(Vector2(-12,0),Vector2(21,0),metal,3); draw_circle(Vector2(23,0),5,color.lightened(.4))
 		_: draw_line(Vector2(-5,0),Vector2(24,0),metal,4); draw_line(Vector2(0,-6),Vector2(0,6),Color("b9a078"),3)
 	draw_set_transform(at)
-	if game.swing_time>0: draw_arc(Vector2.ZERO,36,angle-.8,angle+.8,18,Color("f9e8be"),3)
+	if game.swing_time>0:
+		var sweep=angle-.9+swing*1.8
+		draw_arc(Vector2.ZERO,36,sweep-.65,sweep+.25,18,Color(1,.91,.74,1-swing*.6),3)
+	if game.cast_time>0:
+		var cast_progress=1-game.cast_time/.35
+		var glow=game.cast_color;glow.a=1-cast_progress
+		draw_arc(Vector2(0,-4),20+cast_progress*15,-PI/2,-PI/2+TAU,24,glow,2)
+		draw_circle(Vector2(14,-7),4+cast_progress*3,glow)
 	if game.dash_time>0: draw_arc(Vector2.ZERO,24,0,TAU,24,Color("a4f3cb"),2)
 	draw_colored_polygon(PackedVector2Array([Vector2(0,-47),Vector2(-4,-54),Vector2(4,-54)]),Color("a7e3b6"))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_enemy(enemy: Dictionary) -> void:
-	var at = enemy.pos
+	var recoil=enemy.get("recoil_direction",Vector2.ZERO)*sin(clampf(enemy.get("stagger",0.0)/.14,0,1)*PI)*7
+	var lunge=enemy.pos.direction_to(enemy.get("strike",enemy.pos))*sin(clampf(enemy.get("attack_pose",0.0)/.18,0,1)*PI)*7
+	var at = enemy.pos+recoil+lunge
 	if enemy.has("named"):
 		draw_arc(at,34,0,TAU,28,Color("d1be76"),2)
-		label(at+Vector2(-54,-78),enemy.named,14,Color("edda98"))
-	var tint = Color(1.5,1.5,1.5) if enemy.flash>0 else Color(.7,1,1.3) if enemy.slow>0 else Color.WHITE
-	if enemy.type in ["wolf","frost_wolf","deer"]:
-		draw_beast(enemy)
+		label(at+Vector2(-54,-110),enemy.named,14,Color("edda98"))
+	if enemy.type=="deer":
+		draw_beast(enemy,recoil+lunge)
 	else:
-		var sprite={"archer":"goblin","ice_archer":"skeleton","bog_toad":"slime","crystal_wisp":"wisp"}.get(enemy.type,enemy.type)
-		if enemy.type=="ice_archer": tint=Color(.8,1.2,1.5)
-		elif enemy.type=="bog_toad": tint=Color(.8,1.1,.7)
-		elif enemy.type=="crystal_wisp": tint=Color(1.2,.9,1.5)
-		draw_texture(textures[sprite],at-Vector2(32,64),tint)
-		if enemy.type in ["archer","ice_archer","skeleton"]:
-			draw_set_transform(at+Vector2(12,-16),at.direction_to(game.player_position()).angle())
-			draw_arc(Vector2.ZERO,14,-1.2,1.2,12,Color("dfc48e"),2)
-			draw_line(Vector2(5,-13),Vector2(5,13),Color("dfc48e"),1)
-			draw_set_transform(Vector2.ZERO)
-	if enemy.get("named","")=="The Root Warden":
-		for side in [-1,1]:
-			draw_line(at+Vector2(side*10,-42),at+Vector2(side*30,-68),Color("a18a59"),5)
-			draw_line(at+Vector2(side*21,-56),at+Vector2(side*40,-60),Color("a18a59"),4)
-		draw_circle(at+Vector2(0,-25),7,Color("a7e5b5"))
+		enemy_visuals.draw(self,enemy,at,clock,game.player_position())
 	if enemy.hp<enemy.max_hp or enemy.boss:
 		var width = 52.0 if enemy.boss else 32.0
-		draw_rect(Rect2(at+Vector2(-width/2,-enemy.radius-20),Vector2(width,4)),Color("142b2d"))
-		draw_rect(Rect2(at+Vector2(-width/2,-enemy.radius-20),Vector2(width*maxf(0,enemy.hp/enemy.max_hp),4)),Color("dcaa7a") if enemy.boss else Color("d18d87"))
+		draw_rect(Rect2(at+Vector2(-width/2,-102 if enemy.boss or enemy.has("named") else -68),Vector2(width,4)),Color("142b2d"))
+		draw_rect(Rect2(at+Vector2(-width/2,-102 if enemy.boss or enemy.has("named") else -68),Vector2(width*maxf(0,enemy.hp/enemy.max_hp),4)),Color("dcaa7a") if enemy.boss else Color("d18d87"))
 	if enemy.boss or not game.low_power:
 		label(at+Vector2(-10,enemy.radius+17),"Lv "+str(enemy.level),10,Color("c4d0bc"))
 
-func draw_beast(enemy:Dictionary) -> void:
-	var at=enemy.pos
+func draw_beast(enemy:Dictionary,offset:Vector2=Vector2.ZERO) -> void:
+	var at=enemy.pos+offset
 	var direction=enemy.get("motion",Vector2.RIGHT)
 	var side=1 if direction.x>=0 else -1
 	var deer=enemy.type=="deer"
@@ -381,7 +416,7 @@ func draw_visual(effect:Dictionary) -> void:
 				var center=pos+Vector2((i-1)*15,-progress*35-i*5)
 				draw_line(center-Vector2(0,5),center+Vector2(0,5),color,2)
 				draw_line(center-Vector2(5,0),center+Vector2(5,0),color,2)
-		"fire":
+		"fire","meteor","sunburst":
 			var r=radius*(.25+progress*.75)
 			var fill=color;fill.a*=.25
 			draw_circle(pos,r,fill)
@@ -413,9 +448,14 @@ func draw_weather() -> void:
 		for i in range(3):
 			var y=fposmod(i*view.y/3+clock*4,view.y)
 			draw_rect(Rect2(origin+Vector2(0,y),Vector2(view.x,35)),Color("c4d7d40b"))
+	if game.weather.blizzard():draw_rect(Rect2(origin,view),Color("d0e2e925"))
+	if sky=="Rain":
+		for i in range(4):
+			var p=origin+Vector2(110+i*173,120+fposmod(i*193,view.y))
+			draw_set_transform(p,0,Vector2(2,.45));draw_circle(Vector2.ZERO,11,Color("35556433"));draw_arc(Vector2.ZERO,10,clock+i,clock+i+PI,12,Color("9eb8bc44"),1);draw_set_transform(Vector2.ZERO)
 	for i in range(game.weather.particle_count()):
-		var speed=150.0 if sky=="Rain" else 24.0
-		var drift=30.0 if sky=="Rain" else 8.0
+		var speed=150.0 if sky=="Rain" else 100.0 if game.weather.blizzard() else 24.0
+		var drift=30.0 if sky=="Rain" else 65.0 if game.weather.blizzard() else 8.0
 		var at=origin+Vector2(fposmod(i*137+clock*drift,view.x),fposmod(i*97+clock*speed,view.y))
 		if game.weather.covered_at(at): continue
 		if sky=="Rain": draw_line(at,at+Vector2(4,13),Color("aacede70"),1)
