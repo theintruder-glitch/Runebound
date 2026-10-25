@@ -21,8 +21,9 @@ func step() -> int:
 func objective() -> String:
  if not game.contracts.objective().is_empty(): return game.contracts.objective()
  if not game.hero.exploration.target.is_empty(): return game.exploration.objective()
+ if not game.chapter.objective().is_empty(): return game.chapter.objective()
  match step():
-  0: return "Gather 6 Wood · Approach a labeled tree"
+  0: return "Gather 6 Wood · Approach a labeled woodpile"
   1: return "Build a Campfire · Open Camp"
   2: return "Cook berries · Stand by a lit fire"
   3: return "Build a Shelter · Make 6 Planks and 2 Rope"
@@ -46,13 +47,14 @@ func active() -> bool:
  return not boss.is_empty() and not boss.dead and game.enemies.has(boss)
 func interaction() -> String:
  if game.hero.dungeon!=null: return ""
- if game.player_position().distance_to(game.exploration.RUINS)<80: return "ENTER MOSSVEIL RUINS"
+ if game.player_position().distance_to(game.exploration.RUINS)<80: return "MOSSVEIL RUINS · CHOOSE EXPEDITION" if game.chapter.stage()==3 else "ENTER MOSSVEIL RUINS"
  if game.player_position().distance_to(SHRINE)>80: return ""
  if state().warden: return "CLAIM SHRINE REWARD" if not state().reward else "ELDER SHRINE · RESTORED"
  if active(): return ""
  return "AWAKEN THE ROOT WARDEN"
 func interact() -> void:
  if game.player_position().distance_to(game.exploration.RUINS)<80:
+  if game.chapter.stage()==3: game.hud.show_character("chapter");return
   game.enter_dungeon(); return
  if state().warden:
   claim_reward(); return

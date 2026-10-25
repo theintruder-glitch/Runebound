@@ -54,6 +54,10 @@ var new_character_pending = false
 var import_dialog: FileDialog
 var export_dialog:FileDialog
 var desktop_hint:Label
+var advanced
+var spell_ui
+const SpellUI=preload("res://scripts/spell_ui.gd")
+const SurvivalUI=preload("res://scripts/survival_ui.gd")
 
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -116,7 +120,7 @@ func _ready() -> void:
 	dash_button.add_theme_font_size_override("font_size",13)
 	for name_value in ["fire","frost","heal"]:
 		var spell = name_value
-		spell_buttons[spell] = action(buttons,{"fire":"FIRE\n12 MP","frost":"FROST\n20 MP","heal":"HEAL\n25 MP"}[spell],func():game.cast(spell))
+		spell_buttons[spell] = action(buttons,{"fire":"FIRE\n12 MP","frost":"FROST\n20 MP","heal":"HEAL\n25 MP"}[spell],func():game.spellbook.request_slot(["fire","frost","heal"].find(spell)))
 		spell_buttons[spell].add_theme_font_size_override("font_size",11)
 		spell_buttons[spell].add_theme_color_override("font_color",{"fire":Color("ffc38f"),"frost":Color("a4dcf4"),"heal":Color("b4e8b5")}[spell])
 	interaction = action(buttons,"OPEN CHEST",func():game.interact())
@@ -152,7 +156,7 @@ func _ready() -> void:
 	panel.add_child(column)
 	var head = HBoxContainer.new()
 	column.add_child(head)
-	panel_title = label(head,"Runebound",25,Color("efe5c6"))
+	panel_title = label(head,"VYRNSPIRE",25,Color("efe5c6"))
 	panel_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action(head,"X",back)
 	tabs = HBoxContainer.new()
@@ -169,21 +173,23 @@ func _ready() -> void:
 	import_dialog = FileDialog.new()
 	import_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
 	import_dialog.access = FileDialog.ACCESS_FILESYSTEM
-	import_dialog.filters = PackedStringArray(["*.json;Runebound save;application/json,text/plain,application/octet-stream"])
+	import_dialog.filters = PackedStringArray(["*.json;VYRNSPIRE save;application/json,text/plain,application/octet-stream"])
 	import_dialog.use_native_dialog = true
 	import_dialog.file_selected.connect(import_save)
 	add_child(import_dialog)
 	export_dialog=FileDialog.new()
 	export_dialog.file_mode=FileDialog.FILE_MODE_SAVE_FILE
 	export_dialog.access=FileDialog.ACCESS_FILESYSTEM
-	export_dialog.filters=PackedStringArray(["*.json;Runebound character;application/json"])
+	export_dialog.filters=PackedStringArray(["*.json;VYRNSPIRE character;application/json"])
 	export_dialog.use_native_dialog=true
-	export_dialog.current_file="Runebound-Character.json"
+	export_dialog.current_file="VYRNSPIRE-Character.json"
 	export_dialog.file_selected.connect(export_save)
 	add_child(export_dialog)
-	desktop_hint=label(buttons,"WASD / arrows: move · E: use · C: camp · I: gear · M: map · F11: fullscreen",12,Color("bbcbb1"))
+	desktop_hint=label(buttons,"WASD move · E use · V survival supplies · C camp · I gear · M map · F11 fullscreen",12,Color("bbcbb1"))
 	desktop_hint.mouse_filter=Control.MOUSE_FILTER_IGNORE
 	desktop_hint.visible=game.desktop.enabled
+	advanced=SurvivalUI.new();advanced.game=game;advanced.hud=self;advanced.setup()
+	spell_ui=SpellUI.new();spell_ui.game=game;spell_ui.hud=self;spell_ui.setup()
 	get_viewport().size_changed.connect(layout)
 	layout()
 
@@ -195,8 +201,8 @@ func label(parent: Node,text_value: String,font_size: int=15,color: Color=Color(
 	parent.add_child(result)
 	return result
 
-func action(parent: Node,text_value: String,callback: Callable,disabled: bool=false) -> Button:
-	var result = TouchActionScript.new() if parent==buttons and buttons!=null and not game.desktop.enabled else Button.new()
+func action(parent: Node,text_value: String,callback: Callable,disabled: bool=false,touch_action:bool=false) -> Button:
+	var result = TouchActionScript.new() if (parent==buttons or touch_action) and buttons!=null and not game.desktop.enabled else Button.new()
 	# Let native touch drags reach the enclosing ScrollContainer. It cancels
 	# pending button taps when a swipe starts, and provides inertial scrolling.
 	if not result is TouchActionScript:
@@ -223,6 +229,8 @@ func make_bar(parent: Node,color: Color) -> ProgressBar:
 	return bar
 
 func layout() -> void:
+	if advanced!=null: advanced.layout()
+	if spell_ui!=null: spell_ui.layout()
 	if game.desktop.enabled:
 		layout_desktop();return
 	var view = get_viewport_rect().size
@@ -301,6 +309,7 @@ func layout_desktop() -> void:
 	reset_stick();game.attack_held=false;game.desktop.clear_input()
 	top.size=view;buttons.size=view;stick.hide()
 	heading.position=Vector2(22,16);subheading.position=Vector2(22,42)
+	subheading.clip_text=true;subheading.size=Vector2(maxf(200,view.x-550),20)
 	hp.position=Vector2(22,72);hp.size=Vector2(240,18)
 	mp.position=Vector2(274,72);mp.size=Vector2(180,18)
 	xp.position=Vector2(22,96);xp.size=Vector2(432,4)
@@ -309,8 +318,8 @@ func layout_desktop() -> void:
 	top.get_node("Gear").position=Vector2(view.x-158,16);top.get_node("Gear").size=Vector2(80,44)
 	top.get_node("Pause").position=Vector2(view.x-66,16);top.get_node("Pause").size=Vector2(44,44)
 	var hotbar=[attack_button,dash_button,spell_buttons.fire,spell_buttons.frost,spell_buttons.heal,skill_button,auto_button]
-	var widths=[112,104,88,88,88,120,80]
-	var x=view.x/2-364
+	var widths=[104,96,112,112,112,120,72]
+	var x=view.x/2-388
 	for i in range(hotbar.size()):
 		for state in ["normal","hover","pressed","disabled","focus"]:
 			var style=theme.get_stylebox(state,"Button").duplicate()
@@ -323,7 +332,7 @@ func layout_desktop() -> void:
 	build_tools.get_child(0).text="[R] ROTATE";build_tools.get_child(1).text="[Esc] CANCEL"
 	desktop_hint.position=Vector2(22,view.y-110);desktop_hint.size=Vector2(view.x-44,22)
 	desktop_hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
-	objective_label.position=Vector2(22,160);objective_label.size=Vector2(view.x-44,38)
+	objective_label.position=Vector2(22,160);objective_label.size=Vector2(view.x-330,54)
 	boss_bar.position=Vector2(view.x/2-150,204);boss_bar.size=Vector2(300,12)
 	toast_label.position=Vector2(40,view.y*.36);toast_label.size=Vector2(view.x-80,90)
 	panel.position=Vector2(maxf(18,(view.x-860)/2),20);panel.size=Vector2(minf(view.x-36,860),view.y-40)
@@ -354,10 +363,22 @@ func _process(dt: float) -> void:
 			for enemy in trial_foes:
 				boss_bar.max_value+=enemy.max_hp
 				boss_bar.value+=enemy.hp
+		if game.expedition.enabled() and not game.forest.active() and not game.exploration.active() and game.build_recipe.is_empty():
+			objective_label.text="SURVIVAL · "+("Chapter complete · your home awaits" if game.hero.needs.won else "Build a home · harvest food · survive 5 days · clear the 5-floor ruins")
+		if not game.fishing.objective().is_empty() and game.build_recipe.is_empty() and not game.forest.active() and not game.exploration.active(): objective_label.text=game.fishing.objective()
+		if game.build_recipe.is_empty() and game.hero.exploration.target.is_empty() and game.hero.contracts.target.is_empty() and game.hero.angler.target.is_empty() and not game.chapter.objective().is_empty(): objective_label.text=game.chapter.objective()
+		if game.forge.active():
+			objective_label.text=game.forge.objective();boss_bar.visible=true;boss_bar.max_value=0;boss_bar.value=0
+			for enemy in game.forge.foes:
+				boss_bar.max_value+=enemy.max_hp
+				if not enemy.dead: boss_bar.value+=enemy.hp
+		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
+		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
+		spell_ui.update_targeting()
 		var phase = Data.phase(game.hero.worldTime) if game.hero.dungeon==null else "Dungeon"
 		if phase!=shade_phase:
 			shade_phase = phase
-			shade.visible = phase in ["Night","Dusk"]
+			shade.visible = phase in ["Night","Dusk"] and not game.desktop.enabled
 			shade.color = Color("07183355") if phase=="Night" else Color("6b405b22")
 
 func toast(text_value: String,duration: float=3) -> void:
@@ -372,14 +393,16 @@ func reset_stick() -> void:
 	if stick!=null:
 		stick.reset()
 	if buttons!=null:
-		for child in buttons.get_children():
+		var touch_controls=buttons.get_children()
+		if spell_ui!=null and spell_ui.aim_controls!=null: touch_controls.append_array(spell_ui.aim_controls.get_children())
+		for child in touch_controls:
 			if child.get_script()==TouchActionScript:
-				child.finger = -1
+				child.reset()
 
 func blocks_world_pointer(at:Vector2) -> bool:
 	if overlay.visible: return true
 	for child in top.get_children()+buttons.get_children():
-		if (child is BaseButton or child==build_tools) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
+		if (child is BaseButton or child in [build_tools,stick,spell_ui.aim_controls]) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
 	return false
 
 func update_hud() -> void:
@@ -388,7 +411,8 @@ func update_hud() -> void:
 	var h = game.hero
 	heading.text = "%s · LV %d" % [h.className.to_upper(),h.level]
 	heading.add_theme_font_size_override("font_size",14 if h.className.length()<12 else 12)
-	subheading.text = ("Endless Dungeon · Floor %d" % h.dungeon.floor if h.dungeon!=null else game.exploration.REGIONS[game.exploration.region_at(game.player_position())].name)+" · "+game.weather.season()+" · "+game.weather.sky()+" · "+Data.phase(h.worldTime)
+	subheading.text = (("Survival Ruins · %d / 5" if game.expedition.enabled() else "Endless Dungeon · Floor %d") % h.dungeon.floor if h.dungeon!=null else game.exploration.REGIONS[game.exploration.region_at(game.player_position())].name)+" · "+game.weather.season()+" · "+game.weather.sky()+" · "+Data.phase(h.worldTime)
+	if game.chapter.story_run(): subheading.text="The Hollow Root · %s · %d / 3" % [game.chapter.FLOORS[h.dungeon.floor-1],h.dungeon.floor]
 	hp.max_value = Data.max_hp(h)
 	hp.value = h.hp
 	mp.max_value = Data.max_mp(h)
@@ -404,19 +428,13 @@ func update_hud() -> void:
 	skill_button.disabled=game.abilities.cooldown>.1 or h.mp<skill.cost or not game.build_recipe.is_empty()
 	auto_button.text = "AUTO\nON" if h.auto else "AUTO\nOFF"
 	dash_button.text = "%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "DASH"
-	for key in spell_buttons:
-		var cost = {"fire":12,"frost":20,"heal":25}[key]
-		var cooldown = game.spell_cooldowns[key]
-		spell_buttons[key].text = "%.1fs" % cooldown if cooldown>.1 else key.to_upper()+"\n%d MP" % cost
-		spell_buttons[key].disabled = cooldown>.1 or h.mp<cost
 	if game.desktop.enabled:
 		attack_button.text="[LMB] ATTACK\nSpace"
 		dash_button.text="[Shift] DASH\n"+("%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "Right click")
 		skill_button.text="[Q] "+skill.name+"\n"+("%.1fs" % game.abilities.cooldown if game.abilities.cooldown>.1 else "%d MP" % skill.cost)
 		auto_button.text="[T] AUTO\n"+("ON" if h.auto else "OFF")
-		for i in range(3):
-			var key=["fire","frost","heal"][i];var cooldown=game.spell_cooldowns[key]
-			spell_buttons[key].text="[%d] %s\n" % [i+1,key.to_upper()]+("%.1fs" % cooldown if cooldown>.1 else "%d MP" % {"fire":12,"frost":20,"heal":25}[key])
+	advanced.update()
+	spell_ui.update()
 	if h.dungeon!=null:
 		queue_redraw()
 
@@ -454,13 +472,13 @@ func show_title(has_save: bool) -> void:
 	current_page = "title"
 	top.hide()
 	buttons.hide()
-	clear_content("RUNEBOUND",false)
-	paragraph("THE HEART OF MOSSVEIL",13,Color("89d7b0"))
+	clear_content("VYRNSPIRE",false)
+	paragraph("FORGE YOUR LEGEND",13,Color("89d7b0"))
 	paragraph("Build your home beneath the trees. Follow the call of an ancient shrine. Face the Root Warden and awaken your hidden power.",21,Color("ece2c4"))
-	paragraph("Free roaming · Offline · Random encounters\nVersion 0.12.0 · Android Edition",13)
+	paragraph("Survival chapter · Classic adventure · Offline\nVersion "+str(ProjectSettings.get_setting("application/config/version")),13)
 	if has_save:
 		action(content,"Continue journey",func():game.start_character(Data.read_save()))
-	action(content,"Begin a new journey",func():show_classes(true))
+	action(content,"Begin a new journey",func():advanced.show_modes(true))
 	action(content,"Import a character save",choose_import)
 	if game.desktop.enabled: action(content,"Laptop settings and controls",show_desktop_settings)
 	paragraph("This Godot edition has its own save. To bring a character from v0.2, use the included Save Transfer update and export your character first.",12)
@@ -483,13 +501,18 @@ func show_pause(message: String="") -> void:
 	clear_content("A moment of rest",false)
 	if not message.is_empty():
 		paragraph(message,17,Color("e5bd8d"))
-	paragraph("Version 0.12.0 · Android Edition",12)
+	paragraph("Version "+str(ProjectSettings.get_setting("application/config/version")),12)
 	paragraph(game.weather.summary(),13)
 	paragraph("Level %d %s · %d kills · %d chests" % [game.hero.level,game.hero.className,game.hero.kills,game.hero.stats.chests])
 	action(content,"Resume journey",resume)
+	action(content,"Spellbook · equip slots 1 / 2 / 3",func():show_character("spells"))
+	action(content,"Game mode · "+("Survival" if game.expedition.enabled() else "Classic adventure"),func():advanced.show_modes())
+	if game.expedition.enabled(): action(content,"Survival gauges and supplies",func():show_character("needs"))
 	paragraph("%d FPS · %d enemies · %d MB engine memory" % [Engine.get_frames_per_second(),game.enemies.size(),Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0],12)
+	action(content,"Enemy crowds: "+("Reduced · recommended" if game.reduced_crowds else "Standard"),func():game.set_reduced_crowds(not game.reduced_crowds);show_pause())
 	action(content,"Low power: "+("ON · 30 FPS" if game.low_power else "OFF · 60 FPS"),func():game.set_low_power(not game.low_power);show_pause())
 	action(content,"Auto pickup: "+("ON" if game.survival.auto_pickup else "OFF"),func():game.survival.set_auto_pickup(not game.survival.auto_pickup);show_pause())
+	action(content,"Graphics · "+game.graphics.quality,show_graphics_settings)
 	action(content,"Weather effects: "+("ON" if game.weather.particles_enabled else "OFF"),func():game.weather.toggle_particles();show_pause())
 	action(content,"Sound and music: "+("ON" if game.audio.enabled else "OFF"),func():game.audio.toggle();show_pause())
 	if game.desktop.enabled:
@@ -501,13 +524,25 @@ func show_pause(message: String="") -> void:
 	action(content,"Trader Mara",func():show_character("trader"))
 	action(content,"Quest board and active jobs",func():show_character("quests"))
 	action(content,"World map",func():show_character("map"))
+	action(content,"Recover stuck character",show_position_recovery)
 	action(content,"Equipment and character",func():show_character("gear"))
 	action(content,"Realm and dungeons",func():show_character("realm"))
 	action(content,"Copy save to clipboard",func():DisplayServer.clipboard_set(JSON.stringify(game.hero));toast("Save copied. Paste it into a text file to back it up.",5))
 	action(content,"Export character save",choose_export)
 	action(content,"Save and title screen",func():game.save_game();show_title(true))
 
+func show_position_recovery() -> void:
+	game.pause_game();current_page="recovery";clear_content("Recover position",false)
+	var at=game.player_position()
+	paragraph("Position: %.0f, %.0f · %s" % [at.x,at.y,game.exploration.REGIONS[game.exploration.region_at(at)].name],14)
+	paragraph("If movement is stuck, return to the original Mossveil camp. Your levels, gear, gold, camp and quest progress are kept. Health, mana and survival supplies are not refilled. An active wilds trial is abandoned.",15)
+	if game.hero.dungeon!=null: paragraph("Inside a dungeon, use the entrance stairs to leave. Position recovery is available in the wilds.",14)
+	action(content,"Return to original camp · keep my character",func():game.recover_stuck_character(),game.hero.dungeon!=null or game.hero.hp<=0)
+	action(content,"Cancel · stay here",show_pause)
+
 func back() -> void:
+	if game.playing and not game.spellbook.targeting.is_empty():
+		game.spellbook.cancel_target();return
 	if current_page=="title":
 		return
 	if game.hero.is_empty() and current_page=="laptop":
@@ -523,7 +558,7 @@ func back() -> void:
 func show_character(tab_value: String="gear") -> void:
 	game.pause_game()
 	current_page = tab_value
-	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","trader":"Mara’s camp market","farm":"Your garden plots"}[tab_value],tab_value not in ["map","quests","trader","farm"])
+	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter"])
 	match tab_value:
 		"gear": show_gear()
 		"stats": show_stats()
@@ -535,6 +570,12 @@ func show_character(tab_value: String="gear") -> void:
 		"quests": show_quests()
 		"trader": show_trader()
 		"farm": show_farm()
+		"needs": advanced.show_needs()
+		"kit": game.kit.show_menu()
+		"fishing": game.fishing.show_menu()
+		"chapter": game.chapter.show_menu()
+		"spells": spell_ui.show_spells()
+		"spellshop": spell_ui.show_shop()
 
 func show_classes(choosing: bool) -> void:
 	if choosing:
@@ -555,7 +596,7 @@ func show_classes(choosing: bool) -> void:
 			var current = not choosing and game.hero.className==class_value
 			action(content,"Choose "+class_value if choosing else "Current class" if current else "Become "+class_value,func():
 				if choosing:
-					game.start_character(Data.fresh(class_value))
+					game.start_character(advanced.fresh_character(class_value))
 				else:
 					game.hero.className = class_value
 					game.hero.hp = minf(game.hero.hp,Data.max_hp(game.hero))
@@ -668,7 +709,7 @@ func choose_import() -> void:
 func choose_export() -> void:
 	if game.hero.is_empty(): return
 	game.save_game()
-	export_dialog.current_file="Runebound-Character.json"
+	export_dialog.current_file="VYRNSPIRE-Character.json"
 	export_dialog.popup_centered_ratio(.85)
 
 func export_save(path:String) -> bool:
@@ -682,18 +723,33 @@ func export_save(path:String) -> bool:
 	paragraph("Character exported. Move the JSON to your other device, then choose Import a character save on its title screen." if success else "Export failed. Choose a writable folder and try again.",14,Color("c9dfa9") if success else Color("efad98"))
 	return success
 
+func show_graphics_settings() -> void:
+	game.pause_game();current_page="graphics";clear_content("Graphics",false)
+	paragraph("The new creature and environment art is included in every quality. Performance keeps lights off. Balanced adds ambient lighting and a few soft lights. Rich adds denser ground detail and atmosphere.",15)
+	paragraph("Low power caps lighting at two lights and keeps the existing 30 FPS limit. Start with Performance on your phone, then try Balanced. Save progress before a long playtest.",14)
+	for value in game.graphics.LEVELS:
+		var choice=value
+		action(content,choice+(" · selected" if game.graphics.quality==choice else ""),func():game.graphics.set_quality(choice);show_graphics_settings(),game.graphics.quality==choice)
+	action(content,"Back to pause",show_pause)
+
 func show_desktop_settings() -> void:
 	game.pause_game();current_page="laptop";clear_content("Laptop settings",false)
 	paragraph("WASD / arrows: move · Mouse: aim · Left click / Space: attack · Right click / Shift: dodge · E: use / place · R: rotate · Esc: cancel building or pause",15)
-	paragraph("1 / 2 / 3: Fire / Frost / Heal · Q: class skill · T: auto combat · C: camp · I: gear · M: map · F11: fullscreen",15)
+	paragraph("1 / 2 / 3: equipped spells · B: spellbook · V: survival · Q: class skill · T: auto combat · C: camp · I: gear · M: map · F11: fullscreen",15)
 	paragraph("Mouse aim gives directional sword swings, arrows and firebolts. Auto combat still targets nearby alerted enemies. Disable mouse aim for the original assisted targeting.",13)
 	action(content,"Mouse aim: "+("ON" if game.desktop.mouse_aim else "OFF · assisted targeting"),func():game.desktop.toggle_aim();show_desktop_settings())
 	action(content,"Fullscreen: "+("ON" if game.desktop.fullscreen else "OFF"),func():game.desktop.toggle_fullscreen();show_desktop_settings())
+	section("Graphics quality")
+	paragraph("Balanced adds day/night lighting, campfire and spell lights, detailed ground and fireflies. Rich adds more lights and detail. Performance turns lighting effects off.",13)
+	for value in game.graphics.LEVELS:
+		var choice=value
+		action(content,choice+(" · selected" if game.graphics.quality==choice else ""),func():game.graphics.set_quality(choice);show_desktop_settings(),game.graphics.quality==choice)
 	section("World view")
 	paragraph("Close makes characters larger. Balanced shows more of the world. Wide shows the most and uses more rendering work.",13)
 	for name_value in game.desktop.VIEWS:
 		var selected=name_value
 		action(content,selected+(" · selected" if selected==game.desktop.view_name else ""),func():game.desktop.set_view(selected);show_desktop_settings(),selected==game.desktop.view_name)
+	action(content,"Enemy crowds: "+("Reduced · recommended" if game.reduced_crowds else "Standard"),func():game.set_reduced_crowds(not game.reduced_crowds);show_desktop_settings())
 	action(content,"Frame cap: "+("30 FPS · battery saver" if game.low_power else "60 FPS"),func():game.set_low_power(not game.low_power);show_desktop_settings())
 	action(content,"Weather effects: "+("ON" if game.weather.particles_enabled else "OFF"),func():game.weather.toggle_particles();show_desktop_settings())
 	paragraph("To continue your phone character, update the phone app, use Pause → Export character save, move that JSON to the laptop, then Import a character save here. Saves are local; transferring does not automatically sync later progress.",13)
@@ -705,11 +761,11 @@ func import_save(path: String) -> void:
 	var error = parser.parse(FileAccess.get_file_as_string(path))
 	var data = parser.data if error==OK else null
 	if not data is Dictionary:
-		paragraph("That file is not a valid Runebound save.",15,Color("efad98"))
+		paragraph("That file is not a valid VYRNSPIRE save.",15,Color("efad98"))
 		return
 	var converted = Data.migrate(data)
 	if converted.is_empty():
-		paragraph("That file is not a supported Runebound character.",15,Color("efad98"))
+		paragraph("That file is not a supported VYRNSPIRE character.",15,Color("efad98"))
 		return
 	game.start_character(converted)
 	toast("Character imported. Your Godot journey is ready.",5)
@@ -730,6 +786,10 @@ func _draw() -> void:
 
 func show_camp() -> void:
 	var camp=game.survival
+	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
+	action(content,"Fishing · rod and catch journal",func():show_character("fishing"))
+	action(content,"Survival kit · craft and manage",func():show_character("kit"))
+	if game.expedition.enabled(): action(content,"Food, water and sleep",func():show_character("needs"))
 	paragraph(game.forest.objective(),15,Color("eddaaa"))
 	action(content,"Garden plots · %d ready" % game.farming.ready_count(),func():show_character("farm"))
 	action(content,"Trader Mara",func():show_character("trader"))
@@ -755,6 +815,7 @@ func show_camp() -> void:
 			var stored=PackedStringArray()
 			for material in nearby.get("stash",{}): stored.append("%s: %d" % [material,nearby.stash[material]])
 			text_in(body,"Stored: "+("Empty" if stored.is_empty() else " · ".join(stored)),12)
+			action(body,"Choose supplies to store or take",func():show_storage(nearby))
 			action(body,"Deposit carried materials",func():camp.transfer(nearby,true);show_character("camp"))
 			action(body,"Withdraw stored materials",func():camp.transfer(nearby,false);show_character("camp"))
 	match camp_page:
@@ -785,7 +846,7 @@ func show_camp() -> void:
 			var calendar=visual_panel("Turning Seasons",game.weather.summary(),"map",Color("b7dbbe"))
 			text_in(calendar,"A day lasts 10 minutes of active play; each season lasts two days. Menus and time away pause the calendar. Weather changes every two minutes and varies by region.",13)
 			text_in(calendar,"This season: +1 per harvest of "+", ".join(game.weather.GATHER_BONUS[game.weather.season()])+". All other materials keep their normal yield.",13)
-			text_in(calendar,"Roof or shelter + lit fire: +1 HP and +2 mana per second outside combat. Fire alone or warm tea: +1 mana per second. Bonuses do not stack. Rain and cold never drain health or slow movement.",13)
+			text_in(calendar,"Roof or shelter + lit fire: +1 HP and +2 mana per second outside combat. Fire alone or warm tea: +1 mana per second. Bonuses do not stack. Classic has no exposure damage. Survival has temperature damage and thirst or exhaustion penalties.",13)
 			action(content,"Resume opening guide",func():game.hero.contracts.target="";game.hero.exploration.target="";game.save_game();resume())
 			for key in game.exploration.REGIONS:
 				var region=key;var info=game.exploration.REGIONS[region];var journal=game.hero.exploration
@@ -837,8 +898,44 @@ func show_farm() -> void:
 		if not plot.get("crop","").is_empty(): text_in(body,"Moving keeps this crop. Harvest or clear it before dismantling.",11)
 	action(content,"Return to the wilds",resume)
 
+func show_storage(chest:Dictionary) -> void:
+	game.pause_game();current_page="storage";clear_content("Camp storage",false)
+	var why=game.survival.storage_reason(chest)
+	if not why.is_empty(): paragraph(why,15)
+	else:
+		paragraph("Choose a supply to store or take. You keep control of food, building materials and ingredients; nothing moves until you press a transfer button.",14)
+		var found=false
+		for material in game.survival.MATERIALS:
+			var carried=game.survival.count(material);var stored=int(chest.stash.get(material,0))
+			if carried==0 and stored==0: continue
+			found=true
+			var selected=material
+			action(content,"%s · carry %d / stored %d" % [selected,carried,stored],func():show_storage_item(chest,selected))
+		if not found: paragraph("Both your supplies and this chest are empty.",14)
+	action(content,"Back to camp",func():show_character("camp"))
+
+func show_storage_item(chest:Dictionary,material:String,quantity:int=1) -> void:
+	game.pause_game();current_page="storage_item";clear_content(material+" · Storage",false)
+	var camp=game.survival;var why=camp.storage_reason(chest)
+	if not why.is_empty():
+		paragraph(why,15);action(content,"Back to camp",func():show_character("camp"));return
+	paragraph("Carried: %d · In this chest: %d" % [camp.count(material),int(chest.stash.get(material,0))],16)
+	paragraph("Transfer quantity: %d" % quantity,15)
+	var row=HBoxContainer.new();content.add_child(row)
+	for amount in [1,5,10]:
+		var chosen=amount
+		action(row,str(chosen),func():show_storage_item(chest,material,chosen),quantity==chosen)
+	action(content,"Store %d %s" % [quantity,material],func():camp.transfer_item(chest,material,quantity,true);show_storage_item(chest,material,quantity),camp.transfer_amount(chest,material,true)<quantity)
+	action(content,"Take %d %s" % [quantity,material],func():camp.transfer_item(chest,material,quantity,false);show_storage_item(chest,material,quantity),camp.transfer_amount(chest,material,false)<quantity)
+	var deposit=camp.transfer_amount(chest,material,true);var withdraw=camp.transfer_amount(chest,material,false)
+	action(content,"Store maximum · %d" % deposit,func():camp.transfer_item(chest,material,deposit,true);show_storage_item(chest,material,quantity),deposit<=0)
+	action(content,"Take maximum · %d" % withdraw,func():camp.transfer_item(chest,material,withdraw,false);show_storage_item(chest,material,quantity),withdraw<=0)
+	paragraph("Transfers respect each stack's 99,999 limit. Ingredients stay in the chest until you take them; crafting uses carried supplies.",13)
+	action(content,"Back to chest",func():show_storage(chest))
+
 func recipe_card(recipe:String) -> void:
 	var camp=game.survival
+	if game.expedition.enabled(): action(content,"Food, water and sleep",func():show_character("needs"))
 	var definition=camp.RECIPES[recipe]
 	var why=camp.reason(recipe,false)
 	var kind=definition.get("kind",recipe)
@@ -848,6 +945,28 @@ func recipe_card(recipe:String) -> void:
 	action(body,("Place " if recipe in camp.STRUCTURES else "Make ")+recipe,func():
 		if recipe in camp.STRUCTURES: game.begin_build(recipe)
 		else: camp.craft(recipe);show_character("camp"),not why.is_empty())
+	if camp.batchable(recipe): action(body,"Choose quantity · "+recipe,func():show_craft_batch(recipe))
+
+func show_craft_batch(recipe:String,quantity:int=1) -> void:
+	var camp=game.survival
+	if not camp.batchable(recipe): return
+	game.pause_game();current_page="craft_batch";clear_content("Make "+recipe,false)
+	paragraph(camp.RECIPES[recipe].desc,14)
+	paragraph("Batch quantity: %d · Can make now: %d (limit 99)" % [quantity,camp.batch_limit(recipe)],15)
+	var row=HBoxContainer.new();content.add_child(row)
+	action(row,"−",func():show_craft_batch(recipe,quantity-1),quantity<=1)
+	for amount in [1,5,10]:
+		var chosen=amount
+		action(row,str(chosen),func():show_craft_batch(recipe,chosen),quantity==chosen)
+	action(row,"+",func():show_craft_batch(recipe,quantity+1),quantity>=99)
+	var maximum=camp.batch_limit(recipe)
+	action(content,"Use maximum available · %d" % maximum,func():show_craft_batch(recipe,maximum),maximum<1 or maximum==quantity)
+	paragraph(camp.batch_cost(recipe,quantity),14)
+	var why=camp.batch_reason(recipe,quantity)
+	if not why.is_empty(): paragraph(why,14,Color("efb392"))
+	paragraph("Only carried ingredients are used. Crafting does not eat the food or refill survival gauges. Nothing is spent until you confirm the full batch.",13)
+	action(content,"Make %d · %s" % [quantity,recipe],func():camp.craft_batch(recipe,quantity);show_craft_batch(recipe,quantity),not why.is_empty())
+	action(content,"Back to crafting",func():camp_page="Craft";show_character("camp"))
 
 func visual_panel(title:String,subtitle:String,kind:String,tint:Color) -> VBoxContainer:
 	var frame=PanelContainer.new()
@@ -870,6 +989,7 @@ func show_map() -> void:
 	var landscape=get_viewport_rect().size.x>get_viewport_rect().size.y
 	var layout_box=HBoxContainer.new() if landscape else VBoxContainer.new();content.add_child(layout_box)
 	map_widget=MapScript.new();map_widget.game=game;map_widget.selected=map_selection
+	map_widget.local_view=not map_widget.OVERVIEW.has_point(map_widget.position_in_wilds())
 	map_widget.custom_minimum_size.y=260 if landscape else 330
 	layout_box.add_child(map_widget)
 	var details=VBoxContainer.new();details.custom_minimum_size.x=180 if landscape else 0;details.size_flags_horizontal=Control.SIZE_FILL;layout_box.add_child(details)
@@ -879,6 +999,7 @@ func show_map() -> void:
 	action(details,"World overview",func():map_widget.local_view=false;map_widget.queue_redraw())
 	action(details,"Around me",func():map_widget.local_view=true;map_widget.queue_redraw())
 	action(details,"Resume journey",resume)
+	paragraph("Map opens around you beyond the central regions. Around me centers your location; World overview includes you and home. In a dungeon the arrow marks your wilds entrance.",12)
 	paragraph("White arrow: you · Gold squares: your camp
 Gold rings: completed · Gray markers: undiscovered
 Tap a marker, then Track selected.",11)
@@ -891,6 +1012,7 @@ func map_description(id:String) -> String:
 
 func show_quests() -> void:
 	var board=game.contracts
+	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
 	paragraph("Frontier noticeboard",19,Color("eddaaa"))
 	paragraph("%d/3 active · %d completed · Board: %s" % [board.data().active.size(),board.data().completed,"in the wilds" if game.hero.dungeon!=null else game.exploration.bearing(board.BOARD)],13)
 	if not board.near_board(): paragraph("Accept and turn in at the wooden board northwest of the starting camp. Review and track jobs from anywhere.",13)
@@ -938,6 +1060,8 @@ func show_quests() -> void:
 
 func show_trader() -> void:
 	var market=game.trader
+	action(content,"Speak with Mara · The Hollow Root",func():show_character("chapter"))
+	action(content,"Arcane tomes · buy and upgrade spells",func():show_character("spellshop"))
 	market.refresh()
 	paragraph("%d gold · %s" % [game.hero.gold,market.relation()],13)
 	paragraph("Stock level %d · Restocks in %ds of active play" % [market.data().level,market.restock_in()],12)

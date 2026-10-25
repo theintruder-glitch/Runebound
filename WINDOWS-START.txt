@@ -1,0 +1,21 @@
+VYRNSPIRE 0.24.0 — WINDOWS x64
+
+Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
+WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
+1/2/3: spells. Q: class skill. E: interact. C: camp. I: gear. M: map.
+V: Survival supplies. B: spellbook. Escape: pause/back. F11: fullscreen.
+Start-Low-Power.bat selects safe settings; Start-OpenGL.bat selects native OpenGL.
+
+Formerly Runebound. Existing Windows characters/settings remain in
+%APPDATA%\Godot\app_userdata\Runebound Godot. Keep that historical folder.
+Public application branding is VYRNSPIRE; the fixed old data path preserves your existing saves.
+Android uses the same original package/signing identity for updates.
+Pause > Export character save produces VYRNSPIRE-Character.json; old JSON exports still import.
+Camp > nearby Storage > Choose supplies to store or take adds selective transfers.
+Physical Windows executable startup, drivers/audio and sustained performance still need testing.
+
+Ash and Oath: after claiming Chapter I, speak with Mara in the Story journal. Complete the Emberforge sword + magic trial (prior wins count), read its inscription, defeat the Keeper and both embers, then return to Mara. Android/Windows use the same quest logic.
+
+Crowd Relief: Reduced crowds defaults ON, capping ambient wilds population at 6. Pause > Enemy crowds offers Standard (12). The frame cap is separate. Story/trial/dungeon objectives retain their enemies.
+
+Fieldcraft: all regional resource nodes and three story camps have distinct shaded artwork. Same art and gathering/quest behavior on Android and Windows. The atlas SVG and its deterministic generator are editable in the source.

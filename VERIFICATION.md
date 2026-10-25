@@ -1,3 +1,275 @@
+# 0.24.0 Fieldcraft verification
+
+Replaces prototype field props with sixteen original shaded SVG designs: twelve gathering materials, Broken Caravan wagon wreck, Silent Watch scout tent, Ashen Grove charred stump/sprout and a carved runic cache. Existing coordinates, resource IDs/yields/regrowth, auto pickup, walk-through behavior, clue data, story text and one-time rewards remain. Android package app.runebound.godot, original release certificate and pinned legacy save/settings directory remain. Version code 33 / 0.24.0-fieldcraft. Crowd Relief remains included.
+
+- Full source: 34 suite runs / **2,114 checks**, pass. Final label-placement refinement also passes chapter/Fieldcraft suites (107 checks).
+- Actual signed APK resources: 15 suites / **1,027 checks**, pass.
+- Actual Windows PCK: 15 suites / **819 checks**, pass under matching Linux Godot 4.5.1; this does not launch Windows EXE.
+- Signed ARM64 export: manifest/name/package/version/API/ABI, ZIP CRC, v2/v3 signing blocks and cryptographic signatures/original certificate, ELF and ZIP 16 KB alignment pass.
+- Additional legacy-name to VYRNSPIRE isolated save/settings directory probe passes.
+- Native Godot/Mesa Compatibility renderer inspected the atlas, caravan in portrait/landscape and other two story camps. Labels moved above the props after review. Dummy audio; initial-frame FPS counters in fixtures are not phone performance evidence.
+- Generator repeat produces identical SVG bytes; --check also runs in CI before the engine suites. Shell/Python syntax checks pass.
+
+Forty-eight new engine checks cover atlas dimensions/base texture budget, sixteen visible/distinct/clipped/padded designs, actual twelve-kind biome coverage, original gathering yield and harvested ID for every kind, all graphics qualities/no added Performance lights, unchanged character data, retained stationary scenery commands, unchanged caravan investigation location/one-time progress/immediate cached marker update, JSON persistence, readable larger wagon scale, both orientations and story-cache entry/position/one-time reward.
+
+One shared 512×512 texture adds 1 MiB base RGBA. Field props use one cached texture command each; outdoor story sites now draw in retained scenery instead of per-frame World primitives, with view culling. No new per-prop scene nodes, lights, shaders, collisions or animations. This bounds implementation cost; no Motorola FPS or memory profiler claim is made. Artwork remains editable in assets/field_props.svg and tools/build_gathering_assets.py; no external art was imported.
+
+Pending: physical-phone recognition/readability in mixed biomes, remaining overlaps, smoothness/heat/audio and actual Android install-over-old, native Windows EXE startup. CI is observed separately after commit. No commercial-ready or photorealistic rendering claim.
+
+## Previous milestones
+
+# 0.23.1 Crowd Relief verification
+
+User reported whole-screen slowdown when enemies accumulate. The source allowed 24/38 wilds enemies with rapid level/night-scaled spawns, and target queries checked expensive sight paths before rejecting out-of-range targets. This patch reduces ambient load and repeated decisions without changing the save schema, package app.runebound.godot, original signing identity or pinned legacy save/settings directory. Android code 32 / 0.23.1-crowd-relief.
+
+- Full source: 33 suite runs / **2,066 checks**, pass.
+- Actual signed APK resources: 14 suites / **979 checks**, pass.
+- Actual Windows PCK: 14 suites / **771 checks**, pass with Linux Godot 4.5.1; not native Windows EXE execution.
+- Signed ARM64 release exports and passes manifest/package/version/label/API/ABI, CRC, signing-block/original-certificate cryptographic checks and ELF/ZIP 16 KB alignment checks.
+- Native Godot/Mesa pause menus rendered and inspected in portrait/landscape; Reduced crowds visible and selected. Dummy audio and initial-frame FPS counters in those screenshots are not performance measurements.
+
+Thirty-one new checks exercise seeded spawning across all four regions, bounded packs, separate frame-cap/density settings, nearby-fight reinforcement suppression, wildlife exclusion, night/high-level spawn intervals, distant idle recycling without rewards, preserved active/burning/windup/named/dungeon foes, per-frame movement/status/attack timers, paused warnings, displacement-triggered steering, full-rate named/trial AI, nearest-visible/excluded/blocked targeting and persisted native setting actions in both orientations. Existing story/trial/dungeon rewards and objectives remain passing.
+
+Synthetic headless cave CPU fixture: same 600 measured ticks after 60 warmup ticks, pinned engine, seeded ordinary archers. Mean tick changed from 1,537.73 to 322.47 microseconds at six enemies and 5,490.27 to 948.94 at 24 enemies. The benchmark intentionally injects 24 to compare equal legacy-size loads; new ambient spawning cannot accumulate that many. One-run script simulation evidence, not GPU FPS, physical-phone smoothness or thermal proof. See PERFORMANCE.md and tests/benchmark_crowds.gd.
+
+Remaining: install-over-old and real touch/smoothness on Motorola Edge 2025, dungeon-specific remaining slowdowns, sustained heat/battery/audio and native Windows startup. User feedback is required to establish the reported slowdown is resolved. CI status is checked separately after commit; no hardware or commercial-readiness claim.
+
+## Previous milestones
+
+# 0.23.0 Ash and Oath verification
+
+Incremental update from 0.22.0. Public branding remains VYRNSPIRE. Android package `app.runebound.godot`, original release certificate and fixed legacy user directory remain unchanged. Android code 31 / 0.23.0-ash-and-oath. New optional `forge_chapter` state migrates old characters to an unstarted Chapter II; no reset of earlier progression.
+
+- Full source: 32 suite runs / **2,035 checks**, pass.
+- Actual signed APK resources: 13 suite runs / **948 checks**, pass.
+- Actual Windows PCK: 13 suite runs / **740 checks**, pass.
+- Isolated legacy-name to VYRNSPIRE save-path probe passes, retaining real character/backup/graphics data on Linux.
+- Signed ARM64 export passes actual manifest label/version/package/ABI/API, ZIP CRC, v2/v3 signing block and cryptographic signature, original certificate, ELF and ZIP 16 KB alignment checks.
+- Windows x64 export includes Vyrnspire.exe/Vyrnspire.pck and launchers; PCK tests run with Linux Godot 4.5.1, not the native Windows EXE.
+- Native Godot Compatibility/Mesa render inspected for Chapter II journal in portrait and landscape, plus actual binding encounter, objective, health bar and warning circles; dummy audio. This is not phone GPU/FPS evidence.
+
+Fifty-one new checks cover old-save defaults, invalid/order-inconsistent chapter imports, Chapter I gating, Mara location, one-time acceptance, real existing sword/magic trial completion, preserved regional relic priority, validated tracking, inscription and JSON persistence, blocked encounter space, three real foes, repeated-input protection, Hearthcall/trial exclusion, phase timing/radius, paused attacks, retreat/reload/missing-foe/defeat retry, full encounter completion, exact one-time rewards, full-bag reward claiming, veteran trial wins and native menu launch/resume in both orientations. Existing combat, crafting, storage, map recovery and survival suites remain passing.
+
+Fixed adjacent defects: the prior story's regional tracking action called a missing function; it now uses a validated helper. Android CI's upload glob now matches the renamed APK. Original private signing material was recovered from the supplied 0.15.0 archive for this local export and is excluded from the repository/source deliverable.
+
+Pending: physical Android install-over-old and existing-character continuity, real multi-touch/audio/focus/rotation, native Windows EXE/save continuity, sustained phone frame times/heat/battery, chapter pacing and encounter balance. CI status is checked separately after the source commit; package tests do not establish commercial-release readiness.
+
+## Previous milestones
+
+# 0.22.0 VYRNSPIRE / Camp Stores verification
+
+Public game branding is VYRNSPIRE. Android package app.runebound.godot, original signing certificate, character filename/schema and fixed historical user directory are retained. Android code 30 / 0.22.0-camp-stores. Original icon artwork remains as an editable historical asset; active icon uses a new V rune.
+
+- Full source: 31 suite runs / **1,984 checks**, pass.
+- Actual APK resources: 12 suites / **897 checks**, pass.
+- Actual Windows exported PCK: 12 suites / **689 checks**, pass using matching Linux Godot; this does not launch the Windows EXE.
+- Additional rename probe passes: create real legacy character/backup/graphics settings in an isolated profile, then launch the renamed project and verify identical OS user directory and retained contents. Linux runtime evidence; Windows path override follows the documented legacy capitalization and still requires native validation.
+- Signed ARM64 APK exports with actual application-label VYRNSPIRE, original certificate/v2-v3 signatures, code/name/ABI/API checks, ZIP CRC and ELF/ZIP 16 KB alignment. Windows x64 export uses Vyrnspire.exe/Vyrnspire.pck, new product metadata and updated launchers; stale generated Runebound executables are removed before packaging.
+- APK SHA-256: `032e754a4b7ca210a5a0ad6b5f08e04f809f861968f062a965cc39066d8814b2`.
+- Native Godot/Mesa title and storage menus inspected in portrait/landscape with dummy audio; this is not phone GPU/performance or Windows EXE evidence.
+
+Forty-two new checks cover public branding, export name, legacy directory settings, selective deposit/withdrawal, retaining carried food, validation without partial transfer, stack limits, bulk compatibility, actual saved chest contents, stale/remote/lookalike/removed/wall-blocked chest rejection and native UI transfer/maximum/capacity revalidation in both orientations. No save-schema change.
+
+Physical Android install-over-old, launcher icon caching/name refresh, actual existing-phone character continuity, native Windows EXE/save continuity, real touch feel and sustained FPS/heat/audio remain to be playtested. No commercial readiness conclusion is made by this implementation. The domain/site and repository name are not changed by this game rename.
+
+Godot path references used in implementation: https://docs.godotengine.org/en/4.5/tutorials/io/data_paths.html and the pinned 4.5.1-stable core/os/os.cpp and platform/android/os_android.cpp. Local engine probe is the direct Linux runtime evidence. CI/download-copy status is recorded in the verification bundle when available.
+
+## Previous milestones
+
+# 0.21.0 Camp Provisions verification
+
+Incremental update from v0.20.1. Original package app.runebound.godot, signing identity, app name and user://character.json remain. Android code 29 / 0.21.0-camp-provisions. No character-schema change.
+
+## Behavior covered
+
+Fifty new engine checks cover exact batch costs/output, entire-request failure without partial crafting, full-quantity shortages, zero/negative/excess quantities, unknown/gear/building rejection, aliased Reed rope output, 99-item/output-stack limits, food production without free healing/needs/time, tutorial cooking flag, actual save reload and existing food use. Every campfire cooking family and bench crafting is blocked through walls; usable alternative stations are found despite a closer blocked/unlit one. A moving structure cannot bypass single/batch recipe costs. Regional discovery gates remain. Native UI plus/minus, preset/maximum, cancel, paused preview, both orientations and stale confirmation revalidation pass.
+
+## Evidence and limits
+
+Final source/compiled APK/Windows-pack results, artifact hashes/signatures and CI state are recorded in the verification bundle. Portrait/landscape Godot/Mesa batch previews were inspected with dummy audio; this is not phone GPU/FPS evidence. User reports v0.20.1 recovery works; v0.21.0 physical install/upgrade, real touch feel, balance, sustained heat/battery/FPS, audio and native Windows EXE startup still require playtesting.
+
+## Previous milestones
+
+# 0.20.1 Position Recovery verification
+
+Patch from v0.20.0; package app.runebound.godot, app name, original signing key and user://character.json retained. Android code 28 / 0.20.1-position-recovery. No save-schema change and no art/content removal.
+
+## Reproduced and addressed
+
+The world map used fixed bounds (-3200,-3000 to 3200,3000) despite an endless world. A distant snowy position such as (-5200,-6200) projected outside it and the player arrow was explicitly clamped to a corner. The patch opens around distant players and expands the overview in stable blocks, showing actual position/home. Around me centers the arrow; it follows facing. Dungeon maps use the saved wilds entrance.
+
+The user's specific movement lock has not been reproduced from their actual device/save. Engine checks demonstrate functional touch movement in all four directions at Winter Oath and far-northwest snow, in both orientations. A separate reproducible failure occurs at extreme finite coordinates where single-precision vectors swallow normal frame movement; those positions are now repaired before nearby chunk generation. Blocked saved coordinates are also relocated; ordinary valid snowy saves keep their position.
+
+An explicit Pause recovery action returns to original camp while retaining inventory, equipped gear, level/XP, gold/essence/points, chapter/journey/stats, structures/materials, needs, HP/mana, bed location, deaths and play time. Confirmation/cancel, released input, actual save reload and subsequent movement are covered. Recovery stays paused so an injured/freezing character can review supplies. Active dungeons cannot be discarded by recovery.
+
+## Validation
+
+- Full source: 29 suite runs / **1,892 checks**, pass.
+- Actual signed APK extracted resources: 10 suites / **805 checks**, pass, including 93 new position/map/recovery checks.
+- Actual exported Windows PCK: 10 suites / **597 checks**, pass using matching Linux Godot 4.5.1; this does not execute the Windows EXE.
+- Signed ARM64 APK and Windows x64 package exported. APK manifest, original v2/v3 certificate/signatures, ZIP CRC and ELF/ZIP 16 KB alignment pass.
+- APK SHA-256: `88a8f808af6475c151802e94dbddbf6c2519ad3b147eebf5a1b6297d1dd21d6e`.
+- Native Godot/Mesa portrait/landscape distant-snow maps and recovery screen inspected; controls fit the native scrolling menu. Dummy audio/software renderer; captured fixture FPS does not measure phone performance.
+- CI status and downloadable-copy/readback evidence are recorded in the verification bundle when available. Automated touch dispatch is not a physical-phone test. The actual affected character, phone FPS/heat/audio and native Windows EXE startup still require player/device validation.
+
+## Previous milestones
+
+# 0.20.0 Dreadwood verification
+
+Continues v0.19.0. App name Runebound Godot, package app.runebound.godot, original release certificate and user://character.json are retained; Android code 27 / 0.20.0-dreadwood. No save schema, hitbox, combat damage, quest or enemy AI change.
+
+- Full source: **28 suite runs / 1,799 checks**, pass in Godot 4.5.1.
+- Actual signed APK extracted resources: **9 suites / 712 checks**, pass, including the 62 new graphics checks.
+- Actual Windows exported PCK: **9 suites / 504 checks**, pass using matching Linux Godot. This does not launch the Windows EXE.
+- Real signed ARM64 APK and Windows x64 EXE/PCK/ZIP exported. APK manifest, v2/v3 cryptographic signatures/original certificate, ZIP integrity, ELF 16 KB and ZIP 16 KB alignment pass.
+- APK SHA-256: `8ae1290060ed61724b8ca6790914af05d5095a30d569bd90dc9726e02aa09b39`.
+- Native Godot/Mesa renders inspected: Performance forest and Hollow Heart on portrait, Balanced boss encounter on landscape, plus a gallery of the actual creature assets. Dummy audio/software rendering; captured fixture FPS is not a phone measurement.
+- Asset generator Python syntax, repeatable SVG regeneration, shell syntax and existing build workflow syntax checked. Existing sprites.svg and original credit/license files remain.
+
+## New checks
+
+All 13 atlas cells contain artwork with transparent margins and clipped sampling. Each creature selects its own design; named Root Warden and Hollow Heart select unique designs; bosses are larger visually. Creature atlas is 640×480 and environment atlas 512×192 (under 1.7 MiB raw RGBA total, excluding engine overhead). Environment entries use their new atlas. Phone Graphics controls fit both orientations and pause gameplay. All qualities retain creature art; Performance turns lights off, battery saver bounds enabled lights, and Android quality choices survive reinitialization. Graphics changes leave character JSON unchanged. Dungeon tile count/collision layout is retained. Existing gameplay, movement, touch, chapter and progression suites pass.
+
+## Still pending
+
+Actual Motorola Edge 2025 / Android 16 install-over-existing-app, enemy readability/scare preference, sustained FPS/RAM/heat/battery, real multi-touch, hardware audio and native Windows launch. No physical-device performance gain or commercial readiness is claimed. GitHub CI status is separate from local results and is recorded in the verification bundle when available.
+
+## Previous milestones
+
+# 0.19.0 Enemy Tactics verification
+
+Incremental update from v0.18.0. Package app.runebound.godot, original signing identity, application name and user://character.json are retained. Android version code 26. Enemy steering is transient and changes no saved character fields.
+
+## Current evidence
+
+- Final signed ARM64 APK export succeeds; eight focused suites / **650 checks** pass against its actual extracted resources, including all 50 enemy-tactics/version checks.
+- Windows x64 export succeeds; eight suites / **442 checks** pass against the actual exported PCK with the matching Linux engine. This does not execute the Windows PE binary.
+- APK ZIP integrity, manifest code/name/ABI, ELF and ZIP 16 KB alignment, actual v2/v3 signature blocks and cryptographic signature verification pass. The downloadable copy independently verifies with original certificate SHA-256 `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`.
+- APK SHA-256: `c3584515b358994c77ff5cd5e72b044ec3ab73a0fd6b8bb6f696263374cb1404`.
+- Portrait/landscape ranged-warning renders were inspected using Godot Compatibility / Mesa software rendering with dummy audio. Warning line, target circle and mobile controls fit both orientations. These captures do not measure phone FPS.
+- Title/pause version labels now use project metadata, fixing the stale v0.15.0 label.
+- Shell syntax and Python compilation pass. Source-suite totals and GitHub CI state are recorded with the verification bundle after completion. No native Windows execution or physical Android playtest is claimed.
+
+## Behavior covered
+
+All five ranged types hold/retreat/approach at appropriate distances; blocked retreats stand ground and blocked sight uses the existing route. Real wilds and dungeon ticks exercise movement, including newly detected enemies before their first hit. Melee spacing, deterministic coincident spawns, speed bounds, dead neighbors, idle/returning/wildlife behavior and boss exclusions are checked. Locked shots do not retarget, moving out avoids damage, cover and disengagement cancel windups, hits still damage/animate, dodge/stealth protect, menus freeze timers and zero-time updates cannot resolve attacks. A dense 48-enemy steering fixture stays finite. Character JSON roundtrips unchanged.
+
+## Still needs device playtesting
+
+Motorola Edge 2025 / Android 16 install-over-existing-app, real multi-touch, readability during mixed encounters, chapter difficulty, sustained FPS/heat/battery/RAM, hardware audio and native Windows EXE startup remain unverified here. Prior user reports established basic v0.17 playability, not this update's hardware results. See PLAYTEST.md.
+
+## Previous milestones
+
+# 0.18.0 The Hollow Root verification
+
+This update adds a first playable Mossveil story chapter to v0.17.0. It preserves app.runebound.godot, the original signing certificate and save location. Android version code is 25.
+
+## Confirmed locally
+
+- The 26-suite source regression run passes (1,684 checks with the first 56 chapter checks). The chapter suite was subsequently expanded to **59 passing checks**, including reload during investigation, reload inside the story expedition, and no boss/reward duplication after reloading a defeated boss. The full updated suite contains 1,687 checks.
+- Signed Android export succeeds. Seven focused suites pass against the actual APK resources (597 checks with the initial chapter suite). The final 59-check chapter suite, 266 gameplay/save checks and 71 touch/combat checks also pass separately against the exported resources.
+- Windows x64 export succeeds. Seven compiled-PCK suites pass (389 checks with the initial chapter suite); the final 59-check chapter suite passes again against that same exported PCK. These are Linux-engine pack checks, not native Windows startup tests.
+- APK integrity, manifest, ARM64, 16 KB ELF/ZIP alignment, actual v2/v3 signing blocks, original certificate and unchanged artifact checksum through resource testing pass. No key, test save or migration secret is included in the APK or public source.
+- Actual rendered portrait Mara dialogue and Heart Chamber gameplay, plus landscape chapter journal, were inspected with Linux/Mesa software rendering. Buttons and text fit; the native journal scrolls. Audio was disabled for capture. Phone performance is not inferred from these captures.
+
+## Chapter behavior exercised
+
+Legacy saves gain an unstarted chapter without losing progress. Invalid field types, missing fields and unearned reward states are rejected. Mara proximity, acceptance, physical camp investigation, duplicate clue XP protection, clue persistence, rune translation and one-time preparation reward are checked. Story entry requires the ruins. Rune pulses damage the player, allow dodge protection and pause in menus. Optional caches pay once per floor/run. Actual enemy kills unlock three floors; the final boss changes its warning radius/windup below half health. Killing only the boss does not complete a chamber with survivors; reload does not duplicate that boss. Final stairs return to the wilds. Mara grants the completion reward once. Hearthcall respects the bed return point, saved active-time cooldown and enemy proximity, and never heals, creates water or advances time. Classic floor six and regular Survival floor-five completion remain intact. Journal widths and pausing are checked in both orientations.
+
+## User-reported and remaining work
+
+The user confirmed v0.17.0 launches and is playable, and reported its controls were good. That is basic user-reported playability of v0.17, not hardware validation of this new chapter. v0.18 installation, chapter pacing/difficulty/completion time, long-session phone heat/FPS/RAM/battery, hardware audio, native Windows startup and actual save-upgrade behavior still require playtesting. No hour-long duration or commercial-release readiness is claimed. Current GitHub CI results must be inspected separately.
+
+## Historical verification
+
+# 0.17.0 Focused Combat verification — 2026-10-24
+
+Continues v0.16.0 and the supplied v0.15.0 Godot source. Android remains primary. No application ID, save path, signing identity or character schema change.
+
+- **Source:** 25 isolated suite runs, **1,628 checks**, pass in Godot 4.5.1.stable.official.f62fdbde1, including **71 new touch/combat checks**. No script errors or failed assertions in passing test logs.
+- **Android compiled resources:** all 25 runs / **1,628 checks** pass against actual resources extracted from the signed APK. The export helper additionally runs six focused compiled-resource suites / **541 checks**, protects the APK checksum while tests run, and verifies its signature again afterward.
+- **Windows compiled PCK:** six suites / **333 checks** pass: release boot, fishing, Survival kit, prior stability, new touch/combat in forced mobile mode, and desktop spellbook. This executes the exported PCK using the matching Linux engine, not the native Windows executable.
+- **APK export:** actual ARM64 APK; app.runebound.godot; version code **24**; 0.17.0-focused-combat; minimum API 24; target API 35. ZIP integrity, native ELF 16 KB alignment, ZIP 16 KB alignment, actual v2/v3 signer-block presence and apksigner verification pass.
+- **Signing comparison:** the new APK's certificate matches the supplied signed v0.15.0 APK: SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. No new key was generated. Physical install-over-existing-app was not tested.
+- **Earlier artifact discrepancy:** the v0.16.0 APK copy presently in this workspace has no APK Signing Block and fails verification, conflicting with the earlier recorded success. Treat that APK as superseded; use the freshly verified v0.17.0 package. Independent signing-block checks and checksum protection now guard final output. A deliberately unsigned ZIP with the correct game contents is rejected by the verifier.
+- **Rendered phone QA:** inspected portrait and landscape target placement, valid green circles / blocked red circles, disabled CAST, controls clear of the joystick, and the forward melee hit pose, using native Godot drawing and Linux/Mesa software rendering. The capture fixture uses dummy audio; its shutdown reports audio playback objects retained by the engine, so no hardware-audio or leak-free runtime claim is made from these captures.
+- **Prior CI evidence:** v0.16.0 GitHub Actions run 40093299724 passed source tests and Windows export. Current-commit CI status is separate from these local results.
+
+## New behavior checked
+
+Separate movement/aim/confirm fingers; preview without spending; touch-to-world coordinates and drag ownership; release without casting; CAST exactly once at the chosen point; delayed real Meteor damage/burn; free cancellation; release over CAST without accidental confirmation; blocked targets and range limits; Back, dodge, focus, menu and layout cancellation; needs/time/movement remaining live while aiming; unavailable mana during preview; instant healing; canceled Android touches; forward-only melee; ordinary-enemy windup interruption and guard; boss/named/burn resistance to stun locking; short hit/cast recovery; visible missed attacks, weapon cooldowns, paused attack rejection and wildlife protection; unchanged character roundtrip.
+
+The older gameplay test now resumes play before its bow attack; paused attacks are correctly rejected. Legacy spells also tolerate a missing cooldown entry after a cooldown reset.
+
+## Remaining validation
+
+Real Motorola Edge 2025 / Android 16 installation, physical multi-touch feel, heat/battery/RAM/FPS, hardware audio, native Windows startup and graphics-driver behavior, long-session balance and remaining quest/dungeon content still need playtesting. No commercial-release completion claim is made. See PLAYTEST.md and ROADMAP_ANDROID.md.
+
+## Historical verification (retained; current artifact observations above take precedence)
+
+# 0.16.0 Shelter & Steel verification — 2026-10-24
+
+Continues the supplied v0.15.0 Godot project. The GitHub base was v0.12.0; the branch incorporates existing 0.13–0.15 systems as well as this stabilization milestone.
+
+- **Source:** all 24 isolated suite runs pass, **1557 checks**, with Godot 4.5.1.stable.official.f62fdbde1. Includes both movement/live-frame orientations, native touch scrolling, rotation, existing combat/magic, progression, fishing, farming, quests, trading, Survival/kit and **39 new stability checks**.
+- **Signed APK resources:** all 24 suites pass again, **1557 checks**, using the exact compiled resources extracted from the final signed APK, external test scripts and isolated profiles. Tests do not load source scripts in place of the exported gameplay.
+- **Windows compiled PCK:** release, fishing, kit and new stability suites pass, **217 checks**. This executes the actual exported data pack with the matching Linux engine; it does not execute the Windows PE binary.
+- **Android export:** real ARM64 release APK produced with JDK 17, official matching templates, Android 35 and Build-Tools 35.0.1. Package app.runebound.godot; code 23; name 0.16.0-shelter-and-steel; minimum API 24; target API 35. ZIP CRC, v2/v3 signature, ARM64-only native libraries, ELF 16 KB LOAD alignment and zipalign -P 16 checks pass. Tests, migration files and keystores are absent from the APK.
+- **Signing:** original certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. No replacement signing key was generated. App name, package ID and user://character.json path remain unchanged. Save recovery/migration tests preserve progression and good backups; physical install-over-existing-app remains pending.
+- **Windows export:** actual x64 EXE/PCK and full output ZIP produced from the matching official template. Output pack passes the checks above.
+- **Visual QA:** real rendered Linux/Mesa captures inspected at phone portrait and landscape aspect ratios: live controls, inventory and Survival supplies. The screenshots use the mobile interface and show readable, bounded controls/menus. Software-rendered Linux screenshots do not establish phone FPS, touchscreen feel or native Windows behavior. Audio used the dummy driver; hardware audio was not evaluated.
+- **Build checks:** shell syntax and Python compilation pass. Test runner handles historical completion formats and requires successful completion, no script/assertion errors and a valid exit. It isolates saves/configuration per suite. Build helpers validate actual artifacts and include compiled-resource regression checks.
+
+## New checks
+
+Thumb jitter/dead zone; independent finger ownership; mouse/touch contention; hiding/focus-loss release; legacy wetness default; malformed wetness rejection; corrupt/structurally invalid save recovery without clobbering the last good backup; failed-write reporting; actual calendar rain, cover drying, wet cold exposure, fire drying, paused weather needs and bounds; wall-blocked warmth/bed access; stale/dead/disengaged/sheltered attack handling; peaceful-wildlife bed rest; stale bed rejection; shared save roundtrip.
+
+## Limits and next verification
+
+No physical Android install/upgrade, native Windows executable launch, phone RAM/FPS/thermal/battery measurement, hardware audio or long-session balance test occurred here. GitHub Actions configuration is prepared; remote CI success must be observed separately. The spellbook suite requires --desktop because it tests mouse placement; the runner now supplies that mode. This milestone is ready for device playtesting, not a claim of commercial completion. See PLAYTEST.md and ROADMAP_ANDROID.md.
+
+## Historical verification (earlier versions; retained as supplied)
+
+# 0.15.0 Wild Waters verification
+
+82 dedicated fishing integration checks pass against the source, the compiled Windows pack and the exact game resources extracted from the signed Android APK. They exercise old-save migration, malformed records, actual rod menu callbacks and costs, real world casting, immediately saved bait, duplicate/early/late reeling, native game-tick bites, one-catch rewards, movement/dodge/attack/spell/pause/dungeon interruptions, hostile proximity, full stacks, all regional species, rare Starfin, exact one-time collection reward, save/JSON transfer, cooking costs and food/water effects, reachable fires, reserved construction space, tracking priority, menu bounds in phone portrait/landscape and desktop, and native drawing callbacks.
+
+Ten additional native touch checks pass against source and shipped Android game resources. They dispatch screen-touch plus Android-style emulated mouse events directly over the enabled Craft fishing rod button. Swipes scroll or respect list bounds without crafting; taps consume each ingredient once. Portrait and landscape are covered. These checks use a separate isolated fixture to avoid inheriting the unrelated garden test's scroll state.
+
+Regression suites pass with isolated profiles: 266 gameplay/save, 35 camp survival/building, 25 auto pickup, 73 Survival mode, 76 Survival kit, 107 farming, 109 desktop, 45 spellbook and 87 native menu scrolling checks. The menu suite includes the fishing journal. The shipped Windows pack also passes 20 general release checks. Passing logs contain no script errors or failed checks. The release fishing prompt test accepts the desktop E prefix as well as the mobile wording.
+
+Android release export and ZIP integrity checks pass. apksigner verifies v2/v3 signatures using the existing certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. Manifest: app.runebound.godot, code 22 / 0.15.0-wild-waters, minimum API 24, target API 35, ARM64. The native template was recovered from the previous APK after removing its old game resources and signing metadata, then exported and signed anew. Windows export uses the matching Godot 4.5.1 x64 runtime and current version metadata. Both shipped packs execute the new fishing logic in the engine.
+
+Limits: Android installation and native Windows executable startup, rendered appearance, physical touch feel, audio and device FPS have not been tested on hardware here. The new artwork is code-drawn in the existing style. Engine checks do not establish physical-device performance or long-term fishing balance. No rendered screenshot QA is claimed.
+
+## Historical verification
+
+# 0.14.0 Trailcraft verification
+
+76 dedicated kit checks pass against the source and again against both the compiled Windows pack and the exact resources extracted from the signed Android APK. They cover old-save defaults, invalid ownership/cooldown rejection, six-charge save validation, exact crafting costs, reachable workbench requirements, duplicate prevention, no free water, real spring refill and drink consumption, winter/summer exposure and live Survival ticks, cloak toggling, unchanged gear, bedroll costs and limits, hostile/wildlife checks, dungeons/building/defeat guards, persistence, active-time cooldown, normal bed regression, menu/button bounds and phone-gauge separation from class controls.
+
+Regression suites pass: 266 gameplay/save checks, 35 camp survival/building, 25 auto pickup, 107 farming, 109 desktop, 73 Survival mode, 45 spellbook and 83 touch-menu scrolling checks. The scrolling suite includes the kit menu in portrait and landscape. The compiled Windows pack also passes its 20 general release checks. Passing logs contain no script errors or failed checks. Tests use isolated local profiles. Initial concurrent runs of three suites ended without check output, so those suites were rerun sequentially to obtain their actual passing results.
+
+Android export succeeds. ZIP integrity, compiled kit/game/data/UI scripts and native ARM64 library are checked. apksigner verifies v2/v3 signatures with the unchanged certificate SHA-256 79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37. Manifest: app.runebound.godot, code 21 / 0.14.0-trailcraft, minimum API 24, target API 35. The clean native template was recovered from the previous signed APK with old game assets and signing metadata removed, then exported and signed anew.
+
+Windows x64 export succeeds; its exact compiled pack is exercised above. The native Windows executable and Android APK were not run on physical devices. Headless engine checks do not establish rendered appearance, audio, touch feel, Windows graphics-driver support or achieved device FPS. An X display could not open a listening socket here, so no rendered screenshot QA is claimed. The portable editable project has empty custom-template fields; source excludes build output and test profiles.
+
+## Historical verification
+
+# 0.13.0 Wilds & Wonders verification
+
+73 Survival mode checks pass: migration of old characters to Classic; malformed needs rejection; real active-play food/water/rest drain; pause behavior; spring proximity and E interaction; flask capacity and charge consumption; raw and cooked food consumption; tea; cold, winter, summer heat, snow, fire fuel and roof effects; real deprivation damage without passive recovery cancelling it; exhaustion movement penalty; safe bed rest and its supply costs; garden harvest objective; chapter goal reward and repeat protection; mode switching without refill; five-floor Survival completion and Classic floor-six regression; defeat recovery; responsive gauge and menu widths; JSON roundtrip.
+
+45 spellbook checks pass: legacy starter loadout; invalid ranks and slot rejection; merchant proximity, level, price and rank caps; slot swaps; preview without mana consumption; cancel with right click or Escape; confirmation spending once; delayed meteor damage and burn; placement wall blocking; cooldown; chain jumps; directional ice lance swept collision and slow; repeated blizzard pulses and expiry; Sunburst heal/damage; Ward's reduction in real enemy strikes and lack of deprivation immunity; pause and scene cleanup; native menu widths; hotbar labels and saved assignments. Quality controls and fixed light-pool behavior are checked.
+
+All 20 integration suite runs pass with isolated local profiles: auto pickup, desktop, safe desktop boot, gameplay/save, menu scrolling, rotation, movement in both orientations, live frames in both orientations, camp survival/building, opening forest, region/class expansion, presentation, contracts, weather, trader, farming, Survival mode and spellbook. There are no script errors in passing logs. The final hotbar, artwork and Survival fatal-damage adjustment were rechecked with the desktop, Survival mode and spellbook suites.
+
+Windows x64 release export succeeds. Its actual compiled Runebound.pck passes 20 release checks, including native keyboard/aimed input, auto pickup, menu pause, save export, enabling Survival and actual gauge drain, buying/equipping Meteor, preview/confirmation/expiry, Survival supplies, lighting-pool presence and native draw callbacks. PE architecture and 0.13.0.0 product metadata are verified.
+
+Limits: the Windows PE executable was not run on Windows in this environment. The compiled pack was loaded with Linux Godot using its exported laptop feature. A native rendered graphics display could not be opened here; no screenshot, Windows GPU FPS, audio, actual fullscreen behavior, file-picker or physical device validation is claimed. Balance of the five-day chapter and spell economy still needs playtesting. No new Android APK is included.
+
+## Historical verification
+
 # 0.12.0 Laptop Edition verification
 
 109 desktop checks passed with real native input events and engine callbacks. Coverage includes desktop detection; 1280x720 logical view; hidden touch joystick; native mouse hotbar; physical WASD input, release and normalized diagonals; world-space pointer aim; held attacks, cooldown repeats and release over UI; keyboard attacks; hotbar taps without duplicate world actions; preserving aim while hovering GUI; aimed arrows and Firebolt without a locked target; mana costs; shifted physical skill keys; forward sword arcs and miss animations; shelter restrictions; keyboard/right-mouse dodges and fixed dodge direction; R/E/Escape construction controls; camp/map/equipment shortcuts; automatic combat toggle; paused calendars; focus-loss handling; hotbar and menu bounds at 1366x768, 1920x1080 and 960x540; settings, F11 and view changes; saved aim/view preferences; 30/60 FPS caps; native Save-dialog configuration; filesystem export, validated shared JSON and real import callbacks with partial crops; failed-write reporting; and native world/reticle drawing. One additional safe-mode boot check confirms Close view, windowed preference, 30 FPS and disabled weather particles.

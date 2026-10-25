@@ -12,7 +12,7 @@ func run():
 	var scene=load("res://scenes/main.tscn").instantiate();root.add_child(scene)
 	await process_frame;await process_frame
 	check(scene.desktop.enabled,"Release pack boots the laptop interface without development flags")
-	check(ProjectSettings.get_setting("application/config/version")=="0.12.0","Release pack has current application metadata")
+	check(ProjectSettings.get_setting("application/config/version")=="0.24.0","Release pack has current application metadata")
 	scene.start_character(Data.fresh("Ranger"));scene.set_physics_process(false)
 	scene.hero.auto=false;scene.enemies.clear();scene.spawn_timer=100000
 	check(scene.farming.CROPS.size()==3 and scene.trader.offers().size()==13,"Release pack includes farming and trader systems")
@@ -36,6 +36,19 @@ func run():
 	check(scene.hud.export_save(path),"Release exports character JSON")
 	check(not Data.migrate(JSON.parse_string(FileAccess.get_file_as_string(path))).is_empty(),"Release export can be read by the shared save format")
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	check(scene.expedition.switch_mode("survival"),"Release can enable Survival on an existing character")
+	scene.hud.resume();scene.set_physics_process(false);var food=scene.hero.needs.hunger;scene.tick(.5)
+	check(scene.hero.needs.hunger<food,"Compiled release drains actual Survival gauges")
+	scene.set_player_position(scene.trader.POSITION);scene.hero.gold=1000;scene.hero.level=9
+	check(scene.spellbook.buy("meteor") and scene.spellbook.assign("meteor",0),"Release purchases and equips a new spell")
+	scene.set_player_position(Vector2.ZERO);scene.camera.position=Vector2.ZERO;scene.camera.force_update_scroll()
+	scene.desktop.pointer_seen=true;scene.desktop.pointer_screen=scene.get_canvas_transform()*Vector2(150,50)
+	check(scene.spellbook.request_slot(0) and scene.spellbook.targeting=="meteor","Compiled spell enters ground placement")
+	check(scene.spellbook.confirm() and scene.spellbook.zones.size()==1,"Compiled spell confirms a real placement")
+	scene.spellbook.tick(1);check(scene.spellbook.zones.is_empty(),"Release meteor resolves and expires")
+	check(scene.graphics.lights.size()==8,"Release includes bounded advanced lighting")
+	scene.hud.show_character("needs");await process_frame
+	check(scene.hud.current_page=="needs","Release opens Survival supplies")
 	scene.hud.resume();scene.world.profile_enabled=true;scene.world.refresh(true);scene.world.queue_redraw()
 	await process_frame;await process_frame
 	check(scene.world.profile_draw_samples.size()>0,"Release world executes native draw callbacks")

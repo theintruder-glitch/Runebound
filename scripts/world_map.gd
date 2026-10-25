@@ -5,6 +5,12 @@ var selected="forest"
 var local_view=false
 var world_bounds=Rect2(-3200,-3000,6400,6000)
 var markers:Dictionary={}
+var player_marker=Vector2.ZERO
+const OVERVIEW=Rect2(-3200,-3000,6400,6000)
+func position_in_wilds() -> Vector2:
+ var point=game.player_position() if game.hero.dungeon==null else Vector2(game.hero.dungeon.returnX,game.hero.dungeon.returnY)
+ return point if point.is_finite() else Vector2.ZERO
+func inner_size() -> Vector2: return (size-Vector2(20,20)).max(Vector2.ONE)
 func _ready() -> void:
  if custom_minimum_size.y<=0: custom_minimum_size.y=330
  size_flags_horizontal=Control.SIZE_EXPAND_FILL
@@ -12,15 +18,27 @@ func _ready() -> void:
  clip_contents=true
  resized.connect(queue_redraw)
 func canvas_point(at:Vector2) -> Vector2:
- return Vector2(10,10)+(at-world_bounds.position)/world_bounds.size*(size-Vector2(20,20))
+ return Vector2(10,10)+(at-world_bounds.position)/world_bounds.size*inner_size()
 func world_point(at:Vector2) -> Vector2:
- return world_bounds.position+(at-Vector2(10,10))/(size-Vector2(20,20))*world_bounds.size
+ return world_bounds.position+(at-Vector2(10,10))/inner_size()*world_bounds.size
 func refresh_bounds() -> void:
  if local_view:
-  world_bounds=Rect2(game.player_position()-Vector2(1000,1000),Vector2(2000,2000))
- else: world_bounds=Rect2(-3200,-3000,6400,6000)
+  world_bounds=Rect2(position_in_wilds()-Vector2(1000,1000),Vector2(2000,2000))
+ else:
+  var low=OVERVIEW.position;var high=OVERVIEW.end
+  for point in [position_in_wilds(),Vector2(game.hero.respawn.x,game.hero.respawn.y)]:
+   if not point.is_finite(): continue
+   low=low.min(point-Vector2(640,640));high=high.max(point+Vector2(640,640))
+  # Grow in stable blocks so walking does not continuously reframe the overview.
+  if low.x<OVERVIEW.position.x: low.x=floorf(low.x/1000)*1000
+  if low.y<OVERVIEW.position.y: low.y=floorf(low.y/1000)*1000
+  if high.x>OVERVIEW.end.x: high.x=ceilf(high.x/1000)*1000
+  if high.y>OVERVIEW.end.y: high.y=ceilf(high.y/1000)*1000
+  world_bounds=Rect2(low,high-low)
 func _draw() -> void:
  if game==null or game.hero.is_empty(): return
+ markers.clear()
+ if size.x<40 or size.y<40: return
  refresh_bounds()
  var colors={"forest":Color("305b43"),"caves":Color("46465c"),"swamp":Color("314e55"),"snow":Color("a6c5d0")}
  var inner=size-Vector2(20,20)
@@ -32,7 +50,6 @@ func _draw() -> void:
    if not game.hero.exploration.visited.get(id,false): color=color.darkened(.5)
    draw_rect(rect,color)
  draw_rect(Rect2(Vector2(10,10),inner),Color("b2c6b188"),false,2)
- markers.clear()
  for id in game.exploration.REGIONS:
   var info=game.exploration.REGIONS[id]
   marker(id,info.point,info.landmark,game.hero.exploration.discovered.get(id,false),game.hero.journey.warden if id=="forest" else game.hero.exploration.challenges.get(id,false))
@@ -43,9 +60,11 @@ func _draw() -> void:
  for structure in game.hero.survival.structures:
   var point=canvas_point(Vector2(structure.x,structure.y))
   if Rect2(Vector2(12,12),size-Vector2(24,24)).has_point(point): draw_rect(Rect2(point-Vector2(2,2),Vector2(4,4)),Color("e0d4a8"))
- var player=canvas_point(game.player_position())
- player=player.clamp(Vector2(16,16),size-Vector2(16,16))
- draw_colored_polygon(PackedVector2Array([player+Vector2(0,-9),player+Vector2(-6,6),player+Vector2(6,6)]),Color("f9f3d6"))
+ var player=canvas_point(position_in_wilds())
+ player_marker=player
+ draw_circle(player,12,Color("11232ed9"))
+ var angle=game.facing.angle()+PI/2
+ draw_colored_polygon(PackedVector2Array([player+Vector2(0,-9).rotated(angle),player+Vector2(-6,6).rotated(angle),player+Vector2(6,6).rotated(angle)]),Color("f9f3d6"))
  draw_string(ThemeDB.fallback_font,Vector2(size.x-29,25),"N",HORIZONTAL_ALIGNMENT_LEFT,-1,13,Color("f4e5b9"))
 func marker(id:String,pos:Vector2,title:String,known:bool,complete:bool) -> void:
  var point=canvas_point(pos)

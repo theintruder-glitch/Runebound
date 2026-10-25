@@ -104,6 +104,7 @@ func run() -> void:
 	scene.enemies.clear()
 	scene.shots.clear()
 	scene.attack_cooldown = 0
+	scene.playing = true
 	var bow = Data.fresh("Ranger").inventory[0]
 	scene.hero.inventory.append(bow)
 	scene.equip(bow)

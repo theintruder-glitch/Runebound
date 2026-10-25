@@ -1,42 +1,104 @@
-# Runebound — Android completion roadmap for Codex
+# Android-first completion roadmap
 
-**Baseline**: editable Godot v0.12.0 sources in this repository. Android-focused export preset uses ARM64, app ID `app.runebound.godot`, version code 19. No new Android APK has been built or verified by this handoff.
+Current source: **0.24.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
 
-## Priority 0: Make the current Android game buildable and testable
-- [ ] Verify exact Godot 4.5.x version required; install the matching editor and export templates, Android SDK/build-tools, and Java 17 in a supported build environment.
-- [ ] Run Godot project import and existing automated tests; repair actual failures without dropping features.
-- [ ] Audit `.github/workflows/android-debug.yml` and make it successfully publish **verified Android test APKs** on GitHub Actions. Do not claim an update-compatible APK unless signed by the original certificate.
-- [ ] Verify APK manifest: ARM64, `app.runebound.godot`, appropriate Android compatibility, versionCode, package identity, and signature.
-- [ ] Prepare a physical-phone test checklist for Motorola Edge 2025 / Android 16. Validate installation, boot, joystick and combat, rotation, scrolling, resume, saving and loading.
-- [ ] Preserve existing data during updates: require the exact old signing certificate for install-over-previous-build testing; if unavailable, use a fresh-install-only test flow and explain the limitation.
+## Completed in this milestone
 
-## Priority 1: Finish the Android experience
-- [ ] Fix joystick lag, drift and rotation-position errors; controls must respond continuously.
-- [ ] Improve touch control placement, spell buttons, screen scaling and accessible menu scrolling in both orientations.
-- [ ] Polish responsive combat animations, hit feedback, dodge cues and audio; profile CPU/GPU and RAM on a real phone.
-- [ ] Harden save migration, autosaves and reload/recovery with regression tests.
+- [x] Install pinned Godot 4.5.1 engine/templates, JDK 17 and Android SDK/build tools; produce signed ARM64 APK and Windows x64 package locally.
+- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 33.
+- [x] Isolate automated tests from developer saves and detect silent script errors, assertion failures, missing completion and timeouts.
+- [x] Repair touch lifecycle/dead zone and save recovery; verify rotation/scrolling and existing combat/magic in engine checks.
+- [x] Expand existing Survival mode with persisted wetness and cover/fire drying; fix heat/bed wall checks and stale enemy windups.
+- [x] Prepare GitHub Actions tests and both build targets; inspect rendered mobile layouts.
 
-## Priority 2: Expanded survival mode (planned, not shipped)
-- [ ] Offer **Adventure** (existing core gameplay) and separate **Survival** game modes.
-- [ ] Survival meters: hunger, thirst, fatigue/sleep, temperature/exposure; weather and biome conditions matter.
-- [ ] Add fair remedies: food, water, shelter, bedding, fires and useful crafted tools; avoid unplayable punishment loops.
-- [ ] Persist new meters and difficulty options without corrupting old Adventure saves.
-- [ ] Build automated checks around regeneration, depletion, shelter, seasons, save/load and mode switching.
+## Combat milestone completed
 
-## Priority 3: RPG expansion and content
-- [ ] Expand spell upgrade/buy/unlock paths, spell hotbar customization, gear and enchantment variety.
-- [ ] Make combat skills, enemies, treasure and region exploration more varied and legible on a phone.
-- [ ] Improve world objectives, quests, progression pacing, crafting and camp personalization.
-- [ ] Improve art consistency and readable visual effects while keeping an adjustable low-power mode.
-- [ ] Consider a separate endless/survival challenge mode, distinct from the main storyline, with clear player choice.
+- [x] Touch placement and CAST/CANCEL for learned ground spells, retaining multi-touch movement.
+- [x] Shared forward melee, visible misses, directional weapon sweeps, spell glow and guarded ordinary-enemy stagger.
+- [x] Add real touch-event tests and compiled Android/Windows regression coverage.
 
-## Definition of done for a milestone
-1. Changes committed and reviewable.
-2. Existing relevant tests pass; new feature tests included.
-3. An Android APK is successfully built and checked **if build tools and signing requirements are actually available**.
-4. Phone-specific manual validation recorded or explicitly noted as untested.
-5. Save compatibility and signing restrictions documented.
-6. The next unfinished milestone is named.
+## Fieldcraft visual milestone
 
-## First Codex task
-Read `AGENTS.md` and this roadmap. First prove the existing Android project imports, runs its tests and exports a verifiable APK in CI. Fix the build pipeline instead of only writing instructions. Preserve all existing features and the Android app ID. Do not introduce a new signing certificate as if it were an update to installed users. Report the exact verified APK artifact or the precise remaining blocker, and create a pull request.
+- [x] Recognizable covered-wagon wreck, ruined scout tent, charred grove and carved runic cache replace prototype markers.
+- [x] Twelve distinct shaded gathering props, including log piles, plants, ore, resin, mushrooms, reeds and crystals.
+- [x] One small shared editable atlas, cached outdoor drawing and original pickup/quest locations, yields and rewards retained.
+- [ ] Player-check resource recognition, labels and phone performance in mixed biomes.
+
+## Crowd Relief patch
+
+- [x] Respond to user-reported crowd slowdown with default six-enemy ambient cap, bounded wolf packs and nearby-fight spawn pressure.
+- [x] Slower bounded spawn cadence, far-idle cleanup, sampled ordinary steering and range-first target queries.
+- [x] Preserve active/status/boss/trial/dungeon encounters and full-rate movement/attacks; persist separate crowd/frame-cap preferences.
+- [ ] User-test the patch on Motorola Edge 2025; record remaining dungeon, spell or crowd slowdowns and long-session performance.
+
+## Ash and Oath milestone
+
+- [x] Playable second chapter links Mara, the existing Emberforge sword/magic trial, an inscription and a separate three-enemy binding encounter.
+- [x] Veteran trial completion, one-time rewards, persistent journal, retries after retreat/defeat/reload and shared mobile/Windows UI.
+- [x] Faster/wider Keeper phase, fixed story tracking helper and renamed Android CI artifact path.
+- [ ] Player-test chapter pacing, encounter balance and narrative clarity on Android.
+
+## VYRNSPIRE / Camp Stores milestone
+
+- [x] Rename public title/launcher, Windows product/executable, exports, UI and icon to VYRNSPIRE.
+- [x] Preserve historical package, release certificate and fixed legacy save/settings directory; exercise a real old-to-new Linux save-path probe.
+- [x] Selective chest transfers (1/5/10/maximum), capacity bounds, saved contents, native menu in both orientations.
+- [x] Preserve bulk transfers and prevent remote/stale/lookalike/wall-blocked chest operations.
+- [ ] Verify actual Android rename/install-over-old and native Windows character continuity with the player.
+
+## Camp Provisions milestone
+
+- [x] Food/parts batches with exact quantities, full-cost preview, maximum/stack bounds and execution revalidation.
+- [x] Preserve single-item gear/building actions and existing recipe/food progression.
+- [x] Reachable lit-fire/workbench selection, all-recipe wall checks and building-move cost-bypass repair.
+- [x] Native scrolling batch controls, both orientations and compiled-resource/save checks.
+- [ ] Tune Survival resource availability and batch limits through player feedback.
+
+## Position recovery patch
+
+- [x] Replace fixed world-map arrow clamping with player/home-inclusive stable bounds and automatic local view for distant positions.
+- [x] Add explicit paused camp recovery that keeps progression, supplies and saved bed location intact.
+- [x] Repair blocked/extreme saved coordinates before chunk generation; keep valid snow positions.
+- [x] Exercise real touch movement in both orientations, map movement and recovery/save reload.
+- [x] User reports v0.20.1 recovery works; original movement-lock cause remains unconfirmed.
+
+## Dreadwood art milestone
+
+- [x] Thirteen distinct shaded creature designs, including two unique story bosses; keep original art assets.
+- [x] New tree/rock/chest atlas, calmer ground texture, stone joints and cached dungeon details.
+- [x] Shared mobile/Windows quality menu, persisted Android selection and bounded lights.
+- [x] Exported-resource checks and rendered portrait/landscape art review.
+- [ ] Check scary/readable enemy silhouettes, mixed encounters and sustained phone heat/FPS with the player.
+
+## Enemy tactics milestone
+
+- [x] Shared ranged spacing in dungeon/wilds, blocked-retreat checks and pathfinder fallback.
+- [x] Local neighbor steering for ordinary attackers, deterministic overlap separation and capped speed.
+- [x] Source-linked ranged warnings, cover/reach cancellation and paused attack guards.
+- [ ] Tune encounter pressure and readability from actual phone playtests.
+
+## Story milestone
+
+- [x] Mara dialogue, three investigation camps, persistent journal and bearings.
+- [x] Separate three-floor expedition, warning runes, optional caches and two-phase named boss.
+- [x] One-time chapter rewards, safe Hearthcall and a lead toward the existing caves adventure.
+- [ ] Measure and tune chapter length, encounter difficulty and rewards through player testing.
+
+## Next: hardware playtest and fixes
+
+- [ ] Install over v0.15.0 on Motorola Edge 2025 / Android 16 and compare saved progress.
+- [ ] Exercise real multi-touch, both landscape directions, scrolling, focus/resume and file import/export dialogs.
+- [ ] Measure FPS/frame times, RAM, heat and battery during 30–60 minute sessions; tune limits from actual measurements.
+- [ ] Run Windows executable on the laptop; verify driver fallback, audio and save location.
+- [x] Observe successful GitHub Actions source/Windows validation for v0.16.0 (run 40093299724).
+- [ ] Configure original Android release-signing secrets for remote APK builds.
+
+## Then: RPG/content completion
+
+- [ ] Combat feel and balance pass: attack animation timing, hit feedback, spell placement on touch, enemy pack/ranged behavior and class progression.
+- [ ] Longer main quest arc, dungeon encounters/rewards, exploration goals and pacing; retain Classic endless dungeon as an option.
+- [ ] Building/crafting usability and Survival resource balance, including wetness pacing and access to water/food/rest.
+- [ ] Consistent art/audio, accessibility, onboarding and a broader final-playtest cycle.
+- [ ] Commercial packaging, rights/credits review and an explicit distribution/signing plan compatible with the existing prototype population.
+
+A passing engine suite is not physical-device validation or commercial-release readiness. Record real hardware results in PLAYTEST.md before closing those items.

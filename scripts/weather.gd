@@ -42,7 +42,7 @@ func covered_at(pos:Vector2) -> bool:
 func near_fire() -> bool:
 	if game.hero.dungeon!=null: return false
 	for structure in game.hero.survival.structures:
-		if structure.kind=="Campfire" and structure.fuel>0 and game.survival.at(structure).distance_to(game.player_position())<100:
+		if structure.kind=="Campfire" and structure.fuel>0 and game.survival.at(structure).distance_to(game.player_position())<100 and game.line_clear(game.player_position(),game.survival.at(structure)):
 			return true
 	return false
 
