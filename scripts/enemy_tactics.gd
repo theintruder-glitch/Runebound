@@ -50,3 +50,16 @@ func direction(e:Dictionary,base:Vector2) -> Vector2:
 func attack_reachable(e:Dictionary,pos:Vector2) -> bool:
 	var reach=330.0 if e.has("named") else 260.0 if e.type in RANGED else e.radius+100.0
 	return e.pos.distance_to(pos)<=reach and game.line_clear(e.pos,pos) and game.line_clear(e.pos,e.strike)
+
+func wilds_direction(e:Dictionary,dt:float) -> Vector2:
+	# Ordinary wilds steering is sampled; movement, damage and warnings stay per frame.
+	if e.boss or e.has("named") or e.has("trial"):
+		return direction(e,game.survival.enemy_direction(e,dt))
+	e["think_wait"]=e.get("think_wait",0.0)-dt
+	e["think_elapsed"]=e.get("think_elapsed",0.0)+dt
+	var moved=game.player_position().distance_squared_to(e.get("think_player",game.player_position()))>576
+	if e.think_wait<=0 or moved or not e.has("steering"):
+		e["steering"]=direction(e,game.survival.enemy_direction(e,e.think_elapsed))
+		e["think_player"]=game.player_position();e.think_elapsed=0.0
+		e.think_wait=.12+float(e.get("tactic_order",0)%3)*.01
+	return e.steering

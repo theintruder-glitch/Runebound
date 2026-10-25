@@ -74,6 +74,7 @@ var hud
 var camera: Camera2D
 var saved: Dictionary = {}
 var low_power = true
+var reduced_crowds = true
 var is_walking = false
 var screen_landscape = false
 
@@ -313,7 +314,7 @@ func tick(dt: float) -> void:
 	spawn_timer -= dt
 	if spawn_timer<=0 and hero.dungeon==null:
 		spawn_enemy()
-		spawn_timer = randf_range(1.4,2.8)/minf(1.8,1+hero.level*.025)*(.1/Data.spawn_chance(Data.phase(hero.worldTime)))
+		spawn_timer = roaming_spawn_interval()
 	tactics.prepare()
 	var in_combat = false
 	for enemy in enemies.duplicate():
@@ -339,12 +340,12 @@ func tick(dt: float) -> void:
 		var distance = enemy.pos.distance_to(at)
 		var direction = Vector2.ZERO
 		if hero.dungeon==null:
-			direction = survival.enemy_direction(enemy,dt)
+			direction = tactics.wilds_direction(enemy,dt)
 			in_combat = in_combat or enemy.aggro>0
 		elif distance<330 or enemy.aggro>0:
 			in_combat = true
 			direction = dungeon_direction(enemy,dt)
-		direction=tactics.direction(enemy,direction)
+		if hero.dungeon!=null: direction=tactics.direction(enemy,direction)
 		if enemy.stagger>0: direction=Vector2.ZERO
 		enemy["motion"]=direction
 		if (distance>enemy.radius+12 or enemy.get("neutral",false) or tactics.ranged(enemy)) and enemy.get("windup",0.0)<=0:
@@ -371,7 +372,7 @@ func tick(dt: float) -> void:
 				shot.life = 0
 				break
 	shots = shots.filter(func(s): return s.life>0)
-	enemies = enemies.filter(func(e): return not e.dead and (hero.dungeon!=null or e.pos.distance_to(at)<1600))
+	enemies = enemies.filter(func(e): return not e.dead and (hero.dungeon!=null or protected_encounter_enemy(e) or e.aggro>0 or e.burn>0 or e.pos.distance_squared_to(at)<810000))
 	for visual in visuals: visual.life-=dt
 	visuals=visuals.filter(func(v):return v.life>0)
 	for effect in effects:
@@ -416,9 +417,25 @@ func update_edge_camera(at: Vector2) -> void:
 		camera.force_update_scroll()
 		world.refresh()
 
+func roaming_limit() -> int: return 6 if reduced_crowds else 12
+
+func protected_encounter_enemy(enemy:Dictionary) -> bool:
+	return enemy.has("named") or enemy.has("trial") or enemy.has("dungeon_id") or enemy.get("chapter_boss",false) or enemy.get("forge_boss",false)
+
+func roaming_spawn_interval() -> float:
+	var base=randf_range(5,8) if reduced_crowds else randf_range(3,5)
+	return clampf(base/minf(1.3,1+hero.level*.01)*(.1/Data.spawn_chance(Data.phase(hero.worldTime))),3.0 if reduced_crowds else 2.0,10.0)
+
+func nearby_hostiles() -> int:
+	var count=0
+	for enemy in enemies:
+		if not enemy.dead and not enemy.get("neutral",false) and enemy.pos.distance_squared_to(player_position())<102400: count+=1
+	return count
+
 func spawn_enemy(boss_force: bool=false) -> Dictionary:
-	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or enemies.size()>=(24 if low_power else 38):
+	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or enemies.size()>=roaming_limit():
 		return {}
+	if not boss_force and nearby_hostiles()>=(3 if reduced_crowds else 5): return {}
 	var boss = boss_force or randf()<.035
 	var level_value = maxi(1,int(hero.level*.65+player_position().length()/1900+randf_range(0,2)))
 	var at = player_position()+Vector2.from_angle(randf()*TAU)*randf_range(290,570)
@@ -430,7 +447,7 @@ func spawn_enemy(boss_force: bool=false) -> Dictionary:
 		var pack=randi_range(1,2147483640)
 		enemy.pack=pack
 		for i in range(2):
-			if enemies.size()>=(24 if low_power else 38): break
+			if enemies.size()>=roaming_limit(): break
 			var spot=at+Vector2.from_angle(i*TAU/3)*42
 			if not walkable(spot,12): continue
 			var ally=create_enemy(spot,level_value,kind)
@@ -445,10 +462,10 @@ func closest(range_value: float,from: Vector2,excluded: Dictionary={},hostile_on
 	var best: Dictionary = {}
 	var distance = range_value
 	for enemy in enemies:
-		if (hostile_only and enemy.get("neutral",false)) or enemy.dead or (not excluded.is_empty() and is_same(enemy,excluded)) or not line_clear(from,enemy.pos):
+		if (hostile_only and enemy.get("neutral",false)) or enemy.dead or (not excluded.is_empty() and is_same(enemy,excluded)):
 			continue
 		var value = from.distance_to(enemy.pos)
-		if value<distance:
+		if value<distance and line_clear(from,enemy.pos):
 			distance = value
 			best = enemy
 	return best
@@ -985,9 +1002,12 @@ func burst(at: Vector2,color: Color,count: int) -> void:
 
 func load_performance_settings() -> void:
 	var config = ConfigFile.new()
+	reduced_crowds=true
 	low_power=not desktop.enabled
 	if config.load("user://performance.cfg")==OK:
 		low_power = bool(config.get_value("display","low_power",true))
+		var crowd_value=config.get_value("display","reduced_crowds",true)
+		reduced_crowds=crowd_value if crowd_value is bool else true
 	if desktop.enabled and "--safe-mode" in OS.get_cmdline_user_args():
 		low_power=true;weather.particles_enabled=false
 	Engine.max_fps = 30 if low_power else 60
@@ -996,10 +1016,20 @@ func set_low_power(enabled: bool) -> void:
 	low_power = enabled
 	Engine.max_fps = 30 if low_power else 60
 	var config = ConfigFile.new()
+	config.load("user://performance.cfg")
 	config.set_value("display","low_power",low_power)
 	config.save("user://performance.cfg")
 	if world!=null:
 		world.queue_redraw()
+
+func set_reduced_crowds(enabled:bool) -> void:
+	reduced_crowds=enabled
+	var config=ConfigFile.new();config.load("user://performance.cfg")
+	config.set_value("display","reduced_crowds",enabled);config.save("user://performance.cfg")
+	# Only recycle distant, idle ambient enemies. Active fights and quest foes stay.
+	if enabled and not hero.is_empty() and hero.dungeon==null:
+		enemies=enemies.filter(func(e):return protected_encounter_enemy(e) or e.aggro>0 or e.burn>0 or e.get("windup",0.0)>0 or e.pos.distance_squared_to(player_position())<422500)
+	spawn_timer=maxf(spawn_timer,3.0)
 
 func adapt_screen() -> void:
 	var window=get_window()

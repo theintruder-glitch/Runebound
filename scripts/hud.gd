@@ -509,6 +509,7 @@ func show_pause(message: String="") -> void:
 	action(content,"Game mode · "+("Survival" if game.expedition.enabled() else "Classic adventure"),func():advanced.show_modes())
 	if game.expedition.enabled(): action(content,"Survival gauges and supplies",func():show_character("needs"))
 	paragraph("%d FPS · %d enemies · %d MB engine memory" % [Engine.get_frames_per_second(),game.enemies.size(),Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0],12)
+	action(content,"Enemy crowds: "+("Reduced · recommended" if game.reduced_crowds else "Standard"),func():game.set_reduced_crowds(not game.reduced_crowds);show_pause())
 	action(content,"Low power: "+("ON · 30 FPS" if game.low_power else "OFF · 60 FPS"),func():game.set_low_power(not game.low_power);show_pause())
 	action(content,"Auto pickup: "+("ON" if game.survival.auto_pickup else "OFF"),func():game.survival.set_auto_pickup(not game.survival.auto_pickup);show_pause())
 	action(content,"Graphics · "+game.graphics.quality,show_graphics_settings)
@@ -748,6 +749,7 @@ func show_desktop_settings() -> void:
 	for name_value in game.desktop.VIEWS:
 		var selected=name_value
 		action(content,selected+(" · selected" if selected==game.desktop.view_name else ""),func():game.desktop.set_view(selected);show_desktop_settings(),selected==game.desktop.view_name)
+	action(content,"Enemy crowds: "+("Reduced · recommended" if game.reduced_crowds else "Standard"),func():game.set_reduced_crowds(not game.reduced_crowds);show_desktop_settings())
 	action(content,"Frame cap: "+("30 FPS · battery saver" if game.low_power else "60 FPS"),func():game.set_low_power(not game.low_power);show_desktop_settings())
 	action(content,"Weather effects: "+("ON" if game.weather.particles_enabled else "OFF"),func():game.weather.toggle_particles();show_desktop_settings())
 	paragraph("To continue your phone character, update the phone app, use Pause → Export character save, move that JSON to the laptop, then Import a character save here. Saves are local; transferring does not automatically sync later progress.",13)

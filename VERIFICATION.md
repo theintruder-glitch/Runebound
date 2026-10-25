@@ -1,3 +1,21 @@
+# 0.23.1 Crowd Relief verification
+
+User reported whole-screen slowdown when enemies accumulate. The source allowed 24/38 wilds enemies with rapid level/night-scaled spawns, and target queries checked expensive sight paths before rejecting out-of-range targets. This patch reduces ambient load and repeated decisions without changing the save schema, package app.runebound.godot, original signing identity or pinned legacy save/settings directory. Android code 32 / 0.23.1-crowd-relief.
+
+- Full source: 33 suite runs / **2,066 checks**, pass.
+- Actual signed APK resources: 14 suites / **979 checks**, pass.
+- Actual Windows PCK: 14 suites / **771 checks**, pass with Linux Godot 4.5.1; not native Windows EXE execution.
+- Signed ARM64 release exports and passes manifest/package/version/label/API/ABI, CRC, signing-block/original-certificate cryptographic checks and ELF/ZIP 16 KB alignment checks.
+- Native Godot/Mesa pause menus rendered and inspected in portrait/landscape; Reduced crowds visible and selected. Dummy audio and initial-frame FPS counters in those screenshots are not performance measurements.
+
+Thirty-one new checks exercise seeded spawning across all four regions, bounded packs, separate frame-cap/density settings, nearby-fight reinforcement suppression, wildlife exclusion, night/high-level spawn intervals, distant idle recycling without rewards, preserved active/burning/windup/named/dungeon foes, per-frame movement/status/attack timers, paused warnings, displacement-triggered steering, full-rate named/trial AI, nearest-visible/excluded/blocked targeting and persisted native setting actions in both orientations. Existing story/trial/dungeon rewards and objectives remain passing.
+
+Synthetic headless cave CPU fixture: same 600 measured ticks after 60 warmup ticks, pinned engine, seeded ordinary archers. Mean tick changed from 1,537.73 to 322.47 microseconds at six enemies and 5,490.27 to 948.94 at 24 enemies. The benchmark intentionally injects 24 to compare equal legacy-size loads; new ambient spawning cannot accumulate that many. One-run script simulation evidence, not GPU FPS, physical-phone smoothness or thermal proof. See PERFORMANCE.md and tests/benchmark_crowds.gd.
+
+Remaining: install-over-old and real touch/smoothness on Motorola Edge 2025, dungeon-specific remaining slowdowns, sustained heat/battery/audio and native Windows startup. User feedback is required to establish the reported slowdown is resolved. CI status is checked separately after commit; no hardware or commercial-readiness claim.
+
+## Previous milestones
+
 # 0.23.0 Ash and Oath verification
 
 Incremental update from 0.22.0. Public branding remains VYRNSPIRE. Android package `app.runebound.godot`, original release certificate and fixed legacy user directory remain unchanged. Android code 31 / 0.23.0-ash-and-oath. New optional `forge_chapter` state migrates old characters to an unstarted Chapter II; no reset of earlier progression.

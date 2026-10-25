@@ -1,6 +1,16 @@
-# VYRNSPIRE 0.23.0 — Ash and Oath
+# VYRNSPIRE 0.23.1 — Crowd Relief
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Crowd Relief
+
+Reduced crowds now defaults ON for existing and new installations, independently of the 30/60 FPS option. Ordinary roaming population is capped at **6** including wildlife and wolf-pack additions (previously 24/38). Standard, available under **Pause → Enemy crowds**, caps roaming at **12**. No class, item, biome or quest content is removed.
+
+Reduced mode stops ambient reinforcements when three hostiles are within 320 units, and clamps spawn attempts to at least three seconds even at night/high levels. Failed spawn attempts also wait before retrying. Standard uses a five-hostile threshold and at least two seconds. Ordinary idle enemies beyond 900 units are recycled without loot or kill credit; active fights, burning foes and named/objective enemies are retained. Switching the setting only recycles distant idle ambient enemies.
+
+Ordinary wilds steering is sampled about every 0.12–0.14 seconds and refreshes immediately after meaningful player displacement. Movement, collision, status effects, telegraphs and damage still run each physics frame. Named bosses, regional trials and dungeon AI retain full-rate updates. Targeting rejects out-of-range enemies before checking expensive line-of-sight paths. The crowd preference survives changes to the separate frame-cap option.
+
+Existing story/trial/dungeon encounter counts are preserved. Crowd settings control ambient wilds spawning, not required dungeon objectives. If a particular dungeon still lags on the phone, record its floor and encounter for the next measured optimization.
 
 ## Chapter II — Ash and Oath
 
@@ -66,7 +76,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.23.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **31**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.23.1.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **32**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

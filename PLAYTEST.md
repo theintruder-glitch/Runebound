@@ -1,3 +1,13 @@
+# Crowd Relief 0.23.1 — urgent phone checks
+
+The player reported severe slowdown when many enemies accumulate. This is user evidence of a performance problem, not an FPS measurement.
+
+1. Install over the previous game; keep existing data. Reduced crowds should already be ON in Pause.
+2. Walk through the forest and snow for 10 minutes. Check joystick response, scrolling and fighting wolves/archers; note whether crowds still cause slowdown.
+3. Test night and a busy fight. Ambient population should stay smaller; 30/60 FPS must not raise the crowd cap.
+4. Try the Hollow Root and Ash and Oath. Required encounters remain, attacks still warn, menus pause, rewards stay correct.
+5. If slowdown remains, report region/dungeon floor, approximate enemy count, active spells and whether the phone is hot. Native phone FPS/thermal/audio and Windows startup remain unmeasured here.
+
 # Ash and Oath 0.23.0 — new player checks
 
 - Install over the previous game; do not uninstall or clear data. Confirm your character, camp and graphics setting remain.
