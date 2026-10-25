@@ -5,6 +5,8 @@ const TacticsScript=preload("res://scripts/enemy_tactics.gd")
 var tactics
 const ChapterScript=preload("res://scripts/chapter.gd")
 var chapter
+const ForgeScript=preload("res://scripts/forge_chapter.gd")
+var forge
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
@@ -79,6 +81,7 @@ func _ready() -> void:
 	get_window().title="VYRNSPIRE"
 	tactics=TacticsScript.new();tactics.game=self
 	chapter=ChapterScript.new();chapter.game=self
+	forge=ForgeScript.new();forge.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
@@ -164,6 +167,7 @@ func set_player_position(at: Vector2) -> void:
 	hero.y = at.y
 
 func clear_scene() -> void:
+	if forge!=null: forge.reset()
 	if fishing!=null: fishing.reset()
 	if desktop!=null: desktop.clear_input();desktop.pointer_seen=false
 	build_recipe=""
@@ -265,6 +269,7 @@ func tick(dt: float) -> void:
 	cast_time=maxf(0,cast_time-dt)
 	forest.reset_if_abandoned()
 	exploration.tick(dt)
+	forge.tick(dt)
 	abilities.tick(dt)
 	contracts.tick(dt)
 	hero.worldTime += dt
@@ -412,7 +417,7 @@ func update_edge_camera(at: Vector2) -> void:
 		world.refresh()
 
 func spawn_enemy(boss_force: bool=false) -> Dictionary:
-	if hero.dungeon!=null or forest.active() or exploration.active() or enemies.size()>=(24 if low_power else 38):
+	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or enemies.size()>=(24 if low_power else 38):
 		return {}
 	var boss = boss_force or randf()<.035
 	var level_value = maxi(1,int(hero.level*.65+player_position().length()/1900+randf_range(0,2)))
@@ -541,6 +546,7 @@ func kill_enemy(enemy: Dictionary,kind: String) -> void:
 	enemy.dead = true
 	forest.defeated(enemy)
 	exploration.on_kill(enemy)
+	forge.on_kill(enemy)
 	contracts.on_kill(enemy)
 	if enemy.get("neutral",false):
 		survival.add("Raw meat",2); survival.add("Hide",1)
@@ -903,6 +909,7 @@ func update_interaction() -> void:
 	if trader.near(): label_value="TRADE WITH MARA"
 	if not fishing.interaction().is_empty(): label_value=fishing.interaction()
 	if not chapter.interaction().is_empty(): label_value=chapter.interaction()
+	if not forge.interaction().is_empty(): label_value=forge.interaction()
 	if not build_recipe.is_empty(): label_value="PLACE "+build_recipe.to_upper()
 	hud.set_interaction(label_value)
 
@@ -913,6 +920,7 @@ func interact() -> void:
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
+	if not forge.interaction().is_empty(): forge.interact();return
 	if not chapter.interaction().is_empty(): chapter.interact();return
 	if not fishing.interaction().is_empty():
 		fishing.interact();return
@@ -1059,6 +1067,9 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 		if enemy.get("chapter_boss",false):
 			enemy.windup=.8 if enemy.hp<enemy.max_hp*.5 else 1.2
 			enemy.strike_radius=100.0 if enemy.hp<enemy.max_hp*.5 else 55.0
+		if enemy.get("forge_boss",false):
+			enemy.windup=.85 if enemy.hp<enemy.max_hp*.5 else 1.3
+			enemy.strike_radius=82.0 if enemy.hp<enemy.max_hp*.5 else 58.0
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 

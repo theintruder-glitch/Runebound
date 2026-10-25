@@ -1,3 +1,13 @@
+# Ash and Oath 0.23.0 — new player checks
+
+- Install over the previous game; do not uninstall or clear data. Confirm your character, camp and graphics setting remain.
+- Claim Chapter I, speak with Mara in Camp → Story journal, then track Ash and Oath.
+- Complete Emberforge's sword + magic trial (or confirm a prior win counts). Claim its regional relic, read the inscription and start the ashen binding.
+- Dodge the Keeper's warnings, defeat it and both embers. Check the phase below half health and readability on your phone.
+- Pause, rotate, resume; retreat beyond the clearing or reload mid-fight. Confirm you can retry and no chapter completion was granted.
+- Return to Mara; claim 350 gold, 6 essence and 2 points exactly once. Export/import the character and confirm Chapter II stays complete.
+- Native Android update/install, Windows startup, real touch/audio and sustained performance remain hardware checks. Engine/package tests do not replace them.
+
 # v0.22.0 — VYRNSPIRE rename and camp stores
 
 Install Vyrnspire-Godot-v0.22.0.apk over the existing Runebound app without uninstalling/clearing data. Confirm the launcher/title show VYRNSPIRE and Continue loads the same character, chapter, camp and settings. Export a JSON and confirm its filename uses VYRNSPIRE; old JSON exports should still import.

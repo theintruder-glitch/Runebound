@@ -93,7 +93,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: Vyrnspire-Android-release
-          path: builds/Runebound-Godot-*.apk
+          path: builds/Vyrnspire-Godot-*.apk
           if-no-files-found: error
           retention-days: 14
       - uses: actions/upload-artifact@v4

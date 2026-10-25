@@ -56,6 +56,10 @@ func objective() -> String:
  if target=="home": return "Home · "+bearing(Vector2(game.hero.respawn.x,game.hero.respawn.y))
  if not REGIONS.has(target): return "Explore · Track a regional landmark from Camp"
  return REGIONS[target].landmark+" · "+bearing(REGIONS[target].point)
+func track(id:String) -> void:
+ if id not in ["forest","caves","swamp","snow","ruins","home","trader"]: return
+ data().target=id;game.hero.contracts.target="";game.hero.angler.target=""
+ game.save_game();game.hud.resume()
 func nearby() -> String:
  if game.hero.dungeon!=null: return ""
  for id in ["caves","swamp","snow"]:
@@ -63,7 +67,7 @@ func nearby() -> String:
  return ""
 func interaction() -> String:
  var id=nearby()
- if id.is_empty() or active(): return ""
+ if id.is_empty() or active() or game.forge.active(): return ""
  if not data().discovered.get(id,false): return "DISCOVER "+REGIONS[id].landmark.to_upper()
  if data().pending.get(id,false): return "CLAIM TRIAL RELIC"
  if data().challenges.get(id,false): return REGIONS[id].landmark.to_upper()+" · COMPLETED"
@@ -76,7 +80,7 @@ func instructions(id:String) -> String:
  return "Defeat the Root Warden at the Elder Shrine."
 func interact() -> void:
  var id=nearby()
- if id.is_empty(): return
+ if id.is_empty() or game.forge.active(): return
  if not data().discovered.get(id,false):
   data().discovered[id]=true
   game.hero.gold+=30; game.hero.essence+=2
@@ -86,6 +90,7 @@ func interact() -> void:
  if data().challenges.get(id,false) or active(): return
  begin_trial(id)
 func begin_trial(id:String) -> void:
+ if game.forge.active(): return
  trial=id; foes.clear(); hits.clear(); dodged=false
  var center=REGIONS[id].point
  for i in range(3 if id=="swamp" else 1):

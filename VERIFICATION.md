@@ -1,3 +1,23 @@
+# 0.23.0 Ash and Oath verification
+
+Incremental update from 0.22.0. Public branding remains VYRNSPIRE. Android package `app.runebound.godot`, original release certificate and fixed legacy user directory remain unchanged. Android code 31 / 0.23.0-ash-and-oath. New optional `forge_chapter` state migrates old characters to an unstarted Chapter II; no reset of earlier progression.
+
+- Full source: 32 suite runs / **2,035 checks**, pass.
+- Actual signed APK resources: 13 suite runs / **948 checks**, pass.
+- Actual Windows PCK: 13 suite runs / **740 checks**, pass.
+- Isolated legacy-name to VYRNSPIRE save-path probe passes, retaining real character/backup/graphics data on Linux.
+- Signed ARM64 export passes actual manifest label/version/package/ABI/API, ZIP CRC, v2/v3 signing block and cryptographic signature, original certificate, ELF and ZIP 16 KB alignment checks.
+- Windows x64 export includes Vyrnspire.exe/Vyrnspire.pck and launchers; PCK tests run with Linux Godot 4.5.1, not the native Windows EXE.
+- Native Godot Compatibility/Mesa render inspected for Chapter II journal in portrait and landscape, plus actual binding encounter, objective, health bar and warning circles; dummy audio. This is not phone GPU/FPS evidence.
+
+Fifty-one new checks cover old-save defaults, invalid/order-inconsistent chapter imports, Chapter I gating, Mara location, one-time acceptance, real existing sword/magic trial completion, preserved regional relic priority, validated tracking, inscription and JSON persistence, blocked encounter space, three real foes, repeated-input protection, Hearthcall/trial exclusion, phase timing/radius, paused attacks, retreat/reload/missing-foe/defeat retry, full encounter completion, exact one-time rewards, full-bag reward claiming, veteran trial wins and native menu launch/resume in both orientations. Existing combat, crafting, storage, map recovery and survival suites remain passing.
+
+Fixed adjacent defects: the prior story's regional tracking action called a missing function; it now uses a validated helper. Android CI's upload glob now matches the renamed APK. Original private signing material was recovered from the supplied 0.15.0 archive for this local export and is excluded from the repository/source deliverable.
+
+Pending: physical Android install-over-old and existing-character continuity, real multi-touch/audio/focus/rotation, native Windows EXE/save continuity, sustained phone frame times/heat/battery, chapter pacing and encounter balance. CI status is checked separately after the source commit; package tests do not establish commercial-release readiness.
+
+## Previous milestones
+
 # 0.22.0 VYRNSPIRE / Camp Stores verification
 
 Public game branding is VYRNSPIRE. Android package app.runebound.godot, original signing certificate, character filename/schema and fixed historical user directory are retained. Android code 30 / 0.22.0-camp-stores. Original icon artwork remains as an editable historical asset; active icon uses a new V rune.

@@ -1,7 +1,7 @@
-VYRNSPIRE 0.22.0 — ANDROID
+VYRNSPIRE 0.23.0 — ASH AND OATH / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.22.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.23.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 30 and the original prototype certificate.
+This update uses app.runebound.godot, version code 31 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -68,3 +68,5 @@ Near a built Storage chest: Camp > Choose supplies to store or take > select a s
 Store/take 1, 5, 10 or the maximum. Food and other materials stay where you leave them.
 Reach the chest without a wall or closed door in the way. Old bulk transfer buttons remain.
 New exported saves use VYRNSPIRE-Character.json; old exported saves still import.
+
+NEW: Finish Chapter I and return to Mara. Camp > Story journal > Ask Mara about Emberforge begins Chapter II. Earlier Emberforge trial wins count. Read the inscription, break the ashen binding, then return to Mara.

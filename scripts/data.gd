@@ -132,6 +132,15 @@ static func migrate(hero: Dictionary) -> Dictionary:
 	if hero.dungeon!=null:
 		if not hero.dungeon.get("story",false) is bool: return {}
 		if hero.dungeon.get("story",false) and (not chapter.translated or hero.dungeon.floor<1 or hero.dungeon.floor>3): return {}
+	hero.forge_chapter=hero.get("forge_chapter",{"accepted":false,"inspected":false,"cleared":false,"claimed":false})
+	var forge=hero.forge_chapter
+	if not forge is Dictionary or forge.size()!=4: return {}
+	for key in ["accepted","inspected","cleared","claimed"]:
+		if not forge.get(key) is bool: return {}
+	if forge.accepted and not chapter.claimed: return {}
+	if forge.inspected and not forge.accepted: return {}
+	if forge.cleared and not forge.inspected: return {}
+	if forge.claimed and not forge.cleared: return {}
 	hero.journey=hero.get("journey",{})
 	if not hero.journey is Dictionary: return {}
 	for key in ["wood","cooked","warden","reward","dungeon_entered","first_floor","opening_reward"]: hero.journey[key]=bool(hero.journey.get(key,false))
@@ -145,6 +154,7 @@ static func migrate(hero: Dictionary) -> Dictionary:
 		for region in hero.exploration[key]:
 			if region not in ["forest","caves","swamp","snow"]: return {}
 			hero.exploration[key][region]=bool(hero.exploration[key][region])
+	if forge.inspected and not hero.exploration.challenges.get("caves",false): return {}
 	hero.exploration.visited.forest=true
 	hero.exploration.discovered.forest=true
 	hero.exploration.target=str(hero.exploration.get("target",""))

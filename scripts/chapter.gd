@@ -22,7 +22,8 @@ func track() -> void:
 	data().tracking=true;game.hero.exploration.target="";game.hero.contracts.target="";game.hero.angler.target=""
 	game.save_game();game.hud.resume()
 func objective() -> String:
-	if not data().tracking or stage()==5: return ""
+	if not data().tracking: return ""
+	if stage()==5: return game.forge.objective()
 	var lead="THE HOLLOW ROOT · "
 	if stage() in [0,2,4]: return lead+"Speak with Mara · "+game.exploration.bearing(game.trader.POSITION)
 	if stage()==1:
@@ -70,7 +71,7 @@ func claim() -> bool:
 	game.sound("reward");game.save_game();return true
 func recall_reason() -> String:
 	if not data().claimed: return "Complete The Hollow Root first"
-	if game.hero.hp<=0 or game.hero.dungeon!=null or game.exploration.active(): return "Return from the expedition or trial first"
+	if game.hero.hp<=0 or game.hero.dungeon!=null or game.exploration.active() or game.forge.active(): return "Return from the expedition or trial first"
 	if not game.build_recipe.is_empty(): return "Finish building placement first"
 	if data().return_until>game.hero.worldTime: return "Ready in %ds of active play" % ceili(data().return_until-game.hero.worldTime)
 	for e in game.enemies:
@@ -149,6 +150,6 @@ func show_menu() -> void:
 		var why=recall_reason()
 		if not why.is_empty(): hud.paragraph(why,13)
 		hud.action(hud.content,"Hearthcall · return to camp",func():recall();hud.resume(),not why.is_empty())
-		hud.action(hud.content,"Next lead · track the Emberforge",func():game.exploration.track("caves"))
+		game.forge.show_menu()
 	if stage()<5: hud.action(hud.content,"Track chapter objective",track)
 	hud.action(hud.content,"Back to camp",func():hud.show_character("camp"))

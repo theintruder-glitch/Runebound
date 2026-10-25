@@ -367,6 +367,11 @@ func _process(dt: float) -> void:
 			objective_label.text="SURVIVAL · "+("Chapter complete · your home awaits" if game.hero.needs.won else "Build a home · harvest food · survive 5 days · clear the 5-floor ruins")
 		if not game.fishing.objective().is_empty() and game.build_recipe.is_empty() and not game.forest.active() and not game.exploration.active(): objective_label.text=game.fishing.objective()
 		if game.build_recipe.is_empty() and game.hero.exploration.target.is_empty() and game.hero.contracts.target.is_empty() and game.hero.angler.target.is_empty() and not game.chapter.objective().is_empty(): objective_label.text=game.chapter.objective()
+		if game.forge.active():
+			objective_label.text=game.forge.objective();boss_bar.visible=true;boss_bar.max_value=0;boss_bar.value=0
+			for enemy in game.forge.foes:
+				boss_bar.max_value+=enemy.max_hp
+				if not enemy.dead: boss_bar.value+=enemy.hp
 		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
 		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
 		spell_ui.update_targeting()
@@ -552,7 +557,7 @@ func back() -> void:
 func show_character(tab_value: String="gear") -> void:
 	game.pause_game()
 	current_page = tab_value
-	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"The Hollow Root","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter"])
+	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter"])
 	match tab_value:
 		"gear": show_gear()
 		"stats": show_stats()
@@ -779,7 +784,7 @@ func _draw() -> void:
 
 func show_camp() -> void:
 	var camp=game.survival
-	action(content,"Chapter I · The Hollow Root",func():show_character("chapter"))
+	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
 	action(content,"Fishing · rod and catch journal",func():show_character("fishing"))
 	action(content,"Survival kit · craft and manage",func():show_character("kit"))
 	if game.expedition.enabled(): action(content,"Food, water and sleep",func():show_character("needs"))
@@ -1005,7 +1010,7 @@ func map_description(id:String) -> String:
 
 func show_quests() -> void:
 	var board=game.contracts
-	action(content,"Story · The Hollow Root",func():show_character("chapter"))
+	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
 	paragraph("Frontier noticeboard",19,Color("eddaaa"))
 	paragraph("%d/3 active · %d completed · Board: %s" % [board.data().active.size(),board.data().completed,"in the wilds" if game.hero.dungeon!=null else game.exploration.bearing(board.BOARD)],13)
 	if not board.near_board(): paragraph("Accept and turn in at the wooden board northwest of the starting camp. Review and track jobs from anywhere.",13)

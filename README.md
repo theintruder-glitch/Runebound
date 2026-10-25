@@ -1,6 +1,14 @@
-# VYRNSPIRE 0.22.0 — Camp Stores
+# VYRNSPIRE 0.23.0 — Ash and Oath
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Chapter II — Ash and Oath
+
+After claiming Chapter I's reward, open **Camp → Story journal · Chapters I–II** and speak with Mara to start Ash and Oath. Track the chapter to follow the eastern road to **Emberforge**. Discover the landmark and complete its existing sword + magic trial; earlier trial wins count, and its Spellblade unlock/relic remain unchanged.
+
+Read the forge inscription, then choose **Break ashen binding** at the forge or in the journal while nearby. Defeat the **Ashbound Keeper and two Bound Embers**. Warning circles lock before striking; the Keeper's second phase shortens its warning and widens its strike. Menus pause the fight. Leaving the clearing, defeat or reload abandons the encounter, keeping the inscription and allowing a retry. This encounter is separate from the regional trial and regular dungeons.
+
+Return to Mara for a one-time **350 gold, 6 essence and 2 stat points**, plus a lead toward the existing Whisperfen adventure. A full gear bag does not block this currency reward. Story progress survives JSON import/export; older characters receive an unstarted second chapter. Track the journal from either screen orientation. The former Emberforge tracking action now calls a real validated tracking helper. The Android CI artifact glob now matches the Vyrnspire APK name.
 
 ## VYRNSPIRE and camp storage
 
@@ -58,7 +66,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.22.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **30**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.23.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **31**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 
