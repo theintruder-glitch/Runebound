@@ -1,6 +1,16 @@
-# RUNEBOUND 0.19.0 — Enemy Tactics
+# RUNEBOUND 0.20.0 — Dreadwood
 
 An offline Godot 4.5.1 RPG for ARM64 Android, with the same gameplay on Windows x64. Android is the primary target. This continues the supplied **v0.15.0** source; it does not replace the game or its systems.
+
+## Dreadwood graphics
+
+Thirteen new creature designs replace the old shared block shapes: gaunt skeletons, hooded archers, horned guardians, fanged wolves, toothy oozes, ragged spirits and distinct thorned Root Warden/Hollow Heart bosses. Glowing eyes, breathing/hover motion, existing attack lunges and recoil make their intent readable. Boss art is larger; hitboxes and damage rules stay the same. Deer keep their peaceful wildlife appearance.
+
+Trees, rocks and metal-bound chests use a new shaded environment atlas. Ground noise is softer; dungeon floors/walls have baked stone joints and cached cracks/bone fragments. Existing weather, seasons, buildings, terrain and original assets remain.
+
+On either platform open **Pause → Graphics**. Performance includes all the new art and keeps real lights off; it remains the phone default. Balanced adds soft lighting; Rich adds ground detail/atmosphere. The setting now persists on Android. Battery saver caps lights at two; mobile without battery saver caps them at four. Safe mode forces Performance. The two new atlases occupy under 1.7 MiB of raw RGBA texture data before engine overhead. No realtime shadows or new shaders are required.
+
+Vector art remains editable in `assets/enemies.svg` and `assets/environment.svg`; regenerate it with `python3 tools/build_visual_assets.py`. See `assets/ART-DREADWOOD.md` for layout. Measured Motorola performance and subjective scare/readability still need phone playtesting.
 
 ## Enemy tactics
 
@@ -24,7 +34,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Runebound-Godot-v0.19.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **26**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Runebound-Godot-v0.20.0.apk` over **Runebound Godot**. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **27**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Runebound.exe` beside `Runebound.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The application name and `user://character.json` location remain unchanged, so existing local characters remain discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

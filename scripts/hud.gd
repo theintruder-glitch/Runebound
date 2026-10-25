@@ -506,6 +506,7 @@ func show_pause(message: String="") -> void:
 	paragraph("%d FPS · %d enemies · %d MB engine memory" % [Engine.get_frames_per_second(),game.enemies.size(),Performance.get_monitor(Performance.MEMORY_STATIC)/1048576.0],12)
 	action(content,"Low power: "+("ON · 30 FPS" if game.low_power else "OFF · 60 FPS"),func():game.set_low_power(not game.low_power);show_pause())
 	action(content,"Auto pickup: "+("ON" if game.survival.auto_pickup else "OFF"),func():game.survival.set_auto_pickup(not game.survival.auto_pickup);show_pause())
+	action(content,"Graphics · "+game.graphics.quality,show_graphics_settings)
 	action(content,"Weather effects: "+("ON" if game.weather.particles_enabled else "OFF"),func():game.weather.toggle_particles();show_pause())
 	action(content,"Sound and music: "+("ON" if game.audio.enabled else "OFF"),func():game.audio.toggle();show_pause())
 	if game.desktop.enabled:
@@ -705,6 +706,15 @@ func export_save(path:String) -> bool:
 	file.close()
 	paragraph("Character exported. Move the JSON to your other device, then choose Import a character save on its title screen." if success else "Export failed. Choose a writable folder and try again.",14,Color("c9dfa9") if success else Color("efad98"))
 	return success
+
+func show_graphics_settings() -> void:
+	game.pause_game();current_page="graphics";clear_content("Graphics",false)
+	paragraph("The new creature and environment art is included in every quality. Performance keeps lights off. Balanced adds ambient lighting and a few soft lights. Rich adds denser ground detail and atmosphere.",15)
+	paragraph("Low power caps lighting at two lights and keeps the existing 30 FPS limit. Start with Performance on your phone, then try Balanced. Save progress before a long playtest.",14)
+	for value in game.graphics.LEVELS:
+		var choice=value
+		action(content,choice+(" · selected" if game.graphics.quality==choice else ""),func():game.graphics.set_quality(choice);show_graphics_settings(),game.graphics.quality==choice)
+	action(content,"Back to pause",show_pause)
 
 func show_desktop_settings() -> void:
 	game.pause_game();current_page="laptop";clear_content("Laptop settings",false)

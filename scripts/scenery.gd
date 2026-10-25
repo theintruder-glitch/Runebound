@@ -19,9 +19,10 @@ func _draw() -> void:
 			if game.weather.season()=="Summer": tint=Color(1.05,1.08,.85)
 			elif game.weather.season()=="Autumn": tint=Color(1.6,.85,.55)
 			elif game.weather.season()=="Winter": tint=Color(.9,1.05,1.2)
-		draw_texture(world.textures[decoration.kind],decoration.pos-Vector2(32,64),tint)
+		draw_texture_rect(world.textures[decoration.kind],Rect2(decoration.pos-Vector2(32,64),Vector2(64,96)),false,tint)
 		if (region=="snow" or (region in ["forest","swamp"] and game.weather.season()=="Winter")) and decoration.kind=="tree":
-			draw_colored_polygon(PackedVector2Array([decoration.pos+Vector2(-15,-32),decoration.pos+Vector2(0,-57),decoration.pos+Vector2(15,-32)]),Color("d4e5e4"))
+			for dx in [-12,0,12]:
+				draw_arc(decoration.pos+Vector2(dx,-37-abs(dx)*.3),8,PI,TAU,10,Color("d4e5e4"),3,true)
 	if game.hero.dungeon==null:
 		for i in range(game.hero.kingdom.buildings.size()):
 			var at = Vector2(-160+i*150,-150)
@@ -40,7 +41,7 @@ func _draw() -> void:
 		game.fishing.draw_pools(self,bounds)
 	for chest in visible_chests:
 		var opened = game.hero.opened.has(chest.id)
-		draw_texture(world.textures["chest_open" if opened else "chest"],chest.pos-Vector2(32,64))
+		draw_texture_rect(world.textures["chest_open" if opened else "chest"],Rect2(chest.pos-Vector2(32,64),Vector2(64,96)),false)
 		if not opened:
 			draw_string(ThemeDB.fallback_font,chest.pos+Vector2(-20,-23),"CHEST",HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("e1c98f"))
 
@@ -51,8 +52,7 @@ func draw_survival(game) -> void:
 		draw_circle(pos,18,Color("274c41"))
 		match node.kind:
 			"Wood":
-				draw_rect(Rect2(pos+Vector2(-4,-23),Vector2(8,28)),Color("ab8052"))
-				draw_colored_polygon(PackedVector2Array([pos+Vector2(-21,-12),pos+Vector2(0,-49),pos+Vector2(21,-12)]),Color("78a564"))
+				draw_texture_rect(world.textures.tree,Rect2(pos-Vector2(32,64),Vector2(64,96)),false)
 			"Crystal","Frost shard":
 				draw_colored_polygon(PackedVector2Array([pos+Vector2(-14,5),pos+Vector2(-6,-35),pos+Vector2(3,-16),pos+Vector2(12,-28),pos+Vector2(17,6)]),Color("b7a3ed") if node.kind=="Crystal" else Color("a6e9f3"))
 			"Glowcap":

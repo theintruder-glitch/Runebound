@@ -1,11 +1,11 @@
 # Android-first completion roadmap
 
-Current source: **0.19.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.20.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
 
 ## Completed in this milestone
 
 - [x] Install pinned Godot 4.5.1 engine/templates, JDK 17 and Android SDK/build tools; produce signed ARM64 APK and Windows x64 package locally.
-- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 26.
+- [x] Preserve application ID, original signing certificate, character save path and progression migration; raise Android version code to 27.
 - [x] Isolate automated tests from developer saves and detect silent script errors, assertion failures, missing completion and timeouts.
 - [x] Repair touch lifecycle/dead zone and save recovery; verify rotation/scrolling and existing combat/magic in engine checks.
 - [x] Expand existing Survival mode with persisted wetness and cover/fire drying; fix heat/bed wall checks and stale enemy windups.
@@ -16,6 +16,14 @@ Current source: **0.19.0**, built incrementally from supplied **0.15.0**. The ol
 - [x] Touch placement and CAST/CANCEL for learned ground spells, retaining multi-touch movement.
 - [x] Shared forward melee, visible misses, directional weapon sweeps, spell glow and guarded ordinary-enemy stagger.
 - [x] Add real touch-event tests and compiled Android/Windows regression coverage.
+
+## Dreadwood art milestone
+
+- [x] Thirteen distinct shaded creature designs, including two unique story bosses; keep original art assets.
+- [x] New tree/rock/chest atlas, calmer ground texture, stone joints and cached dungeon details.
+- [x] Shared mobile/Windows quality menu, persisted Android selection and bounded lights.
+- [x] Exported-resource checks and rendered portrait/landscape art review.
+- [ ] Check scary/readable enemy silhouettes, mixed encounters and sustained phone heat/FPS with the player.
 
 ## Enemy tactics milestone
 

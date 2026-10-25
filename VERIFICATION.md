@@ -1,3 +1,25 @@
+# 0.20.0 Dreadwood verification
+
+Continues v0.19.0. App name Runebound Godot, package app.runebound.godot, original release certificate and user://character.json are retained; Android code 27 / 0.20.0-dreadwood. No save schema, hitbox, combat damage, quest or enemy AI change.
+
+- Full source: **28 suite runs / 1,799 checks**, pass in Godot 4.5.1.
+- Actual signed APK extracted resources: **9 suites / 712 checks**, pass, including the 62 new graphics checks.
+- Actual Windows exported PCK: **9 suites / 504 checks**, pass using matching Linux Godot. This does not launch the Windows EXE.
+- Real signed ARM64 APK and Windows x64 EXE/PCK/ZIP exported. APK manifest, v2/v3 cryptographic signatures/original certificate, ZIP integrity, ELF 16 KB and ZIP 16 KB alignment pass.
+- APK SHA-256: `8ae1290060ed61724b8ca6790914af05d5095a30d569bd90dc9726e02aa09b39`.
+- Native Godot/Mesa renders inspected: Performance forest and Hollow Heart on portrait, Balanced boss encounter on landscape, plus a gallery of the actual creature assets. Dummy audio/software rendering; captured fixture FPS is not a phone measurement.
+- Asset generator Python syntax, repeatable SVG regeneration, shell syntax and existing build workflow syntax checked. Existing sprites.svg and original credit/license files remain.
+
+## New checks
+
+All 13 atlas cells contain artwork with transparent margins and clipped sampling. Each creature selects its own design; named Root Warden and Hollow Heart select unique designs; bosses are larger visually. Creature atlas is 640×480 and environment atlas 512×192 (under 1.7 MiB raw RGBA total, excluding engine overhead). Environment entries use their new atlas. Phone Graphics controls fit both orientations and pause gameplay. All qualities retain creature art; Performance turns lights off, battery saver bounds enabled lights, and Android quality choices survive reinitialization. Graphics changes leave character JSON unchanged. Dungeon tile count/collision layout is retained. Existing gameplay, movement, touch, chapter and progression suites pass.
+
+## Still pending
+
+Actual Motorola Edge 2025 / Android 16 install-over-existing-app, enemy readability/scare preference, sustained FPS/RAM/heat/battery, real multi-touch, hardware audio and native Windows launch. No physical-device performance gain or commercial readiness is claimed. GitHub CI status is separate from local results and is recorded in the verification bundle when available.
+
+## Previous milestones
+
 # 0.19.0 Enemy Tactics verification
 
 Incremental update from v0.18.0. Package app.runebound.godot, original signing identity, application name and user://character.json are retained. Android version code 26. Enemy steering is transient and changes no saved character fields.

@@ -18,7 +18,7 @@ run_logged(){
 run_logged builds/logs/windows-import.log --headless --path "$ROOT" --import
 run_logged builds/logs/windows-export.log --headless --path "$ROOT" --export-release Windows "$ROOT/builds/Windows/Runebound.exe"
 [[ -s builds/Windows/Runebound.exe && -s builds/Windows/Runebound.pck ]] || { echo >&2 "Windows export incomplete"; exit 1; }
-python3 tools/run_tests.py --godot "$GODOT_BIN" --pack "$ROOT/builds/Windows/Runebound.pck" --suite test_enemy_tactics --suite test_chapter --suite test_release_pack --suite test_fishing --suite test_survival_kit --suite test_stability --suite test_touch_combat --suite test_spellbook --output builds/windows-pack-tests
+python3 tools/run_tests.py --godot "$GODOT_BIN" --pack "$ROOT/builds/Windows/Runebound.pck" --suite test_dreadwood --suite test_enemy_tactics --suite test_chapter --suite test_release_pack --suite test_fishing --suite test_survival_kit --suite test_stability --suite test_touch_combat --suite test_spellbook --output builds/windows-pack-tests
 cp WINDOWS-START.txt builds/Windows/README.txt
 cp LICENSE-GODOT.txt GODOT-THIRD-PARTY-NOTICES.txt builds/Windows/
 printf '@echo off\ncd /d "%%~dp0"\nstart "" "%%~dp0Runebound.exe" -- --safe-mode\n' > builds/Windows/Start-Low-Power.bat

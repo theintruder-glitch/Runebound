@@ -1,7 +1,7 @@
-RUNEBOUND 0.19.0 — ANDROID
+RUNEBOUND 0.20.0 — ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Runebound-Godot-v0.19.0.apk and install it over the existing app.
+2. Download Runebound-Godot-v0.20.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 26 and the original prototype certificate.
+This update uses app.runebound.godot, version code 27 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -39,3 +39,10 @@ Dungeon archers and wisps hold their firing distance. Close in to force them bac
 stand their ground. A gold dashed line connects a shooter to its locked warning circle.
 Move out of the circle or dodge. Walls interrupt pending attacks; melee enemies spread as they approach.
 Chapter I and your existing character remain available.
+
+DREADWOOD GRAPHICS:
+All graphics qualities include the new scary creature/boss designs and detailed trees/chests.
+Pause > Graphics: Performance is the phone default. Try Balanced for soft dungeon/camp lighting.
+Rich adds detail; return to Performance if your phone feels warm or slow.
+Low power still caps the game at 30 FPS and limits soft lights to two.
+Bosses look larger; their hitboxes and warning/dodge rules have not changed.

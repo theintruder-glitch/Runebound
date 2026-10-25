@@ -1,3 +1,8 @@
+# v0.20.0 Dreadwood — graphics phone checks
+
+Install over the existing app; keep its data. Confirm the same character and chapter state load. Compare skeletons, archers, wolves and The Hollow Heart with the last build. Check that silhouettes/eyes are visible on your phone and that warning circles, health bars, attacks, dropped items and touch controls remain readable.
+Pause → Graphics offers Performance (default), Balanced and Rich. Test Performance first, then Balanced with low power on/off. Return to Performance if needed. Reopen the app and confirm your choice persists. Rotate while playing and while scrolling Graphics. Check rain/snow and a crowded fight. Report measured FPS, heat/battery behavior and whether the enemies look scary enough at your normal zoom. Native Windows startup/audio still need laptop testing.
+
 # v0.19.0 Enemy Tactics — next phone checks
 
 Install over the current app, keep its data, and confirm the same character and Chapter I state load.
