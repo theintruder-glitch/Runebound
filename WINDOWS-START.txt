@@ -1,4 +1,4 @@
-VYRNSPIRE 0.29.0 — WINDOWS x64
+VYRNSPIRE 0.30.0 — WINDOWS x64
 
 Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
 WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
@@ -25,3 +25,5 @@ Settings → Controls offers the shared layout editor. Keyboard/mouse and gamepa
 HIDDEN DEPTHS: Camp > Quests > Explore Glacier Hollow / Oathstone Mine. Follow the marked branch trails to ENTER. Read the journal, open the mechanism and defeat the guardian; an optional watchman protects one-time treasure. Entrance stairs always leave. Gold stairs leave after the main guardians fall.
 
 WAYKEEPER BEACONS: Camp > Waykeeper beacons. Track a shrine; read its oath, interact with the three stones in order, return to awaken watchers, then claim its Epic relic. E interacts. Progress persists; unfinished fights can be retried.
+
+DUNGEON ATLAS: M opens the current dungeon floor. Select Entrance or a discovered destination for a gold route. World map toggles outdoors; Current dungeon floor returns. Escape/Resume exploration returns to play.

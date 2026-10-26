@@ -14,6 +14,7 @@ const CastleScript=preload("res://scripts/castle.gd")
 var landscape
 var castle
 var beacons
+var atlas
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
@@ -94,6 +95,7 @@ func _ready() -> void:
 	landscape=LandscapeScript.new();landscape.game=self
 	castle=CastleScript.new();castle.game=self
 	beacons=preload("res://scripts/beacons.gd").new();beacons.game=self
+	atlas=preload("res://scripts/dungeon_atlas.gd").new();atlas.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
@@ -179,6 +181,8 @@ func set_player_position(at: Vector2) -> void:
 	hero.y = at.y
 
 func clear_scene() -> void:
+	if atlas!=null:atlas.stamp="";atlas.seen.clear()
+	if hud!=null:hud.dungeon_world_view=false
 	if input_router!=null: input_router.reset_virtual()
 	if forge!=null: forge.reset()
 	if beacons!=null: beacons.reset()
@@ -384,6 +388,7 @@ func tick(dt: float) -> void:
 	expedition.tick(dt)
 	chapter.tick(dt)
 	castle.tick(dt)
+	atlas.observe()
 	if hero.hp<=0:
 		defeated()
 		return
@@ -773,6 +778,7 @@ func build_floor(reset_position: bool=true) -> void:
 	if reset_position or not walkable(player_position(),10):
 		set_player_position(cell_center(dungeon_map.start))
 	hero.highestFloor = maxi(hero.highestFloor,dungeon.floor)
+	atlas.observe(true)
 	if castle.active():
 		castle.setup();camera.position=player_position();camera.reset_smoothing();world.refresh(true);check_floor_clear();return
 	var places = dungeon_map.floors.filter(func(c):return Vector2(c).distance_to(Vector2(dungeon_map.start))>2.2 and c!=dungeon_map.exit)

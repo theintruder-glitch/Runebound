@@ -155,6 +155,17 @@ static func migrate(hero: Dictionary) -> Dictionary:
 			if not hero.dungeon.get("cleared") is Array or not hero.dungeon.get("rewarded") is bool:return {}
 			for flag in hero.opened:
 				if str(flag).split(":")[0] in ["thornwatch","frostspire","blackmire","stormbreak","frost-cave","highland-mine"] and not hero.opened[flag] is bool:return {}
+		# Survey corruption discards only optional map memory, preserving the character.
+		var survey=hero.dungeon.get("atlas",{})
+		if not survey is Dictionary or survey.size()>8:survey={}
+		for floor_key in survey.keys():
+			if not floor_key is String or not floor_key.is_valid_int() or int(floor_key)<1:
+				survey.erase(floor_key);continue
+			var cells=survey[floor_key]
+			if not cells is Array or cells.size()>1600:
+				survey.erase(floor_key);continue
+			if not cells.all(func(v):return (v is int or v is float) and is_finite(float(v)) and v==floor(v) and v>=0 and v<1600):survey.erase(floor_key)
+		hero.dungeon.atlas=survey
 		if not hero.dungeon.get("story",false) is bool: return {}
 		if hero.dungeon.get("story",false) and (not chapter.translated or hero.dungeon.floor<1 or hero.dungeon.floor>3): return {}
 	hero.forge_chapter=hero.get("forge_chapter",{"accepted":false,"inspected":false,"cleared":false,"claimed":false})
