@@ -58,3 +58,14 @@ lights, shader passes, particle nodes or per-prop physics bodies were added.
 Only the active castle level exists: 3–5 authored enemies and a 32×32 tile grid.
 The outdoors keeps Reduced's six-enemy budget. See VERIFICATION.md and the
 headless benchmark log for controlled CPU figures; those are not phone FPS.
+
+## 0.27 controls
+
+Gameplay input is event-driven with per-finger ownership; native physical actions
+are polled through InputMap. Styles are cached by skin and shared across controls.
+No per-button timers, network calls, textures, dynamic lights or physics bodies
+were added. The editor works on the actual bounded HUD registry (17 controls),
+with at most 50 undo states and 12 custom presets. Overlap searches occur only on
+request or loading size-changing built-ins while gameplay is paused. Disk writes
+happen on settings changes/Save, never on joystick drag or ordinary combat.
+Physical-phone touch latency, GPU/frame time, heat and battery remain unmeasured.

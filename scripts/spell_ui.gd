@@ -2,15 +2,17 @@ extends RefCounted
 var hud
 var game
 var button:Button
-var aim_controls:HBoxContainer
+var aim_controls:Control
 var cast_button:Button
 var cancel_button:Button
 func setup() -> void:
 	button=hud.action(hud.top,"[B] Spells",func():hud.show_character("spells"));button.visible=game.desktop.enabled
-	aim_controls=HBoxContainer.new();aim_controls.add_theme_constant_override("separation",8);hud.buttons.add_child(aim_controls)
-	cast_button=hud.action(aim_controls,"CAST",func():game.spellbook.confirm(),false,true)
-	cancel_button=hud.action(aim_controls,"CANCEL",func():game.spellbook.cancel_target(),false,true)
+	aim_controls=Control.new();hud.buttons.add_child(aim_controls)
+	cast_button=hud.action(aim_controls,"CAST",func():pass,false,true)
+	cancel_button=hud.action(aim_controls,"CANCEL",func():pass,false,true)
 	for control in [cast_button,cancel_button]: control.custom_minimum_size=Vector2(108,52)
+	cast_button.position=Vector2.ZERO;cast_button.size=Vector2(108,52)
+	cancel_button.position=Vector2(116,0);cancel_button.size=Vector2(108,52)
 	aim_controls.hide()
 func layout() -> void:
 	button.position=Vector2(hud.get_viewport_rect().size.x-508,16);button.size=Vector2(108,44)

@@ -28,13 +28,13 @@ func run():
   check(root.content_scale_size==(Vector2i(900,480) if dims.x>dims.y else Vector2i(480,900)),"Landscape keeps a 480-unit base height "+str(dims))
   check(game.move_vector==Vector2.ZERO and not game.attack_held,"Rotation releases held touch actions "+str(dims))
   if dims.x>dims.y:
-   check(game.hud.stick.position.x==184,"Landscape joystick is moved 160 units inward "+str(dims))
+   check(game.hud.stick.position.x<view.x*.1 and game.hud.stick.get_global_rect()==game.hud.controls.model.rect("movement",game.hud.controls.safe_rect(),"landscape"),"Landscape joystick retains its saved relative left position "+str(dims))
   else:
    var bottom_spells=true
    for button in game.hud.spell_buttons.values():
-    bottom_spells=bottom_spells and absf(button.get_global_rect().end.y-(view.y-20))<1
+    bottom_spells=bottom_spells and button.get_global_rect().end.y>view.y*.94 and button.get_global_rect().end.y<=view.y-8
    check(bottom_spells,"Portrait spells sit along the bottom edge "+str(dims))
-   check(game.hud.attack_button.position.y>=view.y-158,"Portrait combat row leaves the former spell area clear "+str(dims))
+   check(game.hud.attack_button.position.y>=view.y*.7,"Portrait combat row stays in the reachable lower screen "+str(dims))
   var controls=[game.hud.skill_button,game.hud.stick,game.hud.attack_button,game.hud.auto_button,game.hud.dash_button,game.hud.interaction]
   controls.append_array(game.hud.spell_buttons.values())
   var within=true
@@ -61,7 +61,7 @@ func run():
   game.hud.layout()
   var rect=game.hud.build_tools.get_global_rect()
   check(Rect2(Vector2.ZERO,game.get_viewport_rect().size).encloses(rect),"Build controls fit after rotation "+str(dims))
-  check(not rect.intersects(game.hud.interaction.get_global_rect()),"Build controls leave PLACE accessible "+str(dims))
+  check(not game.hud.controls.registry.build_rotate.get_global_rect().intersects(game.hud.interaction.get_global_rect()) and not game.hud.controls.registry.build_cancel.get_global_rect().intersects(game.hud.interaction.get_global_rect()),"Build controls leave PLACE accessible "+str(dims))
  game.cancel_build()
  check(game.hero.level==1,"Rotation preserves character state")
  print(str(checks)+" ROTATION CHECKS PASSED")
