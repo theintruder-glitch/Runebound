@@ -1,4 +1,4 @@
-VYRNSPIRE 0.27.0 — WINDOWS x64
+VYRNSPIRE 0.27.1 — WINDOWS x64
 
 Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
 WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
