@@ -52,11 +52,8 @@ var scroll: ScrollContainer
 var tabs: HBoxContainer
 var panel_title: Label
 var current_page = "title"
-var menu_action_page=""
-var menu_action_title=""
-var menu_action_scroll=0
-var menu_action_active=false
-var menu_action_focus_index=-1
+var rendered_menu_page=""
+var rendered_menu_title=""
 var menu_refresh_serial=0
 var new_character_pending = false
 var import_dialog: FileDialog
@@ -220,13 +217,7 @@ func action(parent: Node,text_value: String,callback: Callable,disabled: bool=fa
 	result.text = text_value
 	result.disabled = disabled
 	result.focus_mode = Control.FOCUS_ALL if controls!=null and controls.connected and parent!=buttons else Control.FOCUS_NONE
-	result.pressed.connect(func():
-		var in_menu=overlay!=null and overlay.visible and overlay.is_ancestor_of(result)
-		if in_menu:
-			menu_action_active=true;menu_action_page=current_page;menu_action_title=panel_title.text;menu_action_scroll=scroll.scroll_vertical
-			menu_action_focus_index=menu_buttons(content).find(result) if result.has_focus() else -1
-		callback.call()
-		menu_action_active=false)
+	result.pressed.connect(callback)
 	parent.add_child(result)
 	return result
 
@@ -479,7 +470,10 @@ func update_hud() -> void:
 
 func clear_content(title_value: String,show_tabs: bool=true) -> void:
 	menu_refresh_serial+=1
-	var keep_position=menu_action_active and current_page==menu_action_page and title_value==menu_action_title
+	var keep_position=overlay.visible and current_page==rendered_menu_page and title_value==rendered_menu_title
+	var previous_scroll=scroll.scroll_vertical
+	var previous_focus=menu_buttons(content).find(get_viewport().gui_get_focus_owner()) if keep_position else -1
+	rendered_menu_page=current_page;rendered_menu_title=title_value
 	panel_title.text = title_value
 	for child in content.get_children():
 		content.remove_child(child)
@@ -496,8 +490,8 @@ func clear_content(title_value: String,show_tabs: bool=true) -> void:
 			b.add_theme_font_size_override("font_size",12)
 			b.add_theme_constant_override("outline_size",0)
 			b.add_theme_stylebox_override("normal",theme.get_stylebox("normal","Button"))
-	scroll.scroll_vertical = menu_action_scroll if keep_position else 0
-	if keep_position: restore_menu_scroll.call_deferred(menu_action_scroll,menu_refresh_serial,menu_action_focus_index)
+	scroll.scroll_vertical = previous_scroll if keep_position else 0
+	if keep_position: restore_menu_scroll.call_deferred(previous_scroll,menu_refresh_serial,previous_focus)
 	overlay.show()
 	buttons.hide()
 	if controls!=null and not keep_position: controls.call_deferred("focus_menu")

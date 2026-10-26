@@ -27,6 +27,8 @@ func run():
    choices[2].pressed.emit();await settle()
    check(game.hero.points==points-1,"Stat point is applied once")
    check(abs(hud.scroll.scroll_vertical-before)<=1 and before>0,"Repeated stat upgrade retains scroll position "+str(dims))
+  hud.scroll.scroll_vertical=150;await settle();var refresh_position=hud.scroll.scroll_vertical
+  hud.show_character("stats");await settle();check(hud.scroll.scroll_vertical==refresh_position,"Direct same-page refresh also retains position without a button callback")
   hud.show_character("gear");await settle();check(hud.scroll.scroll_vertical==0,"Opening a different page starts at the top")
   hud.show_pause();await settle();hud.scroll.scroll_vertical=180;await settle();var old=hud.scroll.scroll_vertical
   var toggle=buttons(hud.content).filter(func(b):return b.text.begins_with("Auto pickup:"))[0]
