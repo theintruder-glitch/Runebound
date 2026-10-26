@@ -64,6 +64,7 @@ func tick(dt:float) -> void:
 	var cover=game.weather.covered_at(game.player_position())
 	var sky=game.weather.sky()
 	var wet_rate=-1.4 if game.weather.near_fire() else -.2 if cover else .65 if sky=="Rain" else .2 if sky=="Snow" else -.08
+	if wet_rate>0:wet_rate*=game.mire.weather_multiplier()
 	n.wetness=clampf(n.wetness+wet_rate*dt,0,100)
 	n.hunger=maxf(0,n.hunger-dt*(.11 if game.is_walking else .08))
 	n.water=maxf(0,n.water-dt*(.22 if n.temperature>80 else .14))

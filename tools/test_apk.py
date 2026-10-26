@@ -20,6 +20,6 @@ with tempfile.TemporaryDirectory(prefix='runebound-apk-') as temp:
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(apk.read(name))
     command = [sys.executable, str(root / 'tools/run_tests.py'), '--resources', str(resources), '--output', str(root / 'builds/android-pack-tests')]
-    for suite in ['test_boss_signs', 'test_dungeon_atlas', 'test_beacons', 'test_side_caves', 'test_menu_position', 'test_controls', 'test_control_input', 'test_rotation', 'test_kingdoms', 'test_thornwatch', 'test_fieldcraft', 'test_crowd_relief', 'test_forge_chapter', 'test_brand_storage', 'test_crafting_batches', 'test_position_recovery', 'test_dreadwood', 'test_enemy_tactics', 'test_chapter', 'test_stability', 'test_touch_combat', 'test_game', 'test_expedition', 'test_fishing', 'test_fishing_touch']:
+    for suite in ['test_mire_chapter', 'test_boss_signs', 'test_dungeon_atlas', 'test_beacons', 'test_side_caves', 'test_menu_position', 'test_controls', 'test_control_input', 'test_rotation', 'test_kingdoms', 'test_thornwatch', 'test_fieldcraft', 'test_crowd_relief', 'test_forge_chapter', 'test_brand_storage', 'test_crafting_batches', 'test_position_recovery', 'test_dreadwood', 'test_enemy_tactics', 'test_chapter', 'test_stability', 'test_touch_combat', 'test_game', 'test_expedition', 'test_fishing', 'test_fishing_touch']:
         command += ['--suite', suite]
     raise SystemExit(subprocess.run(command).returncode)

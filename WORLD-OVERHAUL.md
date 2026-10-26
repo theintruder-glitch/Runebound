@@ -8,6 +8,8 @@ Preserve Godot/GDScript, Android package and signing identity, legacy saves, cla
 - scripts/castle.gd: preserved Thornwatch dungeon and common floor/backtracking API.
 - scripts/regional_castles.gd: three independently authored castle plans, real lock/pathfinding changes, rune puzzles/shortcuts, retained progress, checkpoints, hazards, bosses and rewards.
 - scripts/realm_props.gd: one shared environment atlas.
+- scripts/mire_chapter.gd: Chapter III links existing swamp discoveries/trial and Blackmire to a recoverable archive record, one-time rewards and a permanent swamp-weather benefit. No additional enemies or interiors load.
+- tests/test_mire_chapter.gd: mobile clue/record interaction, actual castle progress/backtracking, old saves, veteran wins, checkpoint/reload continuity, rewards and exact Survival wetness behavior.
 - scripts/dungeon_atlas.gd and dungeon_map.gd: visible-floor survey, discovered destinations, safe route previews and native floor-map UI with per-run persistence.
 - tests/test_dungeon_atlas.gd: paths, touch selection, position/facing projection, saves, backtracking, old/corrupt optional surveys and bounded endless retention.
 - scripts/beacons.gd: four distinct roadside shrines, rune sequences, guarded encounters, regional relics, saved exploration journal and crowd-safe activation.

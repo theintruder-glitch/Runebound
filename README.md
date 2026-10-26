@@ -1,8 +1,18 @@
-# VYRNSPIRE 0.31.0 — Boss Signs
+# VYRNSPIRE 0.32.0 — The Drowned Oath
 
-An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **41**.
+An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **42**.
 
 Menu actions now retain your scroll position when refreshing the same screen, including repeated stat upgrades, settings and crafting. Switching pages starts at the top.
+
+## Chapter III — The Drowned Oath
+
+After claiming Mara's Chapter II reward, open **Camp → Chapter III · The Drowned Oath** and speak with Mara to accept. Read the scout ledger at **Sunken Watch** and the warning at **Witchroot Grove**, then complete the existing **Veil Altar** swamp trial. Earlier searched sites and trial victories count; their normal supplies, Reaper unlock and regional relic remain available.
+
+Reclaim **Blackmire Fortress** by defeating its existing Drowned Abomination. Then backtrack using the entrance stairs to the **level-two archive** and recover the **Drowned Testament**. The Dungeon Atlas marks the record after you discover its position. Earlier Blackmire victories count; players who already left can re-enter and reach the archive without repeating the boss victory for this chapter. The castle's current-run locks/guards and optional rune vault still work normally. A previously read archive can still yield the new quest record without repeating its loot.
+
+Return to Mara for **450 gold, 8 essence and 3 stat points**, once. The testament is a quest record, requiring no bag slot; a full Gear bag cannot block the chapter reward. You also gain **Mirewarden's Oath**: 40% less positive weather wetness buildup in the Drowned Mire wilds during Survival. Drying, other regions, temperature, hunger, thirst and sleep keep their usual rules. This is a permanent passive benefit, not an equipped spell or immunity. The closing dialogue points toward Frostspire.
+
+Progress survives save/continue, castle backtracking and checkpoint defeat. Old characters receive an unstarted chapter; all earlier character, building and quest progress remains. This chapter connects existing playable destinations and adds no extra enemies, dungeon interiors or large textures.
 
 ## Boss signs
 
@@ -82,7 +92,7 @@ Only one dungeon floor and at most five authored enemies load at once. Default a
 
 ## Install and test
 
-Install `Vyrnspire-Godot-v0.31.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
+Install `Vyrnspire-Godot-v0.32.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
 
 Windows: extract the entire Windows ZIP and run `Vyrnspire.exe` beside its PCK. The low-power and OpenGL launchers remain. Android and Windows exchange characters through the existing JSON menus.
 
@@ -170,7 +180,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.31.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **41**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.32.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **42**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

@@ -1,7 +1,7 @@
-VYRNSPIRE 0.31.0 — BOSS SIGNS / ANDROID
+VYRNSPIRE 0.32.0 — THE DROWNED OATH / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.31.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.32.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 41 and the original prototype certificate.
+This update uses app.runebound.godot, version code 42 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -106,3 +106,10 @@ World map shows the outdoor entrance; Current dungeon floor returns to the atlas
 Walking records visible tiles. Continue/checkpoints/backtracking preserve this expedition's map; leaving ends the run.
 
 BOSS SIGNS: Watch the named health bar. PHASE II means that keeper has entered its existing faster attack phase. Circle edge marks and the center cross show the actual heavy-strike area. Move clear or dash before the warning finishes.
+
+CHAPTER III — THE DROWNED OATH:
+After claiming Chapter II, Camp > Chapter III > speak with Mara to accept.
+Read Sunken Watch and Witchroot Grove, complete Veil Altar's existing trial, and defeat Blackmire's Abomination. Earlier wins count.
+Backtrack to Blackmire level 2 and recover the Drowned Testament from the archive; use the Dungeon Atlas.
+Return to Mara for 450 gold, 8 essence, 3 points and a permanent 40% reduction to swamp weather wetness buildup.
+The quest record needs no inventory slot. Save/continue and checkpoint defeat preserve chapter progress.

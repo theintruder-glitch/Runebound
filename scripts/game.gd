@@ -9,6 +9,7 @@ const ChapterScript=preload("res://scripts/chapter.gd")
 var chapter
 const ForgeScript=preload("res://scripts/forge_chapter.gd")
 var forge
+var mire
 const LandscapeScript=preload("res://scripts/kingdom_landscape.gd")
 const CastleScript=preload("res://scripts/castle.gd")
 var landscape
@@ -93,6 +94,7 @@ func _ready() -> void:
 	tactics=TacticsScript.new();tactics.game=self
 	chapter=ChapterScript.new();chapter.game=self
 	forge=ForgeScript.new();forge.game=self
+	mire=preload("res://scripts/mire_chapter.gd").new();mire.game=self
 	landscape=LandscapeScript.new();landscape.game=self
 	castle=CastleScript.new();castle.game=self
 	beacons=preload("res://scripts/beacons.gd").new();beacons.game=self
@@ -951,6 +953,7 @@ func update_interaction() -> void:
 	if not landscape.feature_near().is_empty():label_value=landscape.feature_near()
 	if not castle.interaction().is_empty():label_value=castle.interaction()
 	if not beacons.interaction().is_empty():label_value=beacons.interaction()
+	if not mire.interaction().is_empty():label_value=mire.interaction()
 	if not build_recipe.is_empty(): label_value="PLACE "+build_recipe.to_upper()
 	hud.set_interaction(label_value)
 
@@ -961,6 +964,7 @@ func interact() -> void:
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
+	if not mire.interaction().is_empty():mire.interact();return
 	if not beacons.interaction().is_empty():beacons.interact();return
 	if not castle.interaction().is_empty():castle.use_feature();return
 	if not landscape.feature_near().is_empty():landscape.interact();return

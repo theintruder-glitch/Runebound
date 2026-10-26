@@ -400,6 +400,7 @@ func _process(dt: float) -> void:
 					boss_bar.visible=true;boss_bar.max_value=enemy.max_hp;boss_bar.value=enemy.hp
 		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
 		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
+		if game.hero.chapter.tracking and game.mire.stage()==4 and game.hero.dungeon!=null and game.hero.dungeon.get("castle","")=="blackmire":objective_label.text=game.mire.objective()
 		game.boss_signs.update_hud()
 		spell_ui.update_targeting()
 		var phase = Data.phase(game.hero.worldTime) if game.hero.dungeon==null else "Dungeon"
@@ -617,7 +618,7 @@ func back() -> void:
 func show_character(tab_value: String="gear") -> void:
 	game.pause_game()
 	current_page = tab_value
-	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":("Dungeon atlas" if game.hero.dungeon!=null and not dungeon_world_view else "World map"),"quests":"Quest board","beacons":"Waykeeper beacons","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter","beacons"])
+	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":("Dungeon atlas" if game.hero.dungeon!=null and not dungeon_world_view else "World map"),"quests":"Quest board","beacons":"Waykeeper beacons","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","mire":"The Drowned Oath","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter","beacons","mire"])
 	match tab_value:
 		"gear": show_gear()
 		"stats": show_stats()
@@ -634,6 +635,7 @@ func show_character(tab_value: String="gear") -> void:
 		"kit": game.kit.show_menu()
 		"fishing": game.fishing.show_menu()
 		"chapter": game.chapter.show_menu()
+		"mire": game.mire.show_menu()
 		"spells": spell_ui.show_spells()
 		"spellshop": spell_ui.show_shop()
 
@@ -860,11 +862,12 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font,origin+Vector2(0,map.size*scale_value+19),"%d enemies left" % count,HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("d0d9c5"))
 
 func show_camp() -> void:
+	action(content,"Chapter III · The Drowned Oath",func():show_character("mire"))
 	action(content,"Waykeeper beacons · exploration journal",func():show_character("beacons"))
 	action(content,"Castle expeditions · four kingdoms",func():show_character("quests"))
 	var camp=game.survival
 	action(content,"Explore Emerald Wilds · Thornwatch Keep",func():game.exploration.track("keep"))
-	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
+	action(content,"Story journal · Chapters I–III",func():show_character("chapter"))
 	action(content,"Fishing · rod and catch journal",func():show_character("fishing"))
 	action(content,"Survival kit · craft and manage",func():show_character("kit"))
 	if game.expedition.enabled(): action(content,"Food, water and sleep",func():show_character("needs"))
@@ -1121,7 +1124,7 @@ func show_quests() -> void:
 		action(content,"Explore "+game.landscape.realms.Catalog.ZONES[id].castle,func():game.exploration.track(region_id))
 	var board=game.contracts
 	action(content,"Explore Emerald Wilds · Thornwatch Keep",func():game.exploration.track("keep"))
-	action(content,"Story journal · Chapters I–II",func():show_character("chapter"))
+	action(content,"Story journal · Chapters I–III",func():show_character("chapter"))
 	paragraph("Frontier noticeboard",19,Color("eddaaa"))
 	paragraph("%d/3 active · %d completed · Board: %s" % [board.data().active.size(),board.data().completed,"in the wilds" if game.hero.dungeon!=null else game.exploration.bearing(board.BOARD)],13)
 	if not board.near_board(): paragraph("Accept and turn in at the wooden board northwest of the starting camp. Review and track jobs from anywhere.",13)

@@ -215,6 +215,7 @@ func _draw() -> void:
 		draw_line(pos,pos+Vector2.UP.rotated(game.build_rotation*PI/2)*27,Color("f6e5b5"),3)
 		label(pos+Vector2(-25,-40),game.build_recipe,12,Color("f4e7c7"))
 	game.chapter.draw(self)
+	game.mire.draw(self,draw_bounds)
 	game.castle.draw_traps(self)
 	if game.hero.dungeon==null:game.landscape.atmosphere(self,draw_bounds,clock)
 	for enemy in game.enemies:

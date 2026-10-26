@@ -1,4 +1,4 @@
-VYRNSPIRE 0.31.0 — WINDOWS x64
+VYRNSPIRE 0.32.0 — WINDOWS x64
 
 Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
 WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
@@ -27,3 +27,5 @@ HIDDEN DEPTHS: Camp > Quests > Explore Glacier Hollow / Oathstone Mine. Follow t
 WAYKEEPER BEACONS: Camp > Waykeeper beacons. Track a shrine; read its oath, interact with the three stones in order, return to awaken watchers, then claim its Epic relic. E interacts. Progress persists; unfinished fights can be retried.
 
 DUNGEON ATLAS: M opens the current dungeon floor. Select Entrance or a discovered destination for a gold route. World map toggles outdoors; Current dungeon floor returns. Escape/Resume exploration returns to play.
+
+CHAPTER III: Camp > Chapter III. After Chapter II, accept at Mara, investigate the two swamp records, finish the Veil Altar trial, reclaim Blackmire, and backtrack to its level-two archive for the Drowned Testament. Return to Mara for the chapter reward. Earlier site/trial/boss progress counts.
