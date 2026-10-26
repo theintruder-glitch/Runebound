@@ -1,8 +1,14 @@
-# VYRNSPIRE 0.30.0 — Dungeon Atlas
+# VYRNSPIRE 0.31.0 — Boss Signs
 
-An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **40**.
+An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **41**.
 
 Menu actions now retain your scroll position when refreshing the same screen, including repeated stat upgrades, settings and crafting. Switching pages starts at the top.
+
+## Boss signs
+
+Boss health bars now include their name, remaining health percentage and phase. Trial, forge and beacon encounters identify their group and the number of enemies remaining. Actual faster phases on story, castle, cave and beacon keepers display Phase II below half health. Ordinary guardians do not falsely advertise faster attacks. A single brief effect signals a faster phase; it cannot repeat on every hit.
+
+Heavy attack warnings reinforce the existing circular damage boundary with eight visible edge marks and a center cross. Named attacks keep their existing labels; other heavy strikes receive a clear label. These are presentation changes: attack timing, collision, damage, movement, enemy counts and rewards remain unchanged. Menus hide the caption and pause combat normally. No new textures, dynamic lights or enemies are required.
 
 ## Dungeon atlas
 
@@ -76,7 +82,7 @@ Only one dungeon floor and at most five authored enemies load at once. Default a
 
 ## Install and test
 
-Install `Vyrnspire-Godot-v0.30.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
+Install `Vyrnspire-Godot-v0.31.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
 
 Windows: extract the entire Windows ZIP and run `Vyrnspire.exe` beside its PCK. The low-power and OpenGL launchers remain. Android and Windows exchange characters through the existing JSON menus.
 
@@ -164,7 +170,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.30.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **40**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.31.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **41**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

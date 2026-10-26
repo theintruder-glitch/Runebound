@@ -44,6 +44,7 @@ var dash_button: Button
 var spell_buttons: Dictionary = {}
 var build_tools: Control
 var objective_label: Label
+var boss_name: Label
 var boss_bar: ProgressBar
 var interaction: Button
 var overlay: ColorRect
@@ -140,6 +141,8 @@ func _ready() -> void:
 	objective_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	boss_bar=make_bar(top,Color("d58c6d"))
 	boss_bar.visible=false
+	boss_name=label(boss_bar,"",11,Color("fff2da"));boss_name.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT);boss_name.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER;boss_name.vertical_alignment=VERTICAL_ALIGNMENT_CENTER;boss_name.mouse_filter=Control.MOUSE_FILTER_IGNORE;boss_name.clip_text=true
+	boss_name.add_theme_color_override("font_shadow_color",Color("111b24"));boss_name.add_theme_constant_override("shadow_offset_x",1);boss_name.add_theme_constant_override("shadow_offset_y",1)
 	toast_label = label(self,"",15,Color("f1dfa9"))
 	toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	toast_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -305,7 +308,7 @@ func layout() -> void:
 	objective_label.position=Vector2(17,98 if landscape else 162)
 	objective_label.size=Vector2(view.x-34,42)
 	boss_bar.position=Vector2(view.x/2-140,142 if landscape else 210)
-	boss_bar.size=Vector2(280,12)
+	boss_bar.size=Vector2(280,38)
 	toast_label.position = Vector2(25,view.y*.36)
 	toast_label.size = Vector2(view.x-50,90)
 	panel.position = Vector2(maxf(14,(view.x-660)/2),20)
@@ -342,7 +345,7 @@ func layout_desktop() -> void:
 	desktop_hint.position=Vector2(22,view.y-110);desktop_hint.size=Vector2(view.x-44,22)
 	desktop_hint.horizontal_alignment=HORIZONTAL_ALIGNMENT_CENTER
 	objective_label.position=Vector2(22,160);objective_label.size=Vector2(view.x-330,54)
-	boss_bar.position=Vector2(view.x/2-150,204);boss_bar.size=Vector2(300,12)
+	boss_bar.position=Vector2(view.x/2-150,218);boss_bar.size=Vector2(300,38)
 	toast_label.position=Vector2(40,view.y*.36);toast_label.size=Vector2(view.x-80,90)
 	panel.position=Vector2(maxf(18,(view.x-860)/2),20);panel.size=Vector2(minf(view.x-36,860),view.y-40)
 	build_tools.get_child(0).position=Vector2.ZERO;build_tools.get_child(0).size=Vector2(146,42)
@@ -397,6 +400,7 @@ func _process(dt: float) -> void:
 					boss_bar.visible=true;boss_bar.max_value=enemy.max_hp;boss_bar.value=enemy.hp
 		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
 		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
+		game.boss_signs.update_hud()
 		spell_ui.update_targeting()
 		var phase = Data.phase(game.hero.worldTime) if game.hero.dungeon==null else "Dungeon"
 		if phase!=shade_phase:

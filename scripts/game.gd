@@ -15,6 +15,7 @@ var landscape
 var castle
 var beacons
 var atlas
+var boss_signs
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
@@ -96,6 +97,7 @@ func _ready() -> void:
 	castle=CastleScript.new();castle.game=self
 	beacons=preload("res://scripts/beacons.gd").new();beacons.game=self
 	atlas=preload("res://scripts/dungeon_atlas.gd").new();atlas.game=self
+	boss_signs=preload("res://scripts/boss_signs.gd").new();boss_signs.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
@@ -529,6 +531,7 @@ func hurt(enemy: Dictionary,amount: float,kind: String,enchant: int=0,no_chain: 
 	visual_fx("impact",enemy.pos+Vector2(0,-12),18,Color("f1ddb3") if kind=="melee" else Color("e6c59e") if kind=="bow" else Color("f0ac80") if enchant==1 else Color("c6b2ef"),.22)
 	exploration.on_hit(enemy,kind)
 	enemy.hp -= amount
+	boss_signs.on_damage(enemy)
 	exploration.pack_alert(enemy)
 	enemy.aggro = 6
 	enemy.flash = .12

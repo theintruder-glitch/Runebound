@@ -1,3 +1,7 @@
+## v0.31.0 checks still needed
+
+Install over the current game. Check named boss bars, group counts, Phase II text and heavy-warning boundaries during real combat in both orientations. Confirm the display remains readable with movement/spells and the phone stays responsive. Native Windows driver/audio validation remains separate.
+
 ## v0.30.0 checks still needed
 
 Install over the current game. In each castle/cave, open Map, follow the Entrance route, select discovered rooms/objects and toggle to the World map and back. Rotate in both directions. Continue a saved run, backtrack and test a checkpoint defeat. Check the arrow position/facing and unknown rooms on the minimap. Record real phone readability, touch comfort and sustained performance; native Windows remains a separate check.
