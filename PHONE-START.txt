@@ -1,7 +1,7 @@
-VYRNSPIRE 0.26.0 — THORNWATCH / ANDROID
+VYRNSPIRE 0.27.0 — THORNWATCH / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.26.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.27.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 35 and the original prototype certificate.
+This update uses app.runebound.godot, version code 36 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -82,3 +82,6 @@ Find the armory key and library seal on level 1. Bind the checkpoint on level 2.
 Dodge the Colossus root strikes and ground slam on level 3. Claim the treasury blade.
 Floor-one entrance stairs leave the castle. Upper entrance stairs go back one floor. Final gold stairs return outside.
 FOUR KINGDOMS: Camp > Castle expeditions > choose Thornwatch, Frostspire, Blackmire or Stormbreak. Follow the marked road to its gate. Each has three distinct floors, a checkpoint, warned traps, boss and unique relic spell. Read each new castle archive for its rune puzzle order. Assign earned spells in Spells.
+
+CUSTOM CONTROLS
+Pause (or title) → Settings → Controls → Customize Layout. Drag controls, tap for Options, choose Joystick/D-Pad, and Save. Preview tests the unsaved layout. Cancel discards it. Rotate while editing to customize each orientation. See CONTROLS.md.

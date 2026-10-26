@@ -1,7 +1,7 @@
 # Codex instructions — VYRNSPIRE Android
 
 ## Mission
-Continue and finish the native **Android** edition of VYRNSPIRE (formerly Runebound). This repository contains the editable **Godot 4.5 GDScript** game project. The current source is **v0.26.0**, continued from the supplied **v0.15.0** baseline. Make incremental, reviewable improvements without losing any existing game content.
+Continue and finish the native **Android** edition of VYRNSPIRE (formerly Runebound). This repository contains the editable **Godot 4.5 GDScript** game project. The current source is **v0.27.0**, continued from the supplied **v0.15.0** baseline. Make incremental, reviewable improvements without losing any existing game content.
 
 Read `README.md`, `PHONE-START.txt`, `VERIFICATION.md`, `export_presets.cfg`, and `ROADMAP_ANDROID.md` before editing. Use VERIFICATION.md to distinguish local checks from pending hardware and CI validation.
 
@@ -34,3 +34,5 @@ Read `README.md`, `PHONE-START.txt`, `VERIFICATION.md`, `export_presets.cfg`, an
 Provide concise task results: files changed, tests/builds that really passed, APK artifact link if built, blockers, and the next actionable task. When a build fails, show the specific error and a proposed repair—not a generic missing-SDK statement.
 
 Public game branding is VYRNSPIRE. Preserve the historical app.runebound.godot package, release-key alias, internal data class and fixed legacy user directory for update/save compatibility. Do not rename those technical identities for cosmetic consistency.
+
+- `scripts/control_layout.gd`, `mobile_controls.gd`, `control_editor.gd`, `input_router.gd`: persisted controls model, actual HUD binding, editor, and shared InputMap routing. Keep controls preferences separate from character saves. Test both orientations and true per-finger ownership when changing these files.

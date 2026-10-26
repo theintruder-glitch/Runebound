@@ -120,6 +120,23 @@ if [[ ! -x "$SDK/platform-tools/adb" || ! -f "$SDK/build-tools/35.0.1/apksigner"
  msg "Installing Android 35 SDK and build-tools 35.0.1 (prebuilt APK export; no native compilation)"
  "$SDKMANAGER" --sdk_root="$SDK" "platform-tools" 'build-tools;35.0.1' 'platforms;android-35' || fail "SDK package installation failed; inspect SDK manager output"
 fi
+# Some recent Google CLI installs retain the archive's android-15 wrapper.
+# Only normalize the verified 35.0.1 payload when the canonical tools are absent.
+python3 - "$SDK/build-tools/35.0.1" <<'PYSDK'
+from pathlib import Path
+import sys
+root=Path(sys.argv[1]);nested=root/'android-15'
+if not (root/'apksigner').is_file() and (nested/'apksigner').is_file():
+    props=(nested/'source.properties').read_text()
+    if 'Pkg.Revision=35.0.1' not in props.replace(' ', ''):
+        raise SystemExit('Nested Android build-tools revision differs from 35.0.1; refusing to change it.')
+    children=list(nested.iterdir())
+    if any((root/p.name).exists() for p in children):
+        raise SystemExit('Conflicting nested build-tools files; repair the SDK before exporting.')
+    for item in children: item.rename(root/item.name)
+    nested.rmdir()
+    print('Normalized official Android Build-Tools 35.0.1 archive directory.')
+PYSDK
 [[ -x "$SDK/platform-tools/adb" ]] || fail "SDK platform-tools/adb missing"
 [[ -f "$SDK/build-tools/35.0.1/apksigner" ]] || fail "Android Build-Tools 35.0.1 missing"
 # Godot 4.5 uses a per-minor-version EditorSettings file, outside the project.

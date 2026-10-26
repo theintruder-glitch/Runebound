@@ -1,3 +1,64 @@
+# 0.27.0 Your Controls — verification
+
+Adds the actual-HUD layout editor, shared InputMap router, fixed/floating joystick
+and eight-way D-Pad, per-control appearance/assignment, presets and independent
+portrait/landscape preferences. Retains the complete v0.26 project and historical
+application/signing/save identity. No private signing material is in Git or the
+editable source package.
+
+- Pinned Godot 4.5.1 full source: **38 suite variants / 2,754 passing checks**.
+- Final signed APK compiled resources: **20 suites / 1,706 passing checks**.
+- Final Windows PCK compiled resources: **20 suites / 1,498 passing checks** under matching Linux Godot; this does not run Windows EXE on Windows.
+- New focused coverage: 102 layout/editor/settings checks and 195 multitouch/InputMap/controller checks. The final 24-unit grid alignment was also verified by a real touch-drag probe and a further 102-check editor run after the full source run.
+- Native Godot/Mesa software renders inspected: portrait joystick, editor, properties, minimized tools and D-Pad preview; landscape editor/properties and Controls settings. No missing textures or script errors. Render captures are not phone performance measurements.
+- Legacy-to-VYRNSPIRE filesystem probe passes with identical character, backup and graphics-settings paths. Controls use a separate atomic `user://controls.json` plus backup; malformed/corrupted settings recover without replacing character data.
+- Final ARM64 APK: package `app.runebound.godot`, version code **36**, name **0.27.0-controls**, minimum/target API **24/35**. ZIP CRC, native/ZIP 16 KiB alignment, package/resource validation and v2/v3 signatures verified. APK bytes remain unchanged during compiled-resource tests.
+- Original signing certificate SHA-256: `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`.
+- Final APK SHA-256: `f5571ad00d818ee0f89e3af16bc7c70ede497fd0b2acb2f4816aa0149da741b7`.
+
+Tests dispatch actual touch press/drag/release/cancel events in both orientations,
+keyboard/gamepad events and native menu confirm/back. They cover 360-degree and
+diagonal movement, independent fingers, moving/attacking/casting/dodging,
+construction, inventory and a real castle floor; floating-stick edge anchors;
+releasing or switching devices without clearing physical input; held attacks
+resuming after ground-spell confirmation; cooldown expiry before a HUD refresh;
+focus/pause/rotation release; real resized hitboxes; hidden/essential controls;
+assignment swaps; drag/corner resize, undo/redo, Preview, Save/Cancel, confirmed
+Reset, custom preset lifecycle, safe-area simulation and persistent reload/backup.
+
+Regressions repaired during validation: keep Survival gauges clear of the default
+landscape class skill; explicitly bind gamepad UI confirmation/navigation; retain
+virtual attack ownership through ground targeting; check current spell availability
+on a press; keep a floating stick's input anchor at the initial touch while its
+visual base stays within safe bounds. Grid snapping follows the visible 24-unit
+grid. Android build setup also normalizes a verified nested 35.0.1 tool payload
+left by the pinned Google installer, refusing mismatched revisions/conflicts.
+
+## Six-enemy input stress check
+
+Each mode ran 60 warm-up and 300 measured simulation ticks, with a held movement
+finger, a held attack finger and repeated third-finger spell input. Continuous
+movement events were dispatched every tick. Both ended with all virtual input
+released. Timing includes input handling and game simulation on this Linux host;
+it excludes renderer, GPU, Android hardware, heat and battery.
+
+| Movement | Mean CPU | p95 CPU | Active enemies | Input events |
+| --- | --- | --- | --- | --- |
+| Joystick | 0.930 ms | 3.434 ms | 6 | 372 |
+| Dpad | 0.857 ms | 2.301 ms | 6 | 372 |
+
+Raw final reports, export/signature/alignment logs, benchmark JSON, grid/save-path
+probes and render captures are included in the verification bundle. Initial failed
+development runs are not substituted for these final results.
+
+Pending hardware gates: install over the previous game on Motorola Edge 2025 /
+Android 16; physical multitouch, cutout/navigation/gesture reporting, haptics,
+controller hotplug and long combat sessions with FPS/RAM/heat/battery measurements;
+native Windows launch, driver/audio and controller playtest. This is a development
+release, not hardware certification or commercial-release readiness.
+
+---
+
 # 0.26.0 Four Kingdoms — verified 2026-10-25
 
 Continues the recovered v0.25 project with four castle destinations, authored regional approaches, distinct dungeon plans, backtracking, puzzles/shortcuts, checkpoints, bosses, relic spells/materials and atmosphere. Restored source and original signing material from the archived workspace; no private signing material is in Git or deliverable source.

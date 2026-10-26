@@ -1,3 +1,29 @@
+# 0.27 custom controls device playtest
+
+On Motorola Edge 2025, install over the existing app without clearing data. Verify
+character/camp continuity. In Settings → Controls → Customize Layout:
+
+- Drag every control, including top menu and contextual build/cast controls.
+  Minimize Tools to reach the top row. Resize with the corner and 50–200% slider;
+  check the visual/hitbox edges at every size and dark-dungeon skin/opacity.
+- Test Save/Cancel, Undo/Redo, confirmed Reset, Preview → Return to Edit, overlaps,
+  autofix, assignment swaps, hidden optional controls, all built-in presets and
+  create/rename/overwrite/delete personal presets. Force-close/relaunch and verify
+  both orientations and selected preset remain.
+- Hold joystick or D-Pad while attacking, casting, dodging, building and opening
+  inventory. Try D-Pad two-finger diagonals, opposing directions, sliding out/back,
+  floating-stick exclusion around buttons, canceled touches, background/resume,
+  controller hotplug and rotation while fingers are down.
+- Check cutouts, system navigation/gesture edges, portrait and both landscape
+  directions on phone/tablet. Record haptics and real gamepad mappings/hiding.
+- Repeat moving/aiming/attacking/casting in a six-enemy outdoor battle and a castle
+  room. Measure 30-minute FPS, RAM, heat/battery; distinguish renderer/GPU limits
+  from responsiveness. Native Windows must retain keys, mouse, hotbar and gamepad.
+
+These physical checks remain pending. Automated evidence is in VERIFICATION.md.
+
+---
+
 # 0.26.0 Four Kingdoms device playtest
 
 Export the current character, install the matching-key APK over the existing app and keep app data. Confirm your class, level, inventory, camps, chest contents and story progress remain.

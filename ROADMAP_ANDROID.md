@@ -2,6 +2,16 @@
 
 Current source: **0.26.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
 
+## Custom controls milestone
+
+- [x] Shared InputMap action router for mobile movement/actions, keyboard and gamepad.
+- [x] Fixed/floating joystick, eight-way D-Pad, independent fingers and clean release/cancel lifecycle.
+- [x] Actual HUD drag/drop and corner resizing; per-button size, opacity, skin, visibility, assignment swaps, undo/redo, preview and reset confirmation.
+- [x] Normalized portrait/landscape layouts, safe-area projection, bounded hitboxes, overlap validation/autofix and minimized toolbar.
+- [x] Separate atomic controls preferences/backup, eight starting presets and 12 managed custom presets.
+- [ ] Physical Android rotation/cutouts/gesture areas, haptics, real controller hotplug and long-session combat/touch validation.
+- [ ] Native Windows input/driver playtest.
+
 ## Four Kingdoms milestone
 
 - [x] Four distinct castle exteriors and 12 floors / 71 named rooms across the four original regions.

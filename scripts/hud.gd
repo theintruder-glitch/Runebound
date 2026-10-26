@@ -1,6 +1,8 @@
 extends Control
 
 const Data = preload("res://scripts/data.gd")
+const ControlsScript=preload("res://scripts/mobile_controls.gd")
+var controls
 const JoystickScript = preload("res://scripts/joystick.gd")
 const TouchActionScript = preload("res://scripts/touch_action.gd")
 const CardScript=preload("res://scripts/ui_card.gd")
@@ -39,7 +41,7 @@ var attack_button: Button
 var auto_button: Button
 var dash_button: Button
 var spell_buttons: Dictionary = {}
-var build_tools: HBoxContainer
+var build_tools: Control
 var objective_label: Label
 var boss_bar: ProgressBar
 var interaction: Button
@@ -62,6 +64,7 @@ const SurvivalUI=preload("res://scripts/survival_ui.gd")
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	controls=ControlsScript.new();controls.game=game;controls.hud=self
 	var theme_value = Theme.new()
 	theme_value.default_font_size = 17 if game.desktop.enabled else 15
 	for name_value in ["normal","hover","pressed","disabled","focus"]:
@@ -96,12 +99,13 @@ func _ready() -> void:
 	mp_label = label(mp,"",11,Color.WHITE)
 	mp_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mp_label.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	var gear = action(top,"Gear",func():show_character("gear"))
+	var gear = action(top,"Gear",func():pass,false,true)
 	gear.name = "Gear"
-	var realm = action(top,"Camp",func():show_character("camp"))
+	var realm = action(top,"Camp",func():pass,false,true)
 	realm.name = "Realm"
-	var pause = action(top,"II",show_pause)
+	var pause = action(top,"II",func():pass,false,true)
 	pause.name = "Pause"
+	var map_button=action(top,"Map",func():pass,false,true);map_button.name="Map"
 	buttons = Control.new()
 	buttons.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(buttons)
@@ -109,26 +113,24 @@ func _ready() -> void:
 	stick.game = game
 	buttons.add_child(stick)
 	attack_button = action(buttons,"ATTACK",func():pass)
-	attack_button.button_down.connect(func():game.attack_held=true;game.attack())
-	attack_button.button_up.connect(func():game.attack_held=false)
 	attack_button.add_theme_font_size_override("font_size",14)
-	auto_button = action(buttons,"AUTO ON",func():game.hero.auto=not game.hero.auto;update_hud();game.save_game())
+	auto_button = action(buttons,"AUTO ON",func():pass)
 	auto_button.add_theme_font_size_override("font_size",12)
-	skill_button=action(buttons,"CLASS SKILL",func():game.abilities.use())
+	skill_button=action(buttons,"CLASS SKILL",func():pass)
 	skill_button.add_theme_font_size_override("font_size",11)
-	dash_button = action(buttons,"DASH",func():game.dash())
+	dash_button = action(buttons,"DASH",func():pass)
 	dash_button.add_theme_font_size_override("font_size",13)
 	for name_value in ["fire","frost","heal"]:
 		var spell = name_value
-		spell_buttons[spell] = action(buttons,{"fire":"FIRE\n12 MP","frost":"FROST\n20 MP","heal":"HEAL\n25 MP"}[spell],func():game.spellbook.request_slot(["fire","frost","heal"].find(spell)))
+		spell_buttons[spell] = action(buttons,{"fire":"FIRE\n12 MP","frost":"FROST\n20 MP","heal":"HEAL\n25 MP"}[spell],func():pass)
 		spell_buttons[spell].add_theme_font_size_override("font_size",11)
 		spell_buttons[spell].add_theme_color_override("font_color",{"fire":Color("ffc38f"),"frost":Color("a4dcf4"),"heal":Color("b4e8b5")}[spell])
-	interaction = action(buttons,"OPEN CHEST",func():game.interact())
+	interaction = action(buttons,"OPEN CHEST",func():pass)
 	interaction.visible = false
-	build_tools=HBoxContainer.new()
+	build_tools=Control.new()
 	buttons.add_child(build_tools)
-	action(build_tools,"ROTATE",func():game.build_rotation=(game.build_rotation+1)%4)
-	action(build_tools,"CANCEL",func():game.cancel_build())
+	action(build_tools,"ROTATE",func():pass,false,true)
+	action(build_tools,"CANCEL",func():pass,false,true)
 	build_tools.visible=false
 	objective_label=label(top,"",13,Color("eddaa8"))
 	objective_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -191,10 +193,12 @@ func _ready() -> void:
 	advanced=SurvivalUI.new();advanced.game=game;advanced.hud=self;advanced.setup()
 	spell_ui=SpellUI.new();spell_ui.game=game;spell_ui.hud=self;spell_ui.setup()
 	get_viewport().size_changed.connect(layout)
+	controls.setup()
 	layout()
 
 func label(parent: Node,text_value: String,font_size: int=15,color: Color=Color("b7cbbd")) -> Label:
 	var result = Label.new()
+	if result is TouchActionScript: result.game=game
 	result.text = text_value
 	result.add_theme_font_size_override("font_size",font_size)
 	result.add_theme_color_override("font_color",color)
@@ -202,14 +206,14 @@ func label(parent: Node,text_value: String,font_size: int=15,color: Color=Color(
 	return result
 
 func action(parent: Node,text_value: String,callback: Callable,disabled: bool=false,touch_action:bool=false) -> Button:
-	var result = TouchActionScript.new() if (parent==buttons or touch_action) and buttons!=null and not game.desktop.enabled else Button.new()
+	var result = TouchActionScript.new() if ((parent==buttons and buttons!=null) or touch_action) and not game.desktop.enabled else Button.new()
 	# Let native touch drags reach the enclosing ScrollContainer. It cancels
 	# pending button taps when a swipe starts, and provides inertial scrolling.
 	if not result is TouchActionScript:
 		result.mouse_filter = Control.MOUSE_FILTER_PASS
 	result.text = text_value
 	result.disabled = disabled
-	result.focus_mode = Control.FOCUS_NONE
+	result.focus_mode = Control.FOCUS_ALL if controls!=null and controls.connected and parent!=buttons else Control.FOCUS_NONE
 	result.pressed.connect(callback)
 	parent.add_child(result)
 	return result
@@ -302,6 +306,7 @@ func layout() -> void:
 	toast_label.size = Vector2(view.x-50,90)
 	panel.position = Vector2(maxf(14,(view.x-660)/2),20)
 	panel.size = Vector2(minf(view.x-28,660),view.y-40)
+	controls.apply()
 	queue_redraw()
 
 func layout_desktop() -> void:
@@ -336,6 +341,9 @@ func layout_desktop() -> void:
 	boss_bar.position=Vector2(view.x/2-150,204);boss_bar.size=Vector2(300,12)
 	toast_label.position=Vector2(40,view.y*.36);toast_label.size=Vector2(view.x-80,90)
 	panel.position=Vector2(maxf(18,(view.x-860)/2),20);panel.size=Vector2(minf(view.x-36,860),view.y-40)
+	build_tools.get_child(0).position=Vector2.ZERO;build_tools.get_child(0).size=Vector2(146,42)
+	build_tools.get_child(1).position=Vector2(154,0);build_tools.get_child(1).size=Vector2(146,42)
+	controls.apply()
 	queue_redraw()
 
 func _process(dt: float) -> void:
@@ -393,6 +401,8 @@ func _process(dt: float) -> void:
 		elif daylight>=570:shade.color=night.lerp(clear,(daylight-570)/30)
 		shade.visible=not game.desktop.enabled and game.hero.dungeon==null and shade.color.a>.001
 
+	if controls!=null: controls.update_visibility()
+
 func toast(text_value: String,duration: float=3) -> void:
 	toast_label.text = text_value
 	toast_time = duration
@@ -400,8 +410,10 @@ func toast(text_value: String,duration: float=3) -> void:
 func set_interaction(text_value: String) -> void:
 	interaction.text = ("[E] " if game.desktop.enabled and not text_value.is_empty() else "")+text_value
 	interaction.visible = not text_value.is_empty()
+	if controls!=null: controls.update_visibility()
 
 func reset_stick() -> void:
+	if game.input_router!=null: game.input_router.reset_virtual()
 	if stick!=null:
 		stick.reset()
 	if buttons!=null:
@@ -412,9 +424,10 @@ func reset_stick() -> void:
 				child.reset()
 
 func blocks_world_pointer(at:Vector2) -> bool:
-	if overlay.visible: return true
+	if overlay.visible or (controls!=null and controls.editing()): return true
+	if controls!=null and controls.over_button(at): return true
 	for child in top.get_children()+buttons.get_children():
-		if (child is BaseButton or child in [build_tools,stick,spell_ui.aim_controls]) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
+		if (child is BaseButton or child==stick) and child.is_visible_in_tree() and child.get_global_rect().has_point(at): return true
 	return false
 
 func update_hud() -> void:
@@ -448,6 +461,8 @@ func update_hud() -> void:
 		auto_button.text="[T] AUTO\n"+("ON" if h.auto else "OFF")
 	advanced.update()
 	spell_ui.update()
+	controls.refresh_labels()
+	controls.update_visibility()
 	queue_redraw()
 
 func clear_content(title_value: String,show_tabs: bool=true) -> void:
@@ -470,6 +485,7 @@ func clear_content(title_value: String,show_tabs: bool=true) -> void:
 	scroll.scroll_vertical = 0
 	overlay.show()
 	buttons.hide()
+	if controls!=null: controls.call_deferred("focus_menu")
 
 func paragraph(text_value: String,font_size: int=14,color: Color=Color("aec4b8")) -> Label:
 	var result = label(content,text_value,font_size,color)
@@ -492,6 +508,7 @@ func show_title(has_save: bool) -> void:
 		action(content,"Continue journey",func():game.start_character(Data.read_save()))
 	action(content,"Begin a new journey",func():advanced.show_modes(true))
 	action(content,"Import a character save",choose_import)
+	action(content,"Settings",show_settings)
 	if game.desktop.enabled: action(content,"Laptop settings and controls",show_desktop_settings)
 	paragraph("This Godot edition has its own save. To bring a character from v0.2, use the included Save Transfer update and export your character first.",12)
 
@@ -517,6 +534,7 @@ func show_pause(message: String="") -> void:
 	paragraph(game.weather.summary(),13)
 	paragraph("Level %d %s · %d kills · %d chests" % [game.hero.level,game.hero.className,game.hero.kills,game.hero.stats.chests])
 	action(content,"Resume journey",resume)
+	action(content,"Settings",show_settings)
 	action(content,"Spellbook · equip slots 1 / 2 / 3",func():show_character("spells"))
 	action(content,"Game mode · "+("Survival" if game.expedition.enabled() else "Classic adventure"),func():advanced.show_modes())
 	if game.expedition.enabled(): action(content,"Survival gauges and supplies",func():show_character("needs"))
@@ -553,6 +571,15 @@ func show_position_recovery() -> void:
 	action(content,"Cancel · stay here",show_pause)
 
 func back() -> void:
+	if is_instance_valid(controls.editor):
+		if controls.editor.previewing: controls.editor.end_preview()
+		else: controls.editor.cancel_edit()
+		return
+	if current_page in ["settings","controls"]:
+		if current_page=="controls": show_settings()
+		elif game.hero.is_empty(): show_title(not Data.read_save().is_empty())
+		else: show_pause()
+		return
 	if game.playing and not game.spellbook.targeting.is_empty():
 		game.spellbook.cancel_target();return
 	if current_page=="title":
@@ -734,6 +761,16 @@ func export_save(path:String) -> bool:
 	file.close()
 	paragraph("Character exported. Move the JSON to your other device, then choose Import a character save on its title screen." if success else "Export failed. Choose a writable folder and try again.",14,Color("c9dfa9") if success else Color("efad98"))
 	return success
+
+func show_settings() -> void:
+	game.pause_game();current_page="settings";clear_content("Settings",false)
+	action(content,"Controls",controls.show_settings)
+	action(content,"Graphics",show_graphics_settings)
+	action(content,"Sound and music: "+("ON" if game.audio.enabled else "OFF"),func():game.audio.toggle();show_settings())
+	if game.desktop.enabled: action(content,"Windows display and mouse",show_desktop_settings)
+	action(content,"Back",func():
+		if game.hero.is_empty(): show_title(not Data.read_save().is_empty())
+		else: show_pause())
 
 func show_graphics_settings() -> void:
 	game.pause_game();current_page="graphics";clear_content("Graphics",false)
@@ -1164,3 +1201,6 @@ func show_trader() -> void:
 			action(body,"Buy back · %dg" % market.buyback_price(entry),func():market.buyback(id);show_character("trader"),not why.is_empty())
 	action(content,"Back to camp",func():show_character("camp"))
 	action(content,"Resume journey",resume)
+
+func _exit_tree() -> void:
+	if controls!=null: controls.shutdown()

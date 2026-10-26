@@ -1,6 +1,8 @@
 extends Node2D
 
 const Data = preload("res://scripts/data.gd")
+const InputRouter=preload("res://scripts/input_router.gd")
+var input_router
 const TacticsScript=preload("res://scripts/enemy_tactics.gd")
 var tactics
 const ChapterScript=preload("res://scripts/chapter.gd")
@@ -84,6 +86,7 @@ var screen_landscape = false
 
 func _ready() -> void:
 	get_window().title="VYRNSPIRE"
+	input_router=InputRouter.new();input_router.game=self;add_child(input_router)
 	tactics=TacticsScript.new();tactics.game=self
 	chapter=ChapterScript.new();chapter.game=self
 	forge=ForgeScript.new();forge.game=self
@@ -174,6 +177,7 @@ func set_player_position(at: Vector2) -> void:
 	hero.y = at.y
 
 func clear_scene() -> void:
+	if input_router!=null: input_router.reset_virtual()
 	if forge!=null: forge.reset()
 	if fishing!=null: fishing.reset()
 	if desktop!=null: desktop.clear_input();desktop.pointer_seen=false
@@ -206,6 +210,7 @@ func pause_game() -> void:
 	if fishing!=null: fishing.cancel("Line packed away while paused. Bait was used.")
 	if desktop!=null: desktop.clear_input()
 	playing = false
+	if input_router!=null: input_router.reset_virtual()
 	if spellbook!=null: spellbook.cancel_target()
 	move_vector = Vector2.ZERO
 	is_walking = false
@@ -237,31 +242,15 @@ func _notification(what: int) -> void:
 		hud.back()
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if not event.is_pressed() or event.is_echo():
-		return
-	if desktop.handle_key(event):
-		get_viewport().set_input_as_handled();return
-	var code=event.physical_keycode if desktop.enabled and event.physical_keycode!=0 else event.keycode
-	if code==KEY_ESCAPE:
-		hud.back()
-	elif not hero.is_empty() and code==KEY_M:
-		hud.show_character("map")
-	elif not hero.is_empty() and code==KEY_I:
-		hud.show_character("gear")
-	elif playing:
-		match code:
-			KEY_E: interact()
-			KEY_1: spellbook.request_slot(0)
-			KEY_2: spellbook.request_slot(1)
-			KEY_3: spellbook.request_slot(2)
-			KEY_Q: abilities.use()
-			KEY_SHIFT: dash()
+	if input_router.handle_event(event): get_viewport().set_input_as_handled()
 
 func _input(event:InputEvent) -> void:
 	if spellbook!=null: spellbook.release_touch(event)
 	if desktop!=null and desktop.enabled: desktop.release_input(event)
 
 func _unhandled_input(event:InputEvent) -> void:
+	if not event is InputEventKey and input_router.handle_event(event):
+		get_viewport().set_input_as_handled();return
 	if spellbook!=null and spellbook.handle_touch(event):
 		get_viewport().set_input_as_handled();return
 	if desktop!=null: desktop.handle_input(event)
@@ -284,8 +273,7 @@ func tick(dt: float) -> void:
 	survival.tick(dt)
 	farming.tick(dt)
 	spellbook.tick(dt)
-	var keyboard = Vector2(float(Input.is_physical_key_pressed(KEY_D) or Input.is_physical_key_pressed(KEY_RIGHT))-float(Input.is_physical_key_pressed(KEY_A) or Input.is_physical_key_pressed(KEY_LEFT)),float(Input.is_physical_key_pressed(KEY_S) or Input.is_physical_key_pressed(KEY_DOWN))-float(Input.is_physical_key_pressed(KEY_W) or Input.is_physical_key_pressed(KEY_UP)))
-	var movement = (move_vector+keyboard).limit_length(1)
+	var movement = input_router.movement()
 	is_walking = movement.length()>.1 or dash_time>0
 	var speed = 147 if hero.className=="Rogue" else 142 if hero.className=="Ranger" else 130
 	speed*=expedition.speed_factor()
@@ -307,6 +295,7 @@ func tick(dt: float) -> void:
 	survival.pickup_tick(dt)
 	update_edge_camera(at)
 	desktop.update_aim()
+	input_router.update_aim()
 	if hero.dungeon==null:
 		hero.bestDistance = maxf(hero.bestDistance,at.length())
 	attack_cooldown = maxf(0,attack_cooldown-dt)
@@ -314,7 +303,7 @@ func tick(dt: float) -> void:
 	for key in spell_cooldowns:
 		spell_cooldowns[key] = maxf(0,spell_cooldowns[key]-dt)
 	hero.mp = minf(Data.max_mp(hero),hero.mp+dt*(4+hero.int*.07+(1.5 if Data.has_building(hero,"Tavern") else 0)))
-	var manual=attack_held or desktop.mouse_attack or Input.is_physical_key_pressed(KEY_SPACE)
+	var manual=attack_held or input_router.is_virtual_held("attack") or desktop.mouse_attack or Input.is_action_pressed("attack")
 	if (hero.auto or manual) and spellbook.targeting.is_empty():
 		attack(not manual)
 	spawn_timer -= dt
@@ -660,10 +649,8 @@ func dash() -> void:
 	if exploration.active(): exploration.dodged=true
 	dash_cooldown = 2.4 if hero.className=="Rogue" else 3.8
 	dash_time = .23
-	if move_vector.length()>.1:
-		facing = move_vector.normalized()
-	if desktop.enabled and desktop.keyboard_direction().length()>.1:
-		facing=desktop.keyboard_direction().normalized()
+	var direction=input_router.movement()
+	if direction.length()>.1: facing=direction.normalized()
 
 func take_item(item: Dictionary) -> void:
 	if hero.inventory.size()>=40:
