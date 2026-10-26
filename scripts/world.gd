@@ -48,8 +48,8 @@ func _ready() -> void:
 
 func build_palette(season:String) -> void:
 	palette_season=season
-	var image = Image.create(TILE*12,TILE,false,Image.FORMAT_RGBA8)
-	var colors = [Color("293e35"),Color("2c4136"),Color("273b32"),Color("263e3e"),Color("313443"),Color("a3b9bd"),Color("384347"),Color("1a242d"),Color("23312c"),Color("c6d9dc"),Color("443a55"),Color("31503b")]
+	var image = Image.create(TILE*14,TILE,false,Image.FORMAT_RGBA8)
+	var colors = [Color("293e35"),Color("2c4136"),Color("273b32"),Color("263e3e"),Color("313443"),Color("a3b9bd"),Color("384347"),Color("1a242d"),Color("23312c"),Color("c6d9dc"),Color("443a55"),Color("31503b"),Color("1b272f"),Color("203b49")]
 	if season=="Summer":
 		colors[0]=Color("294a32");colors[1]=Color("345236");colors[2]=Color("24432c")
 	elif season=="Autumn":
@@ -59,7 +59,7 @@ func build_palette(season:String) -> void:
 	var noise=FastNoiseLite.new();noise.seed=1594;noise.frequency=.13
 	var rng = RandomNumberGenerator.new()
 	rng.seed = 1594
-	for tile in range(12):
+	for tile in range(14):
 		image.fill_rect(Rect2i(tile*TILE,0,TILE,TILE),colors[tile])
 		for px in range(TILE):
 			for py in range(TILE):
@@ -82,10 +82,17 @@ func build_palette(season:String) -> void:
 			image.fill_rect(Rect2i(tile*TILE,0,TILE,3),colors[tile].lightened(.14))
 			image.fill_rect(Rect2i(tile*TILE,0,2,TILE),colors[tile].darkened(.2))
 			image.fill_rect(Rect2i(tile*TILE,TILE-2,TILE,2),colors[tile].darkened(.2))
+		if tile>=12:
+			# Baked irregular mineral seams distinguish cave rock from castle masonry.
+			for seam in range(3):
+				for y in range(TILE):
+					var x=clampi(8+seam*15+int(sin(y*.22+seam)*4)+int(y*.09),0,TILE-1)
+					image.set_pixel(tile*TILE+x,y,colors[tile].lightened(.12 if tile==13 else .07))
+			image.fill_rect(Rect2i(tile*TILE,0,TILE,2),colors[tile].lightened(.08))
 	var atlas = TileSetAtlasSource.new()
 	atlas.texture = ImageTexture.create_from_image(image)
 	atlas.texture_region_size = Vector2i(TILE,TILE)
-	for i in range(12):
+	for i in range(14):
 		atlas.create_tile(Vector2i(i,0))
 	var tiles = TileSet.new()
 	tiles.tile_size = Vector2i(TILE,TILE)
@@ -117,7 +124,9 @@ func refresh(force: bool=false) -> void:
 		terrain.position = Vector2.ZERO
 		for y in range(game.dungeon_map.size):
 			for x in range(game.dungeon_map.size):
-				terrain.set_cell(Vector2i(x,y),0,Vector2i(6 if game.dungeon_map.grid[y][x] else 7,0))
+				var floor_tile=9 if game.castle.caves.active() and game.castle.caves.id()=="frost-cave" else 4 if game.castle.caves.active() else 6
+				var wall_tile=(13 if game.castle.caves.id()=="frost-cave" else 12) if game.castle.caves.active() else 7
+				terrain.set_cell(Vector2i(x,y),0,Vector2i(floor_tile if game.dungeon_map.grid[y][x] else wall_tile,0))
 	else:
 		var global_center = center*8
 		if (global_center-tile_origin).abs().x>4096 or (global_center-tile_origin).abs().y>4096:
@@ -196,7 +205,7 @@ func _draw() -> void:
 			var color = Color("a6e5c1") if key=="start" else Color("e8cc7f") if game.floor_clear() else Color("8b8799")
 			for i in range(4):
 				draw_rect(Rect2(at+Vector2(-17+i*2,-12+i*7),Vector2(34-i*4,4)),color)
-			label(at+Vector2(-26,-21),("BACK" if game.castle.active() and game.hero.dungeon.floor>1 else "WILDS") if key=="start" else "DOWN" if game.floor_clear() else "LOCKED",10,color)
+			label(at+Vector2(-26,-21),("BACK" if game.castle.active() and game.hero.dungeon.floor>1 else "WILDS") if key=="start" else ("OUT" if game.castle.caves.active() else "DOWN") if game.floor_clear() else "LOCKED",10,color)
 	if not game.build_recipe.is_empty() and game.hero.dungeon==null:
 		var pos=game.survival.place_position()
 		var rect=game.survival.footprint(game.build_recipe,pos,game.build_rotation)

@@ -386,7 +386,7 @@ func _process(dt: float) -> void:
 		if game.castle.active():
 			objective_label.text=game.castle.objective()
 			for enemy in game.enemies:
-				if not enemy.dead and (enemy.get("thornwatch_boss",false) or enemy.has("realm_boss")):
+				if not enemy.dead and (enemy.get("thornwatch_boss",false) or enemy.has("realm_boss") or enemy.get("cave_boss",false)):
 					boss_bar.visible=true;boss_bar.max_value=enemy.max_hp;boss_bar.value=enemy.hp
 		if not game.spellbook.targeting.is_empty(): objective_label.text="PLACE "+game.spellbook.BOOK[game.spellbook.targeting].name.to_upper()+" · "+game.spellbook.placement_hint()
 		if not game.spellbook.targeting.is_empty(): interaction.disabled=true
@@ -440,7 +440,7 @@ func update_hud() -> void:
 	heading.text = "%s · LV %d" % [h.className.to_upper(),h.level]
 	heading.add_theme_font_size_override("font_size",14 if h.className.length()<12 else 12)
 	subheading.text = (("Survival Ruins · %d / 5" if game.expedition.enabled() else "Endless Dungeon · Floor %d") % h.dungeon.floor if h.dungeon!=null else game.exploration.REGIONS[game.exploration.region_at(game.player_position())].name)+" · "+game.weather.season()+" · "+game.weather.sky()+" · "+Data.phase(h.worldTime)
-	if game.castle.active():subheading.text=game.castle.title()+" · %d/3" % h.dungeon.floor
+	if game.castle.active():subheading.text=game.castle.title()+(" · 1/1" if game.castle.caves.active() else " · %d/3" % h.dungeon.floor)
 	if game.chapter.story_run(): subheading.text="The Hollow Root · %s · %d / 3" % [game.chapter.FLOORS[h.dungeon.floor-1],h.dungeon.floor]
 	hp.max_value = Data.max_hp(h)
 	hp.value = h.hp
@@ -1068,6 +1068,7 @@ Gold rings: completed · Gray markers: undiscovered
 Tap a marker, then Track selected.",11)
 
 func map_description(id:String) -> String:
+	if game.castle.caves.SITES.has(id):return game.castle.caves.SITES[id].name+" · Hidden side expedition · "+game.exploration.bearing(game.castle.caves.SITES[id].point)
 	if game.landscape.realms.Catalog.ZONES.has(id):return game.landscape.realms.Catalog.ZONES[id].castle+" · Follow the marked roads, bridges and ramps · "+game.exploration.bearing(game.landscape.realms.Catalog.ZONES[id].gate)
 	if id=="keep":return "Thornwatch Keep · Follow Old King’s Bridge and the marked hillside ramp · "+game.exploration.bearing(game.landscape.KEEP)
 	if id=="trader": return "Mara’s camp market · "+game.exploration.bearing(game.trader.POSITION)
@@ -1076,6 +1077,9 @@ func map_description(id:String) -> String:
 	return game.exploration.REGIONS[id].landmark+" · "+game.exploration.bearing(game.exploration.REGIONS[id].point)
 
 func show_quests() -> void:
+	for id in game.castle.caves.SITES:
+		var cave_id=id
+		action(content,"Explore "+game.castle.caves.SITES[id].name+" · hidden expedition",func():game.exploration.track(cave_id))
 	for id in game.landscape.realms.Catalog.ZONES:
 		var region_id=id
 		action(content,"Explore "+game.landscape.realms.Catalog.ZONES[id].castle,func():game.exploration.track(region_id))

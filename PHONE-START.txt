@@ -1,7 +1,7 @@
-VYRNSPIRE 0.27.1 — THORNWATCH / ANDROID
+VYRNSPIRE 0.28.0 — HIDDEN DEPTHS / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.27.1.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.28.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 37 and the original prototype certificate.
+This update uses app.runebound.godot, version code 38 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -85,3 +85,10 @@ FOUR KINGDOMS: Camp > Castle expeditions > choose Thornwatch, Frostspire, Blackm
 
 CUSTOM CONTROLS
 Pause (or title) → Settings → Controls → Customize Layout. Drag controls, tap for Options, choose Joystick/D-Pad, and Save. Preview tests the unsaved layout. Cancel discards it. Rotate while editing to customize each orientation. See CONTROLS.md.
+
+HIDDEN DEPTHS:
+Camp > Quests > Explore Glacier Hollow or Oathstone Mine; follow the bearing and marked branch trail.
+At the cave mouth tap ENTER. Read the journal and activate the brazier/lever to open the optional vault.
+Dodge the hazard circles and guardian warnings. Each treasure is once per character.
+Entrance stairs always leave. Gold stairs leave after the main guardians fall.
+Defeat returns to the paused cave entrance with run progress intact and the normal gold loss.

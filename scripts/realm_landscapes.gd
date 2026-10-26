@@ -15,6 +15,7 @@ var visible_zone=""
 func zone_at(p:Vector2) -> String:return Catalog.zone_at(p)
 func trail_distance(p:Vector2,id:String) -> float:return Catalog.distance_to_trail(p,Catalog.ZONES[id].trail)
 func clear_route(p:Vector2) -> bool:
+ if Catalog.side_trail(p):return true
  var id=zone_at(p)
  if id.is_empty():return false
  if trail_distance(p,id)<74 or p.distance_to(Catalog.ZONES[id].gate)<100:return true
@@ -23,6 +24,7 @@ func clear_route(p:Vector2) -> bool:
  return false
 func river_x(y:float) -> float:return -2180+sin(y/210.0)*50
 func raw_solid(p:Vector2) -> bool:
+ if Catalog.side_trail(p):return false
  var id=zone_at(p)
  if id.is_empty():return false
  if Catalog.foundation(id).has_point(p):return true
@@ -40,17 +42,19 @@ func feature_id() -> String:
   if p.distance_to(Catalog.ZONES[id].gate)<78:return id
  for id in SITES:
   var site=SITES[id]
-  if not game.hero.opened.get(id,false) and p.distance_to(site.point)<60 and game.line_clear(p,site.point):return id
+  if (game.castle.caves.SITES.has(id) or not game.hero.opened.get(id,false)) and p.distance_to(site.point)<60 and game.line_clear(p,site.point):return id
  return ""
 func interaction() -> String:
  var id=feature_id()
  if Catalog.ZONES.has(id):return "ENTER "+Catalog.ZONES[id].castle.to_upper()
+ if game.castle.caves.SITES.has(id):return "ENTER "+SITES[id].name.to_upper()
  if SITES.has(id):return "EXPLORE "+SITES[id].name.to_upper()
  return ""
 func interact() -> void:
  var id=feature_id()
  if Catalog.ZONES.has(id):game.castle.enter_region(id);return
  if not SITES.has(id):return
+ if game.castle.caves.SITES.has(id):game.castle.caves.enter(id);return
  var site=SITES[id];var material=Catalog.ZONES[site.zone].material
  if game.survival.count(material)>99996:game.notify("Make room for 3 "+material+" and try again.",4);return
  game.hero.opened[id]=true;game.hero.gold+=site.gold;game.hero.essence+=2;game.survival.add(material,3)
@@ -127,13 +131,16 @@ func draw(c:CanvasItem,b:Rect2) -> void:
    if not textures.has(zone) and ResourceLoader.exists(info.image):textures[zone]=load(info.image)
    if textures.has(zone):c.draw_texture_rect(textures[zone],rect,false)
    c.draw_string(ThemeDB.fallback_font,info.gate+Vector2(-110,35),info.castle.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color("e0cb92"))
+ for trail in Catalog.SIDE_TRAILS.values():
+  var route=PackedVector2Array(trail)
+  c.draw_polyline(route,Color("182b3266"),44,true);c.draw_polyline(route,Color("8e95816b"),30,true)
  for site_id in SITES:
   var site=SITES[site_id];var p:Vector2=site.point
   if not b.grow(120).has_point(p):continue
   if "cave" in site_id or "mine" in site_id:
    polygon(c,[p+Vector2(-62,15),p+Vector2(-48,-55),p+Vector2(-9,-82),p+Vector2(39,-56),p+Vector2(64,17)],Color("576d73"));c.draw_arc(p,34,PI,TAU,16,Color("16252e"),28,true)
   else:game.world.field_visuals.draw_prop(c,"cart" if "camp" in site_id else "watch",p)
-  if not game.hero.opened.get(site_id,false):game.world.field_visuals.draw_prop(c,"cache",p+Vector2(0,15))
+  if not game.hero.opened.get(site_id,false) and not game.castle.caves.SITES.has(site_id):game.world.field_visuals.draw_prop(c,"cache",p+Vector2(0,15))
   c.draw_string(ThemeDB.fallback_font,p+Vector2(-60,55),site.name.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("cdbd9c"))
 func atmosphere(c:CanvasItem,b:Rect2,clock:float) -> void:
  var id=zone_at(game.player_position())

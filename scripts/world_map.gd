@@ -69,6 +69,13 @@ func _draw() -> void:
   for p in zone.trail:path.append(canvas_point(p))
   draw_polyline(path,Color(zone.accent,.6),1.5,true)
   marker(id,zone.gate,zone.castle,true,game.hero.opened.get(id+"-cleared",false))
+ for trail in game.landscape.realms.Catalog.SIDE_TRAILS.values():
+  var route=PackedVector2Array()
+  for p in trail:route.append(canvas_point(p))
+  draw_polyline(route,Color("c5b788"),1.5,true)
+ for id in game.castle.caves.SITES:
+  var cave=game.castle.caves.SITES[id]
+  marker(id,cave.point,cave.name,true,game.hero.opened.get(id+"-cleared",false))
  marker("keep",game.landscape.KEEP,"Thornwatch",true,game.hero.opened.get("thornwatch-cleared",false))
  marker("trader",game.trader.POSITION,"Mara",true,false)
  marker("ruins",game.exploration.RUINS,"Ruins",game.hero.journey.dungeon_entered,game.hero.journey.first_floor)

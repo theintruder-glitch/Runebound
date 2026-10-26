@@ -1,6 +1,13 @@
 # Android-first completion roadmap
 
-Current source: **0.26.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.28.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+
+## Hidden Depths milestone
+
+- [x] Enterable Glacier Hollow and Oathstone Mine: ten named chambers, distinct branching plans, mechanisms, guarded optional treasure, warned hazards and two-pattern guardians.
+- [x] Marked branch trails, map/Camp tracking, old-cache compatibility, saved run progress, safe entrance/gold exits and defeat recovery.
+- [x] Four active authored enemies, cached/cullable chamber details and existing quality settings.
+- [ ] Physical-phone navigation, visual readability, difficulty and sustained performance feedback.
 
 ## Custom controls milestone
 

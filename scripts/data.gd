@@ -130,16 +130,16 @@ static func migrate(hero: Dictionary) -> Dictionary:
 	if chapter.claimed and not chapter.cleared: return {}
 	if chapter.return_until>0 and not chapter.claimed: return {}
 	if hero.dungeon!=null:
-		if not hero.dungeon.get("castle","") is String or hero.dungeon.get("castle","") not in ["","thornwatch","frostspire","blackmire","stormbreak"]:return {}
-		if hero.dungeon.get("castle","") in ["thornwatch","frostspire","blackmire","stormbreak"]:
+		if not hero.dungeon.get("castle","") is String or hero.dungeon.get("castle","") not in ["","thornwatch","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]:return {}
+		if hero.dungeon.get("castle","") in ["thornwatch","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]:
 			for key in ["floor","seed","returnX","returnY"]:
 				var value=hero.dungeon.get(key)
 				if not (value is int or value is float) or not is_finite(float(value)):return {}
-			if hero.dungeon.floor<1 or hero.dungeon.floor>3 or floor(hero.dungeon.floor)!=hero.dungeon.floor or hero.dungeon.get("story",false):return {}
+			if hero.dungeon.floor<1 or hero.dungeon.floor>(1 if hero.dungeon.castle in ["frost-cave","highland-mine"] else 3) or floor(hero.dungeon.floor)!=hero.dungeon.floor or hero.dungeon.get("story",false):return {}
 			if not hero.dungeon.get("run") is String or hero.dungeon.run.is_empty() or hero.dungeon.run.length()>80:return {}
 			if not hero.dungeon.get("cleared") is Array or not hero.dungeon.get("rewarded") is bool:return {}
 			for flag in hero.opened:
-				if str(flag).split(":")[0] in ["thornwatch","frostspire","blackmire","stormbreak"] and not hero.opened[flag] is bool:return {}
+				if str(flag).split(":")[0] in ["thornwatch","frostspire","blackmire","stormbreak","frost-cave","highland-mine"] and not hero.opened[flag] is bool:return {}
 		if not hero.dungeon.get("story",false) is bool: return {}
 		if hero.dungeon.get("story",false) and (not chapter.translated or hero.dungeon.floor<1 or hero.dungeon.floor>3): return {}
 	hero.forge_chapter=hero.get("forge_chapter",{"accepted":false,"inspected":false,"cleared":false,"claimed":false})
@@ -168,7 +168,7 @@ static func migrate(hero: Dictionary) -> Dictionary:
 	hero.exploration.visited.forest=true
 	hero.exploration.discovered.forest=true
 	hero.exploration.target=str(hero.exploration.get("target",""))
-	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak"]: hero.exploration.target=""
+	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]: hero.exploration.target=""
 	hero.respawn=hero.get("respawn",{"x":0.0,"y":0.0})
 	if not hero.respawn is Dictionary: return {}
 	for key in ["x","y"]:

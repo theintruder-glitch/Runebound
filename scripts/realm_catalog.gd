@@ -1,5 +1,14 @@
 extends RefCounted
 # Stable world coordinates and IDs: new regions never rename legacy save keys.
+const SIDE_TRAILS={
+ "frost-cave":[Vector2(280,-2230),Vector2(280,-2310),Vector2(-260,-2310),Vector2(-260,-2440)],
+ "highland-mine":[Vector2(1800,0),Vector2(1800,-160),Vector2(1870,-260)]
+}
+static func side_trail(p:Vector2) -> bool:
+ var bounds={"frost-cave":Rect2(-320,-2500,660,340),"highland-mine":Rect2(1740,-320,190,380)}
+ for id in SIDE_TRAILS:
+  if bounds[id].has_point(p) and distance_to_trail(p,SIDE_TRAILS[id])<42:return true
+ return false
 const ZONES={
  "frostspire":{"name":"The Frostbound Peaks","castle":"Frostspire Citadel","region":"snow","area":Rect2(-450,-3450,1900,2000),"gate":Vector2(800,-2800),"trail":[Vector2(-100,-1460),Vector2(-100,-1840),Vector2(280,-2000),Vector2(280,-2230),Vector2(640,-2350),Vector2(800,-2540),Vector2(800,-2800)],"accent":Color("8cdaef"),"floor":5,"level":5,"material":"Frost shard","boss":"The Frost King","core":"Rime seal","spell":"wintercrown","relic":"Winter Sovereign","kind":"staff","order":["rune-c","rune-a","rune-b"],"clue":"Winter yields to dawn: Moon, Sun, then Star.","mechanism":"LIGHT THAW BRAZIER","image":"res://assets/frostspire.png"},
  "blackmire":{"name":"The Drowned Mire","castle":"Blackmire Fortress","region":"swamp","area":Rect2(-3400,-900,1850,1900),"gate":Vector2(-2820,640),"trail":[Vector2(-1500,440),Vector2(-1770,480),Vector2(-1770,180),Vector2(-2200,180),Vector2(-2440,400),Vector2(-2440,700),Vector2(-2700,700),Vector2(-2820,700),Vector2(-2820,640)],"accent":Color("c4a1f1"),"floor":3,"level":6,"material":"Glowcap","boss":"The Drowned Abomination","core":"Mire chain","spell":"mireward","relic":"Blackmire Carapace","kind":"armor","order":["rune-b","rune-c","rune-a"],"clue":"The drowned oath: Star, Moon, then Sun.","mechanism":"TURN DRAINAGE WHEEL","image":"res://assets/blackmire.png"},

@@ -20,6 +20,7 @@ static func region_at(pos:Vector2) -> String:
  if pos.x< -1400: return "swamp"
  return "forest"
 static func cave_wall(pos:Vector2) -> bool:
+ if Catalog.side_trail(pos):return false
  if Catalog.zone_at(pos)=="stormbreak" and Catalog.distance_to_trail(pos,Catalog.ZONES.stormbreak.trail)<74:return false
  if region_at(pos)!="caves" or absf(pos.y)<95 or pos.distance_to(REGIONS.caves.point)<220: return false
  var cell=Vector2i(floori(pos.x/48),floori(pos.y/48))
@@ -54,6 +55,7 @@ func bearing(to:Vector2) -> String:
  return "%s · %dm" % [dir,int(offset.length()/10)]
 func objective() -> String:
  var target=data().get("target","")
+ if game.castle.caves.SITES.has(target):return game.castle.caves.SITES[target].name+" · "+bearing(game.castle.caves.SITES[target].point)
  if target=="trader": return "Mara · Leave dungeon via entrance stairs" if game.hero.dungeon!=null else "Trader Mara · "+bearing(game.trader.POSITION)
  if target=="ruins": return "Mossveil Ruins · "+bearing(RUINS)
  if Catalog.ZONES.has(target):return Catalog.ZONES[target].castle+" · "+bearing(Catalog.ZONES[target].gate)
@@ -62,7 +64,7 @@ func objective() -> String:
  if not REGIONS.has(target): return "Explore · Track a regional landmark from Camp"
  return REGIONS[target].landmark+" · "+bearing(REGIONS[target].point)
 func track(id:String) -> void:
- if id not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak"]: return
+ if id not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]: return
  data().target=id;game.hero.contracts.target="";game.hero.angler.target=""
  game.save_game();game.hud.resume()
 func nearby() -> String:

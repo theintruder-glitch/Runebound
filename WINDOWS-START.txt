@@ -1,4 +1,4 @@
-VYRNSPIRE 0.27.1 — WINDOWS x64
+VYRNSPIRE 0.28.0 — WINDOWS x64
 
 Extract all files and open Vyrnspire.exe beside Vyrnspire.pck. Keep exported DLLs beside them.
 WASD/arrows: move. Mouse: aim. Left click/Space: attack. Right click/Shift: dodge.
@@ -21,3 +21,5 @@ Crowd Relief: Reduced crowds defaults ON, capping ambient wilds population at 6.
 Fieldcraft: all regional resource nodes and three story camps have distinct shaded artwork. Same art and gathering/quest behavior on Android and Windows. The atlas SVG and its deterministic generator are editable in the source.
 
 Settings → Controls offers the shared layout editor. Keyboard/mouse and gamepad continue independently. Gamepad hiding is optional. Hardware gamepad/native Windows tests remain pending.
+
+HIDDEN DEPTHS: Camp > Quests > Explore Glacier Hollow / Oathstone Mine. Follow the marked branch trails to ENTER. Read the journal, open the mechanism and defeat the guardian; an optional watchman protects one-time treasure. Entrance stairs always leave. Gold stairs leave after the main guardians fall.

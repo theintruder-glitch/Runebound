@@ -12,7 +12,7 @@ func run():
 	var scene=load("res://scenes/main.tscn").instantiate();root.add_child(scene)
 	await process_frame;await process_frame
 	check(scene.desktop.enabled,"Release pack boots the laptop interface without development flags")
-	check(ProjectSettings.get_setting("application/config/version")=="0.27.1","Release pack has current application metadata")
+	check(ProjectSettings.get_setting("application/config/version")=="0.28.0","Release pack has current application metadata")
 	scene.start_character(Data.fresh("Ranger"));scene.set_physics_process(false)
 	scene.hero.auto=false;scene.enemies.clear();scene.spawn_timer=100000
 	check(scene.farming.CROPS.size()==3 and scene.trader.offers().size()==13,"Release pack includes farming and trader systems")
