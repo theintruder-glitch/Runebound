@@ -177,6 +177,17 @@ static func migrate(hero: Dictionary) -> Dictionary:
 	if forge.inspected and not forge.accepted: return {}
 	if forge.cleared and not forge.inspected: return {}
 	if forge.claimed and not forge.cleared: return {}
+	hero.mire_chapter=hero.get("mire_chapter",{"accepted":false,"clues":{},"testament":false,"claimed":false})
+	var mire=hero.mire_chapter
+	if not mire is Dictionary or mire.size()!=4 or not mire.get("clues") is Dictionary or mire.clues.size()>2:return {}
+	for key in ["accepted","testament","claimed"]:
+		if not mire.get(key) is bool:return {}
+	for id in mire.clues:
+		if id not in ["mire-watch","mire-grove"] or not mire.clues[id] is bool or not mire.clues[id]:return {}
+	if mire.accepted and not forge.claimed:return {}
+	if not mire.accepted and (not mire.clues.is_empty() or mire.testament or mire.claimed):return {}
+	if mire.testament and (mire.clues.size()!=2 or hero.opened.get("blackmire-cleared",false)!=true):return {}
+	if mire.claimed and not mire.testament:return {}
 	hero.journey=hero.get("journey",{})
 	if not hero.journey is Dictionary: return {}
 	for key in ["wood","cooked","warden","reward","dungeon_entered","first_floor","opening_reward"]: hero.journey[key]=bool(hero.journey.get(key,false))
@@ -191,6 +202,7 @@ static func migrate(hero: Dictionary) -> Dictionary:
 			if region not in ["forest","caves","swamp","snow"]: return {}
 			hero.exploration[key][region]=bool(hero.exploration[key][region])
 	if forge.inspected and not hero.exploration.challenges.get("caves",false): return {}
+	if mire.testament and not hero.exploration.challenges.get("swamp",false):return {}
 	hero.exploration.visited.forest=true
 	hero.exploration.discovered.forest=true
 	hero.exploration.target=str(hero.exploration.get("target",""))

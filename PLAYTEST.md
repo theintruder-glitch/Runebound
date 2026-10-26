@@ -1,3 +1,7 @@
+## v0.32.0 checks still needed
+
+Continue an old character. Finish/claim Chapter II, accept Chapter III at Mara, read both swamp records, complete Veil Altar, clear Blackmire and backtrack to the level-two archive. Verify saved clues/testament after restart and checkpoint defeat. Test the quest marker in the atlas and returning to Mara with a full bag. Compare swamp wetness benefit against other regions; check both orientations and real phone performance.
+
 ## v0.31.0 checks still needed
 
 Install over the current game. Check named boss bars, group counts, Phase II text and heavy-warning boundaries during real combat in both orientations. Confirm the display remains readable with movement/spells and the phone stays responsive. Native Windows driver/audio validation remains separate.

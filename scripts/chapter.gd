@@ -23,7 +23,7 @@ func track() -> void:
 	game.save_game();game.hud.resume()
 func objective() -> String:
 	if not data().tracking: return ""
-	if stage()==5: return game.forge.objective()
+	if stage()==5: return game.mire.objective() if game.hero.forge_chapter.claimed else game.forge.objective()
 	var lead="THE HOLLOW ROOT · "
 	if stage() in [0,2,4]: return lead+"Speak with Mara · "+game.exploration.bearing(game.trader.POSITION)
 	if stage()==1:
@@ -158,5 +158,6 @@ func show_menu() -> void:
 		if not why.is_empty(): hud.paragraph(why,13)
 		hud.action(hud.content,"Hearthcall · return to camp",func():recall();hud.resume(),not why.is_empty())
 		game.forge.show_menu()
+		if game.hero.forge_chapter.claimed:hud.action(hud.content,"Continue Chapter III · The Drowned Oath",func():hud.show_character("mire"))
 	if stage()<5: hud.action(hud.content,"Track chapter objective",track)
 	hud.action(hud.content,"Back to camp",func():hud.show_character("camp"))

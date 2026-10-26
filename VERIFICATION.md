@@ -1,3 +1,23 @@
+# 0.32.0 The Drowned Oath verification
+
+Adds Chapter III after the existing Chapter II reward. Mara leads the character through Sunken Watch and Witchroot Grove, the existing Veil Altar trial, Blackmire's Drowned Abomination, and a recoverable Drowned Testament at the level-two archive. Earlier searched sites, trial victories and boss wins count. The physical record can be recovered even after the archive's normal rune clue was used, without repeating its loot. Existing castle guards, locks, rune puzzle, checkpoint, relics, backtracking and atlas remain.
+
+- Full source: **44 suite runs / 3,901 checks passed** with Godot 4.5.1.
+- Targeted story/kingdom/Survival checks: **5 suites / 554 checks passed**.
+- Signed Android APK resources: **26 suites / 2,853 checks passed**.
+- Windows PCK resources on Linux Godot: **26 suites / 2,645 checks passed**.
+- New chapter suite: **99 checks**, portrait and landscape. Includes actual touch clue/record interactions, real Veil trial kills, Blackmire locks/floor guards/boss progress, backtracking to used archive, atlas marker, unchanged archive currency, saved record and checkpoint defeat, exact one-time full-bag-compatible rewards, veteran credit, malformed progression, and actual precipitation/drying/Classic behavior.
+- Six native Mesa/OpenGL Compatibility captures reviewed: journal, physical archive record and atlas marker, portrait/landscape, using the mobile HUD and disposable preferences. No phone FPS is inferred from software rendering.
+- Android package remains `app.runebound.godot`, version code **42**, name **0.32.0-drowned-oath**. Original certificate, legacy character save directory and separate controls preferences remain fixed. APK v2/v3 signature, ZIP integrity, package/ARM64/version and 16 KiB alignment verified. Certificate SHA-256 remains `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`. Signing secrets are excluded from Git/source.
+
+Chapter reward: 450 gold, 8 essence, 3 stat points, and Mirewarden's Oath, once per character. The Oath multiplies only positive Survival weather wetness buildup by 0.6 while outside dungeons in the swamp. It does not slow drying, change other regions, add Classic needs drain, refill supplies or overwrite spells. Hunger, thirst, sleep and temperature retain their existing formulas. The record is quest state rather than an inventory item. An optional validated `mire_chapter` save section defaults older characters to unstarted; all earlier progression remains.
+
+No extra enemies, active interiors, textures, music or dynamic lights load for this chapter. Small native book/clue markers draw only when relevant and visible. The next lead tracks existing Frostspire content; Chapter IV is not claimed implemented.
+
+Physical Motorola upgrade/touch/rotation, chapter pacing, survival balance, sound, sustained FPS/heat/battery and native Windows execution remain pending. Windows validation uses its PCK on Linux. GitHub CI is separate from these local checks. This is a playable development milestone.
+
+## Earlier releases
+
 # 0.31.0 Boss Signs verification
 
 Incremental update from v0.30.0, retaining the Dungeon Atlas, beacons, four castles, caves, controls, character progression, building and survival. Boss bars now show names, health percentage and applicable faster-phase information. Group encounters show their identity and remaining enemy count. Heavy warnings reinforce the existing circle with edge marks and a center cross. Known faster-phase keepers emit one brief existing visual effect below half health, without repeated hit spam.

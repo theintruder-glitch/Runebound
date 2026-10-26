@@ -1,6 +1,13 @@
 # Android-first completion roadmap
 
-Current source: **0.31.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.32.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+
+## Drowned Oath milestone
+
+- [x] Chapter III connects Mara, two existing swamp records, Veil Altar trial, Blackmire's boss and a physical archive quest record.
+- [x] Veteran progress, separate cache/relic rewards, atlas quest marker, saved record, checkpoint/backtracking continuity and one-time currency/stat reward.
+- [x] Permanent swamp wetness benefit with drying, other regions and Classic rules preserved; no additional active encounters.
+- [ ] Physical-phone pacing, navigation, survival balance and long-session playtest.
 
 ## Boss Signs milestone
 

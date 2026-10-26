@@ -49,6 +49,7 @@ func destinations() -> Dictionary:
   for i in range(rooms.size()):
    var cell:Vector2i=rooms[i][0].get_center()
    if known(cell):result["room:"+str(i)]={"cell":cell,"name":rooms[i][1]}
+ if game.mire.stage()==4 and game.mire.archive_cell().x>=0 and known(game.mire.archive_cell()):result["story:testament"]={"cell":game.mire.archive_cell(),"name":"Recover Drowned Testament"}
  return result
 func route(id:String) -> PackedVector2Array:
  var result=PackedVector2Array();var places=destinations()
