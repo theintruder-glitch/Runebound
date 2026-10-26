@@ -52,6 +52,12 @@ var scroll: ScrollContainer
 var tabs: HBoxContainer
 var panel_title: Label
 var current_page = "title"
+var menu_action_page=""
+var menu_action_title=""
+var menu_action_scroll=0
+var menu_action_active=false
+var menu_action_focus_index=-1
+var menu_refresh_serial=0
 var new_character_pending = false
 var import_dialog: FileDialog
 var export_dialog:FileDialog
@@ -214,7 +220,13 @@ func action(parent: Node,text_value: String,callback: Callable,disabled: bool=fa
 	result.text = text_value
 	result.disabled = disabled
 	result.focus_mode = Control.FOCUS_ALL if controls!=null and controls.connected and parent!=buttons else Control.FOCUS_NONE
-	result.pressed.connect(callback)
+	result.pressed.connect(func():
+		var in_menu=overlay!=null and overlay.visible and overlay.is_ancestor_of(result)
+		if in_menu:
+			menu_action_active=true;menu_action_page=current_page;menu_action_title=panel_title.text;menu_action_scroll=scroll.scroll_vertical
+			menu_action_focus_index=menu_buttons(content).find(result) if result.has_focus() else -1
+		callback.call()
+		menu_action_active=false)
 	parent.add_child(result)
 	return result
 
@@ -466,6 +478,8 @@ func update_hud() -> void:
 	queue_redraw()
 
 func clear_content(title_value: String,show_tabs: bool=true) -> void:
+	menu_refresh_serial+=1
+	var keep_position=menu_action_active and current_page==menu_action_page and title_value==menu_action_title
 	panel_title.text = title_value
 	for child in content.get_children():
 		content.remove_child(child)
@@ -482,10 +496,11 @@ func clear_content(title_value: String,show_tabs: bool=true) -> void:
 			b.add_theme_font_size_override("font_size",12)
 			b.add_theme_constant_override("outline_size",0)
 			b.add_theme_stylebox_override("normal",theme.get_stylebox("normal","Button"))
-	scroll.scroll_vertical = 0
+	scroll.scroll_vertical = menu_action_scroll if keep_position else 0
+	if keep_position: restore_menu_scroll.call_deferred(menu_action_scroll,menu_refresh_serial,menu_action_focus_index)
 	overlay.show()
 	buttons.hide()
-	if controls!=null: controls.call_deferred("focus_menu")
+	if controls!=null and not keep_position: controls.call_deferred("focus_menu")
 
 func paragraph(text_value: String,font_size: int=14,color: Color=Color("aec4b8")) -> Label:
 	var result = label(content,text_value,font_size,color)
@@ -1204,3 +1219,19 @@ func show_trader() -> void:
 
 func _exit_tree() -> void:
 	if controls!=null: controls.shutdown()
+
+func menu_buttons(parent:Node) -> Array:
+	var result=[]
+	for child in parent.get_children():
+		if child is Button: result.append(child)
+		result.append_array(menu_buttons(child))
+	return result
+
+func restore_menu_scroll(value:int,serial:int,focus_index:int=-1) -> void:
+	if serial!=menu_refresh_serial or not overlay.visible: return
+	scroll.scroll_vertical=value
+	await get_tree().process_frame
+	if serial==menu_refresh_serial and overlay.visible:
+		var choices=menu_buttons(content)
+		if focus_index>=0 and focus_index<choices.size() and not choices[focus_index].disabled: choices[focus_index].grab_focus()
+		scroll.scroll_vertical=value

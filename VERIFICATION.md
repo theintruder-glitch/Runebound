@@ -1,3 +1,13 @@
+# 0.27.1 Menu position fix
+
+Same-page menu actions retain their scroll offset instead of forcing the view to zero. The offset is restored after container layout, with a generation guard preventing an old refresh from moving a newly opened page. New pages still start at the top. Focused controller actions retain their replacement button without forcing the first button into view.
+
+Validation: 20 new checks cover repeated Mage stat upgrades, pause-setting toggles, page navigation, and controller focus in portrait/landscape. The final targeted source run passes all 216 checks across menu-position, native touch-scrolling and desktop suites. Additional controls, trading, crafting and spellbook suites passed during development. Both exports include the new menu-position suite in their compiled-resource checks; final reports accompany the build.
+
+Android version code 37 / 0.27.1-controls retains app.runebound.godot, the original signing certificate, all existing content and character save handling. Physical phone/Windows playtests remain pending.
+
+---
+
 # 0.27.0 Your Controls — verification
 
 Adds the actual-HUD layout editor, shared InputMap router, fixed/floating joystick
