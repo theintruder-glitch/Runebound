@@ -12,7 +12,9 @@ func _draw() -> void:
 		return
 	var game = world.game
 	game.graphics.details(self,bounds)
-	if game.hero.dungeon==null:game.landscape.draw(self,bounds)
+	if game.hero.dungeon==null:
+		game.landscape.draw(self,bounds)
+		game.beacons.draw(self,bounds)
 	else:game.castle.draw_rooms(self,bounds)
 	for decoration in decorations:
 		var region=decoration.get("biome","forest")

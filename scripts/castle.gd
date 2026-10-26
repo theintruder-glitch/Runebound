@@ -18,7 +18,7 @@ func retreat() -> bool:
 func token(id:String) -> String:return "%s:%s:%d:%s" % [game.hero.dungeon.castle,game.hero.dungeon.run,game.hero.dungeon.floor,id]
 func has(id:String) -> bool:return game.hero.opened.get(token(id),false)
 func enter() -> bool:
- if game.hero.dungeon!=null or game.player_position().distance_to(game.landscape.KEEP)>=90 or game.exploration.active() or game.forge.active() or game.forest.active():return false
+ if game.hero.dungeon!=null or game.player_position().distance_to(game.landscape.KEEP)>=90 or game.exploration.active() or game.forge.active() or game.forest.active() or game.beacons.active():return false
  game.hero.dungeon={"floor":1,"seed":735931,"run":str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":game.hero.x,"returnY":game.hero.y,"story":false,"castle":"thornwatch"}
  game.hero.journey.dungeon_entered=true;game.build_floor(true);game.save_game();game.notify("THORNWATCH KEEP · Find the armory key and light the library seal. Entrance stairs lead outside; upper landings allow backtracking.",8);return true
 func rooms(f:int) -> Array:

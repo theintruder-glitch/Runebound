@@ -1,8 +1,18 @@
-# VYRNSPIRE 0.28.0 — Hidden Depths
+# VYRNSPIRE 0.29.0 — Waykeeper Beacons
 
-An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **38**.
+An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **39**.
 
 Menu actions now retain your scroll position when refreshing the same screen, including repeated stat upgrades, settings and crafting. Switching pages starts at the top.
+
+## Waykeeper beacons
+
+Open **Camp → Waykeeper beacons · exploration journal** (also in Quests). Track the Rootlight Beacon near the Emerald river road, Last Ember Beacon above the frost ravine, Drowned Lantern on Blackmire's causeway, or Skywatch Orrery on Stormbreak's southern approach. The world map marks all four.
+
+Read each central oath, then interact with Leaf, Moon and Star stones in its recorded order. The sequence differs by region. Wrong input resets that beacon's sequence; partial and solved sequences survive saves. Tracking points toward the next required stone. Return to the center to awaken three watchers. Keepers alternate a locked ground mark and a wider slam, then speed up below half health. Menus pause the encounter. Retreat farther than 380 units, defeat or reload ends an unfinished fight; solved runes remain, allowing a retry. An active beacon prevents another dungeon/trial encounter from stacking on top.
+
+After defeating all three, return to claim a named **Epic ring or charm, 250 gold, 5 essence and 2 regional forging cores**. Make room in Gear and the core stack first; a blocked claim grants nothing and remains available. Completed encounters and rewards are once per character. Restoring all four grants **2 additional stat points**, once. Rings/charms use existing equipment slots and are not automatically equipped. Old character saves start these optional discoveries uncompleted.
+
+Watchers spawn only after activation. The existing six/twelve-enemy crowd budget includes their three slots. Only distant idle ambient actors may be recycled for space; nearby fights, burning actors and named enemies remain protected. If necessary, clear nearby threats before starting. Rootlight's rooted shrine, Frostspire's brazier, Blackmire's chained lantern and Stormbreak's orrery are cached, culled native scenery with no extra textures or real lights. All four castles, both side expeditions, original progression, survival/building and custom controls remain available.
 
 ## Hidden side expeditions
 
@@ -58,7 +68,7 @@ Only one dungeon floor and at most five authored enemies load at once. Default a
 
 ## Install and test
 
-Install `Vyrnspire-Godot-v0.28.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
+Install `Vyrnspire-Godot-v0.29.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
 
 Windows: extract the entire Windows ZIP and run `Vyrnspire.exe` beside its PCK. The low-power and OpenGL launchers remain. Android and Windows exchange characters through the existing JSON menus.
 
@@ -146,7 +156,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.28.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **38**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.29.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **39**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

@@ -383,6 +383,12 @@ func _process(dt: float) -> void:
 			for enemy in game.forge.foes:
 				boss_bar.max_value+=enemy.max_hp
 				if not enemy.dead: boss_bar.value+=enemy.hp
+		if game.beacons.SITES.has(game.hero.exploration.target) and game.build_recipe.is_empty():objective_label.text=game.beacons.objective(game.hero.exploration.target)
+		if game.beacons.active():
+			objective_label.text=game.beacons.objective(game.beacons.running);boss_bar.visible=true;boss_bar.max_value=0;boss_bar.value=0
+			for enemy in game.beacons.foes:
+				boss_bar.max_value+=enemy.max_hp
+				if not enemy.dead:boss_bar.value+=enemy.hp
 		if game.castle.active():
 			objective_label.text=game.castle.objective()
 			for enemy in game.enemies:
@@ -606,7 +612,7 @@ func back() -> void:
 func show_character(tab_value: String="gear") -> void:
 	game.pause_game()
 	current_page = tab_value
-	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter"])
+	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","beacons":"Waykeeper beacons","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter","beacons"])
 	match tab_value:
 		"gear": show_gear()
 		"stats": show_stats()
@@ -616,6 +622,7 @@ func show_character(tab_value: String="gear") -> void:
 		"camp": show_camp()
 		"map": show_map()
 		"quests": show_quests()
+		"beacons": game.beacons.show_menu()
 		"trader": show_trader()
 		"farm": show_farm()
 		"needs": advanced.show_needs()
@@ -846,6 +853,7 @@ func _draw() -> void:
 	draw_string(ThemeDB.fallback_font,origin+Vector2(0,map.size*scale_value+19),"%d enemies left" % count,HORIZONTAL_ALIGNMENT_LEFT,-1,10,Color("d0d9c5"))
 
 func show_camp() -> void:
+	action(content,"Waykeeper beacons · exploration journal",func():show_character("beacons"))
 	action(content,"Castle expeditions · four kingdoms",func():show_character("quests"))
 	var camp=game.survival
 	action(content,"Explore Emerald Wilds · Thornwatch Keep",func():game.exploration.track("keep"))
@@ -1068,6 +1076,7 @@ Gold rings: completed · Gray markers: undiscovered
 Tap a marker, then Track selected.",11)
 
 func map_description(id:String) -> String:
+	if game.beacons.SITES.has(id):return game.beacons.objective(id)
 	if game.castle.caves.SITES.has(id):return game.castle.caves.SITES[id].name+" · Hidden side expedition · "+game.exploration.bearing(game.castle.caves.SITES[id].point)
 	if game.landscape.realms.Catalog.ZONES.has(id):return game.landscape.realms.Catalog.ZONES[id].castle+" · Follow the marked roads, bridges and ramps · "+game.exploration.bearing(game.landscape.realms.Catalog.ZONES[id].gate)
 	if id=="keep":return "Thornwatch Keep · Follow Old King’s Bridge and the marked hillside ramp · "+game.exploration.bearing(game.landscape.KEEP)
@@ -1077,6 +1086,7 @@ func map_description(id:String) -> String:
 	return game.exploration.REGIONS[id].landmark+" · "+game.exploration.bearing(game.exploration.REGIONS[id].point)
 
 func show_quests() -> void:
+	action(content,"Waykeeper beacons · exploration journal",func():show_character("beacons"))
 	for id in game.castle.caves.SITES:
 		var cave_id=id
 		action(content,"Explore "+game.castle.caves.SITES[id].name+" · hidden expedition",func():game.exploration.track(cave_id))

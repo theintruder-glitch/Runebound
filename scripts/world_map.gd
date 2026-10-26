@@ -73,6 +73,9 @@ func _draw() -> void:
   var route=PackedVector2Array()
   for p in trail:route.append(canvas_point(p))
   draw_polyline(route,Color("c5b788"),1.5,true)
+ for id in game.beacons.SITES:
+  var beacon=game.beacons.SITES[id]
+  marker(id,beacon.point,beacon.name,true,game.beacons.has(id,"claimed"))
  for id in game.castle.caves.SITES:
   var cave=game.castle.caves.SITES[id]
   marker(id,cave.point,cave.name,true,game.hero.opened.get(id+"-cleared",false))

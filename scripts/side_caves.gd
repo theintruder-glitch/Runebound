@@ -18,7 +18,7 @@ func mark(flag:String) -> void:game.hero.opened[game.castle.token(flag)]=true
 func rooms(_floor:int=1) -> Array:return PLANS[id()]
 func title() -> String:return info().name+" · Hidden expedition"
 func enter(site:String) -> bool:
- if not SITES.has(site) or game.hero.dungeon!=null or game.exploration.active() or game.forest.active() or game.forge.active():return false
+ if not SITES.has(site) or game.hero.dungeon!=null or game.exploration.active() or game.forest.active() or game.forge.active() or game.beacons.active():return false
  if game.player_position().distance_to(SITES[site].point)>=60 or not game.line_clear(game.player_position(),SITES[site].point):return false
  game.hero.dungeon={"floor":1,"seed":91573,"run":str(Time.get_unix_time_from_system())+"-"+str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":game.hero.x,"returnY":game.hero.y,"story":false,"castle":site}
  game.hero.journey.dungeon_entered=true;game.build_floor(true);game.save_game()

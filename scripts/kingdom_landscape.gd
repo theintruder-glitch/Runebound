@@ -47,6 +47,7 @@ func solid(p:Vector2) -> bool:
 func elevation(p:Vector2) -> int:return (2 if p.y>1087 else 1 if p.x>560 else 0) if inside(p) else 0
 func terrain_id(p:Vector2,base:int) -> int:return (1 if elevation(p)>0 else 0) if inside(p) else realms.terrain_id(p,base)
 func clear_route(p:Vector2) -> bool:
+ if game.beacons!=null and game.beacons.reserved(p):return true
  for site in SITES.values():
   if p.distance_to(site.point)<100:return true
  return realms.clear_route(p) or inside(p) and (Rect2(KEEP-Vector2(300,600),Vector2(600,600)).has_point(p) or trail_distance(p)<60 or bridge(p) or absf(p.x-780)<64 and absf(p.y-1060)<100 or p.distance_to(KEEP)<130)

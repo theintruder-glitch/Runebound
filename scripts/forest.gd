@@ -58,7 +58,7 @@ func interact() -> void:
   game.enter_dungeon(); return
  if state().warden:
   claim_reward(); return
- if active(): return
+ if active() or game.beacons.active(): return
  boss=game.create_enemy(SHRINE+Vector2(0,-100),maxi(2,game.hero.level),"guardian",true)
  boss["named"]="The Root Warden"
  boss.hp=float(260+game.hero.level*38); boss.max_hp=boss.hp

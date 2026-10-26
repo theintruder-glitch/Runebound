@@ -42,7 +42,7 @@ func inspect_forge() -> bool:
 	game.notify("The inscription: 'A forge remembers every chain it made.' Two embers feed the last binding. Break them and silence the Ashbound Keeper.",8)
 	game.save_game();return true
 func begin() -> bool:
-	if game.hero.hp<=0 or stage()!=3 or not near() or running or game.exploration.active() or game.forest.active() or not game.build_recipe.is_empty(): return false
+	if game.hero.hp<=0 or stage()!=3 or not near() or running or game.exploration.active() or game.forest.active() or game.beacons.active() or not game.build_recipe.is_empty(): return false
 	var positions:Array=[]
 	for offset in [Vector2(0,-120),Vector2(-110,40),Vector2(110,40)]:
 		var pos=point()+offset
