@@ -55,6 +55,7 @@ func bearing(to:Vector2) -> String:
  return "%s · %dm" % [dir,int(offset.length()/10)]
 func objective() -> String:
  var target=data().get("target","")
+ if game.beacons.SITES.has(target):return game.beacons.objective(target)
  if game.castle.caves.SITES.has(target):return game.castle.caves.SITES[target].name+" · "+bearing(game.castle.caves.SITES[target].point)
  if target=="trader": return "Mara · Leave dungeon via entrance stairs" if game.hero.dungeon!=null else "Trader Mara · "+bearing(game.trader.POSITION)
  if target=="ruins": return "Mossveil Ruins · "+bearing(RUINS)
@@ -64,7 +65,7 @@ func objective() -> String:
  if not REGIONS.has(target): return "Explore · Track a regional landmark from Camp"
  return REGIONS[target].landmark+" · "+bearing(REGIONS[target].point)
 func track(id:String) -> void:
- if id not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]: return
+ if id not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine","beacon-emerald","beacon-frost","beacon-mire","beacon-storm"]: return
  data().target=id;game.hero.contracts.target="";game.hero.angler.target=""
  game.save_game();game.hud.resume()
 func nearby() -> String:
@@ -97,7 +98,7 @@ func interact() -> void:
  if data().challenges.get(id,false) or active(): return
  begin_trial(id)
 func begin_trial(id:String) -> void:
- if game.forge.active(): return
+ if game.forge.active() or game.beacons.active(): return
  trial=id; foes.clear(); hits.clear(); dodged=false
  var center=REGIONS[id].point
  for i in range(3 if id=="swamp" else 1):

@@ -53,6 +53,21 @@ static func migrate(hero: Dictionary) -> Dictionary:
 			return {}
 	if hero.level<1 or not hero.get("equipped") is Dictionary or not hero.get("stats") is Dictionary or not hero.get("opened") is Dictionary or not hero.get("unlocked") is Array:
 		return {}
+
+	# Optional beacon progress is additive; old saves need no new top-level state.
+	var beacon_ids=["beacon-emerald","beacon-frost","beacon-mire","beacon-storm"]
+	for id in beacon_ids:
+		for key in ["read","step-0","step-1","step-2","solved","cleared","claimed"]:
+			if hero.opened.has(id+":"+key) and not hero.opened[id+":"+key] is bool:return {}
+		var previous=true
+		for key in ["read","step-0","step-1","step-2","solved","cleared","claimed"]:
+			var value=hero.opened.get(id+":"+key,false)
+			if value and not previous:return {}
+			previous=value
+		if hero.opened.get(id+":step-2",false) and not hero.opened.get(id+":solved",false):return {}
+	if hero.opened.has("waykeeper-accord"):
+		if not hero.opened["waykeeper-accord"] is bool:return {}
+		if hero.opened["waykeeper-accord"] and not beacon_ids.all(func(id):return hero.opened.get(id+":claimed",false)):return {}
 	for item in hero.inventory:
 		if not item is Dictionary:
 			return {}
@@ -168,7 +183,7 @@ static func migrate(hero: Dictionary) -> Dictionary:
 	hero.exploration.visited.forest=true
 	hero.exploration.discovered.forest=true
 	hero.exploration.target=str(hero.exploration.get("target",""))
-	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]: hero.exploration.target=""
+	if hero.exploration.target not in ["forest","caves","swamp","snow","ruins","home","trader","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine","beacon-emerald","beacon-frost","beacon-mire","beacon-storm"]: hero.exploration.target=""
 	hero.respawn=hero.get("respawn",{"x":0.0,"y":0.0})
 	if not hero.respawn is Dictionary: return {}
 	for key in ["x","y"]:

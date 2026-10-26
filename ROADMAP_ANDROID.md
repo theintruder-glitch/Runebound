@@ -1,6 +1,13 @@
 # Android-first completion roadmap
 
-Current source: **0.28.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.29.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+
+## Waykeeper Beacons milestone
+
+- [x] Four roadside beacon identities, distinct recorded rune sequences, three-watcher encounters and two-pattern keepers.
+- [x] Native journal, map/Camp tracking, saved puzzle/reward progress, safe retries and capacity-checked regional Epic relics/forging cores.
+- [x] Crowd budget covers the encounter, protected actor preservation and cached/cullable scenery with no new textures.
+- [ ] Physical Android navigation, puzzle clarity, difficulty, visuals and sustained performance playtest.
 
 ## Hidden Depths milestone
 

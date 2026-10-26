@@ -1,3 +1,7 @@
+## v0.29.0 checks still needed
+
+Install over v0.28.0 without clearing data. Use Camp > Waykeeper beacons to track each shrine. Read the oath, test wrong/correct rune order, close/continue mid-puzzle, awaken the watchers and try both boss warning patterns. Pause, retreat, retry and reload. Test a full Gear bag before claiming and confirm the fourth-beacon bonus once. Check all sites with joystick/D-Pad in both orientations and record actual phone FPS/heat/battery. Existing construction should remain saved. Native Windows input/audio remains a separate hardware check.
+
 ## v0.28.0 phone checks still needed
 
 Install over the existing app without clearing data. Track each new side expedition from Camp/Quests. Follow the branch trail in and out, use joystick and D-Pad in both orientations, open the mechanism, dodge hazards and both guardian patterns, collect treasure, leave and revisit. Save/close/continue mid-expedition; verify run progress. Check paused defeat recovery and survival needs. Record FPS/heat/battery on the actual phone and native Windows input/audio separately.

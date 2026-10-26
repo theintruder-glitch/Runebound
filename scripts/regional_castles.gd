@@ -27,7 +27,7 @@ func mark(flag:String,value:bool=true) -> void:game.hero.opened[game.castle.toke
 func rooms(f:int) -> Array:return PLANS[id()][f-1]
 func title() -> String:return info().castle+" · "+rooms(game.hero.dungeon.floor)[0][1]
 func enter(region:String) -> bool:
- if not Catalog.ZONES.has(region) or game.hero.dungeon!=null or game.exploration.active() or game.forge.active() or game.forest.active():return false
+ if not Catalog.ZONES.has(region) or game.hero.dungeon!=null or game.exploration.active() or game.forge.active() or game.forest.active() or game.beacons.active():return false
  if game.player_position().distance_to(Catalog.ZONES[region].gate)>=78:return false
  game.hero.dungeon={"floor":1,"seed":735931,"run":str(Time.get_unix_time_from_system())+"-"+str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":game.hero.x,"returnY":game.hero.y,"story":false,"castle":region}
  game.hero.journey.dungeon_entered=true;game.build_floor(true);game.save_game();game.notify(info().castle.to_upper()+" · Find the armory key and activate the regional mechanism. Entrance stairs return outside; upper landings allow backtracking.",9);return true

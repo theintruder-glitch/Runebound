@@ -13,6 +13,7 @@ const LandscapeScript=preload("res://scripts/kingdom_landscape.gd")
 const CastleScript=preload("res://scripts/castle.gd")
 var landscape
 var castle
+var beacons
 const WorldScript = preload("res://scripts/world.gd")
 const HUDScript = preload("res://scripts/hud.gd")
 const TILE = 48.0
@@ -92,6 +93,7 @@ func _ready() -> void:
 	forge=ForgeScript.new();forge.game=self
 	landscape=LandscapeScript.new();landscape.game=self
 	castle=CastleScript.new();castle.game=self
+	beacons=preload("res://scripts/beacons.gd").new();beacons.game=self
 	desktop=DesktopScript.new()
 	desktop.game=self
 	desktop.initialize()
@@ -179,6 +181,7 @@ func set_player_position(at: Vector2) -> void:
 func clear_scene() -> void:
 	if input_router!=null: input_router.reset_virtual()
 	if forge!=null: forge.reset()
+	if beacons!=null: beacons.reset()
 	if fishing!=null: fishing.reset()
 	if desktop!=null: desktop.clear_input();desktop.pointer_seen=false
 	build_recipe=""
@@ -266,6 +269,7 @@ func tick(dt: float) -> void:
 	forest.reset_if_abandoned()
 	exploration.tick(dt)
 	forge.tick(dt)
+	beacons.tick(dt)
 	abilities.tick(dt)
 	contracts.tick(dt)
 	hero.worldTime += dt
@@ -429,7 +433,7 @@ func nearby_hostiles() -> int:
 	return count
 
 func spawn_enemy(boss_force: bool=false) -> Dictionary:
-	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or enemies.size()>=roaming_limit():
+	if hero.dungeon!=null or forest.active() or exploration.active() or forge.active() or beacons.active() or enemies.size()>=roaming_limit():
 		return {}
 	if not boss_force and nearby_hostiles()>=(3 if reduced_crowds else 5): return {}
 	var boss = boss_force or randf()<.035
@@ -560,6 +564,7 @@ func kill_enemy(enemy: Dictionary,kind: String) -> void:
 	forest.defeated(enemy)
 	exploration.on_kill(enemy)
 	forge.on_kill(enemy)
+	beacons.on_kill(enemy)
 	castle.defeated(enemy)
 	contracts.on_kill(enemy)
 	if enemy.get("neutral",false):
@@ -674,6 +679,7 @@ func populate_chests(force: bool=false) -> void:
 		for y in range(center.y-2,center.y+3):
 			var id = "g:%d,%d:0" % [x,y]
 			var spot=Vector2(x*640+100+WorldScript.tile_hash(x,y,8)*440,y*640+100+WorldScript.tile_hash(x,y,13)*440)
+			spot=beacons.cache_position(spot)
 			if exploration.cave_wall(spot): spot+=Vector2(72,72)
 			if not walkable(spot,10):continue
 			if not exploration.cave_wall(spot): chests.append({"id":id,"pos":spot,"level":maxi(1,int(Vector2(x,y).length()*.55+hero.level*.65))})
@@ -738,7 +744,7 @@ func salvage(item: Dictionary) -> bool:
 	return true
 
 func enter_dungeon(story:bool=false) -> void:
-	if hero.dungeon!=null:
+	if hero.dungeon!=null or beacons.active():
 		return
 	if story and (chapter.stage()!=3 or player_position().distance_to(exploration.RUINS)>=80): return
 	hero.journey.dungeon_entered=true
@@ -935,6 +941,7 @@ func update_interaction() -> void:
 	if not forge.interaction().is_empty(): label_value=forge.interaction()
 	if not landscape.feature_near().is_empty():label_value=landscape.feature_near()
 	if not castle.interaction().is_empty():label_value=castle.interaction()
+	if not beacons.interaction().is_empty():label_value=beacons.interaction()
 	if not build_recipe.is_empty(): label_value="PLACE "+build_recipe.to_upper()
 	hud.set_interaction(label_value)
 
@@ -945,6 +952,7 @@ func interact() -> void:
 	if not build_recipe.is_empty():
 		if survival.craft(build_recipe): cancel_build()
 		return
+	if not beacons.interaction().is_empty():beacons.interact();return
 	if not castle.interaction().is_empty():castle.use_feature();return
 	if not landscape.feature_near().is_empty():landscape.interact();return
 	if not forge.interaction().is_empty(): forge.interact();return
@@ -1119,6 +1127,7 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 			if enemy.thorn_pattern%2==0:enemy.strike=enemy.pos
 		if enemy.has("realm_boss"):castle.regional.prepare_attack(enemy)
 		if enemy.get("cave_boss",false):castle.caves.prepare_attack(enemy)
+		if enemy.get("beacon_boss",false):beacons.prepare_attack(enemy)
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 

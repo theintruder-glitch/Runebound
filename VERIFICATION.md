@@ -1,3 +1,22 @@
+# 0.29.0 Waykeeper Beacons verification
+
+Incremental continuation of v0.28.0. Four optional roadside beacons now provide recorded rune puzzles, guarded encounters, a native exploration journal, map/Camp tracking and regional Epic ring/charm rewards. Four castles, two side expeditions, original story/classes, building/survival, controls and the menu-position fix remain included.
+
+- Full source: **41 suite runs / 3,427 checks passed**, pinned Godot 4.5.1.
+- Final targeted beacon/save-map/game checks: **4 suites / 830 checks passed**.
+- Signed Android APK resources: **23 suites / 2,379 checks passed**.
+- Windows PCK resources using Linux Godot: **23 suites / 2,171 checks passed**.
+- Beacon suite: **438 checks** in portrait/landscape. Actual mobile interaction reads oaths and aligns runes. Checks cover complete return paths to stones, wrong/partial sequences and JSON reload, blocked placements, protected nearby/burning actors, distant-idle recycling within six-enemy budget, no ambient reinforcements, encounter isolation, keeper patterns/phase, menu pause, retreat/reload/defeat retry, unrelated kills, full Gear/core-stack retries, exact unique rewards, all-four stat bonus without duplication, persistent tracking, Survival HUD objective and scroll retention. Malformed flags reject impossible progression.
+- Existing presentation suite verifies **17 map markers** with touch selection/tracking. Ordinary caches move aside with their original IDs, keeping shrine clearings free while preserving claimed-cache state.
+- Ten native OpenGL Compatibility / Mesa captures reviewed: four distinct shrine structures plus journal, portrait and landscape, using the mobile HUD and disposable preferences. The capture fixture positions the hero on reachable ground; it does not measure phone FPS.
+- Original package `app.runebound.godot`, version code **39**, name **0.29.0-waykeepers**. Original signing certificate, legacy save directory and separate controls preference paths remain unchanged. Android v2/v3 signature, ARM64 package/version, ZIP integrity and 16 KiB alignment checks passed. Certificate SHA-256: `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`. No signing secrets are included in Git or editable source.
+
+Only three beacon watchers activate at a time; their slots count against the existing six/twelve-enemy crowd budget. No passive beacon spawning, additional texture assets, real lights or per-prop nodes were added. Shrine draw commands are cached and culled. Active, burning and named actors are protected from space recycling. Existing structures remain saved; obstructed challenges ask the player to clear space instead of deleting construction.
+
+An initial Android build stopped during editor import with an unavailable local ADB daemon. Starting the installed daemon and rerunning the Android pipeline sequentially completed successfully; the final APK and compiled-resource reports are the evidence above. Initial failed runs are not treated as release validation. Windows validation exercises its PCK on Linux, not its EXE on Windows. Physical Motorola upgrade/touch/rotation, difficulty, art preference, audio, sustained FPS/RAM/heat/battery and native Windows execution remain pending. GitHub CI results are separate from local checks. This is a development release.
+
+## Earlier releases
+
 # 0.28.0 Hidden Depths verification
 
 Incremental update from v0.27.1. Two former outdoor cache sites now have enterable, single-floor side expeditions: Glacier Hollow and Oathstone Mine, with ten named chambers total. Existing castles, classic/story dungeons, character progression, building, survival, custom controls and the menu-position fix remain included.

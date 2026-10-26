@@ -41,7 +41,7 @@ for suite in suites:
     for variant in variants:
         name = suite + ('-landscape' if variant else '')
         flags = ['--desktop'] if suite in ['test_desktop', 'test_desktop_boot', 'test_spellbook'] else []
-        if suite == 'test_side_caves':
+        if suite in ['test_side_caves', 'test_beacons']:
             flags.append('--mobile')
         if suite == 'test_desktop_boot':
             flags.append('--safe-mode')
