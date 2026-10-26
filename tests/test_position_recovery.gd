@@ -76,7 +76,7 @@ func run():
 	check(game.player_position().y>start.y,"Movement is live again after recovering")
 	# Dungeons show the wilds entrance; emergency recovery cannot erase an expedition.
 	fresh(Vector2(0,-4100));game.enter_dungeon();var run_id=game.hero.dungeon.run
-	game.hud.show_character("map");await settle();var map=game.hud.map_widget
+	game.hud.show_character("map");await settle();find_button("World map").pressed.emit();await settle();var map=game.hud.map_widget
 	check(map.position_in_wilds()==Vector2(0,-4100) and map.player_marker.distance_to(map.size/2)<.1,"Dungeon map arrow centers on its saved wilds entrance")
 	game.hud.show_position_recovery();check(find_button("Return to original camp · keep my character").disabled and not game.recover_stuck_character() and game.hero.dungeon.run==run_id,"Recovery cannot discard an active dungeon run")
 	print("%d POSITION RECOVERY CHECKS; %d FAILURES" % [checks,failures]);game.queue_free();await process_frame;quit(1 if failures else 0)

@@ -1,8 +1,16 @@
-# VYRNSPIRE 0.29.0 — Waykeeper Beacons
+# VYRNSPIRE 0.30.0 — Dungeon Atlas
 
-An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **39**.
+An offline Godot 4.5.1 RPG for ARM64 Android, with Windows x64 support. Continues the existing game, classes, characters, Survival, building, crafting, quests, garden, fishing and trading. Package `app.runebound.godot`, legacy save directory and original signing certificate remain fixed. Android version code **40**.
 
 Menu actions now retain your scroll position when refreshing the same screen, including repeated stat upgrades, settings and crafting. Switching pages starts at the top.
+
+## Dungeon atlas
+
+Inside any dungeon, open **Pause → World map** (or press M on Windows) to see the current floor. Visible tiles are recorded as you walk. Unknown areas stay dark; discovered castle/cave rooms and unclaimed keys, mechanisms, checkpoints or treasure become selectable destinations. Choose a marker or **Route** button to preview a gold path. **Entrance** remains available to help an older in-progress save find its way out. Other routes require discovered corridors. The arrow shows your actual dungeon position and facing; the map does not walk, teleport or interact for you.
+
+**World map** switches back to the outdoor map, where your marker still represents the entrance. **Current dungeon floor** returns to the atlas. **Resume exploration** returns to play. The small dungeon minimap also uses explored tiles, keeping hidden rooms undisclosed.
+
+Map memory stays in the existing expedition save. It survives continuing the game, checkpoints and castle backtracking; leaving ends that run's map. Old characters and in-progress expeditions gain the atlas automatically. Invalid optional survey data is repaired without rejecting the character. Classic endless runs retain at most eight floor surveys. No new permanent character/settings files, textures or enemies are required.
 
 ## Waykeeper beacons
 
@@ -68,7 +76,7 @@ Only one dungeon floor and at most five authored enemies load at once. Default a
 
 ## Install and test
 
-Install `Vyrnspire-Godot-v0.29.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
+Install `Vyrnspire-Godot-v0.30.0.apk` over the existing VYRNSPIRE / Runebound app. Keep the app installed and its data intact. Export a character backup from Pause first. The release must match the original certificate; no replacement key is included in source.
 
 Windows: extract the entire Windows ZIP and run `Vyrnspire.exe` beside its PCK. The low-power and OpenGL launchers remain. Android and Windows exchange characters through the existing JSON menus.
 
@@ -156,7 +164,7 @@ Existing content includes eight classes, four regions, quests and regional trial
 
 ## Play and preserve saves
 
-**Android:** install `Vyrnspire-Godot-v0.29.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **39**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
+**Android:** install `Vyrnspire-Godot-v0.30.0.apk` over your existing **Runebound Godot / VYRNSPIRE** app. Keep the app installed and do not clear its data. Package `app.runebound.godot`, version code **40**, ARM64, minimum API 24, target API 35. The original prototype certificate is required for updates. Export important characters from Pause before final playtesting.
 
 **Windows:** extract the Windows ZIP and run `Vyrnspire.exe` beside `Vyrnspire.pck`. Keep all extracted DLLs if present. The supplied low-power and OpenGL launchers remain available. The public name is VYRNSPIRE; the explicitly pinned legacy user directory and `user://character.json` location keep existing local characters discoverable. Android and Windows exchange characters through the existing JSON import/export menus.
 

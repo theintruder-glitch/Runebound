@@ -1,3 +1,24 @@
+# 0.30.0 Dungeon Atlas verification
+
+Incremental continuation of v0.29.0. The Map screen now opens the active dungeon floor, records visible floor tiles, marks discovered castle/cave rooms and unclaimed objects, and previews gold routes. Entrance routing remains available to help older saved runs. The outdoor world map remains accessible through a toggle. The dungeon minimap also uses explored tiles. All earlier content, controls and saves remain available.
+
+- Full source: **42 suite runs / 3,680 checks passed**, pinned Godot 4.5.1.
+- Targeted atlas/kingdom/menu-position/menu-scroll run: **4 suites / 634 checks passed**.
+- Signed APK compiled resources: **24 suites / 2,632 checks passed**.
+- Windows PCK compiled resources using Linux Godot: **24 suites / 2,424 checks passed**.
+- New atlas suite: **253 checks** across portrait and landscape, four castles and both side caves. Covers real collision paths, unknown/discovered destinations, actual touch selection, fractional player-marker motion, route availability, world/floor toggles without teleporting, object interactions, JSON reload, castle floor backtracking, old-run initialization, malformed optional map recovery and eight-floor endless retention.
+- Existing 93-check position recovery suite retains its outdoor entrance-marker assertion after explicitly switching from the new atlas to the World map. Initial integration failures exposed that outdated default-view assumption; the updated suite and full source/APK/PCK runs above pass. Existing recovery, touch scrolling and controls checks remain.
+- Six native OpenGL Compatibility/Mesa captures reviewed: Thornwatch, Frostspire and Glacier Hollow, portrait/landscape, with mobile HUD and disposable preferences. Map bounds, discovered geometry, entrance routes, marker placement and touch-size buttons were inspected. No phone/GPU FPS is inferred.
+- Android package stays `app.runebound.godot`, version code **40**, name **0.30.0-dungeon-atlas**. Final APK v2/v3 signature, package/ARM64/version, ZIP integrity and 16 KiB alignment verified with the original certificate. SHA-256 signing identity: `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`. Legacy save directory and controls preferences remain unchanged; no private signing files are included in Git or editable source.
+
+Exploration sampling checks at most 25 nearby tile centers when the player changes cells, using existing line-of-sight collision. The map widget redraws on position/facing/survey/selection changes; no new textures, enemies, dungeon interiors or real lights are loaded. Per-run map data is bounded to eight floors and at most 1,600 distinct indices per floor. Invalid optional surveys discard only bad map memory, preserving the character. Old runs initialize around the existing player and expose a safe entrance route. Leaving a dungeon removes the run survey; checkpoints and castle backtracking retain it.
+
+The first reload checks caught JSON floor numbers being formatted differently from integer floor keys; keys now normalize to integers and surveys survive reload. The first landscape checks caught the map stretching to the full room-button list height; it now retains its own visible height and the list scrolls normally. The initial Android export succeeded but its validation stopped on the old outdoor-map-default assertion; after updating that assertion, all compiled APK checks were rerun against the exact signed APK and passed. Final reports replace those development failures as release evidence.
+
+Physical Motorola update/touch/rotation/readability, long-session performance/heat/battery, and native Windows executable/input/driver/audio tests remain pending. Windows checks exercise the PCK on Linux. GitHub CI is separate from local evidence. This is a development update.
+
+## Earlier releases
+
 # 0.29.0 Waykeeper Beacons verification
 
 Incremental continuation of v0.28.0. Four optional roadside beacons now provide recorded rune puzzles, guarded encounters, a native exploration journal, map/Camp tracking and regional Epic ring/charm rewards. Four castles, two side expeditions, original story/classes, building/survival, controls and the menu-position fix remain included.

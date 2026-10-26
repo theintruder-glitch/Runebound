@@ -1,7 +1,7 @@
-VYRNSPIRE 0.29.0 — WAYKEEPER BEACONS / ANDROID
+VYRNSPIRE 0.30.0 — DUNGEON ATLAS / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.29.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.30.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 39 and the original prototype certificate.
+This update uses app.runebound.godot, version code 40 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -98,3 +98,9 @@ Camp > Waykeeper beacons > Track a beacon. Read its central oath and touch the t
 Return to the center to awaken three watchers. Dodge the keeper marks and slams; stay near the beacon.
 Return to claim its Epic ring/charm and supplies. Make room in Gear if needed. Restore all four for 2 bonus stat points.
 Puzzles survive saves. Retreat, defeat or reload lets an unfinished fight restart. Rewards are once per character.
+
+DUNGEON ATLAS:
+Inside any dungeon open Pause > World map. Select Entrance for a gold route back; select discovered rooms/objects for their routes.
+Dark areas are unexplored. The white arrow follows your actual position and facing.
+World map shows the outdoor entrance; Current dungeon floor returns to the atlas. Resume exploration closes the map.
+Walking records visible tiles. Continue/checkpoints/backtracking preserve this expedition's map; leaving ends the run.

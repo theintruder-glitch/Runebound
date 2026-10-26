@@ -18,6 +18,7 @@ var trader_selected=""
 var craft_filter="Gear"
 var map_selection="forest"
 var map_widget
+var dungeon_world_view=false
 var map_detail:Label
 var game
 var top: Control
@@ -612,7 +613,7 @@ func back() -> void:
 func show_character(tab_value: String="gear") -> void:
 	game.pause_game()
 	current_page = tab_value
-	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":"World map","quests":"Quest board","beacons":"Waykeeper beacons","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter","beacons"])
+	clear_content({"gear":"Equipment","stats":"Character","classes":"Paths of power","realm":"Your realm","guide":"Field guide","camp":"Your camp","map":("Dungeon atlas" if game.hero.dungeon!=null and not dungeon_world_view else "World map"),"quests":"Quest board","beacons":"Waykeeper beacons","trader":"Mara’s camp market","farm":"Your garden plots","needs":"Survival supplies","spells":"Your spellbook","spellshop":"Arcane tomes","kit":"Survival kit","chapter":"Story journal","fishing":"Fishing and catches"}[tab_value],tab_value not in ["map","quests","trader","farm","needs","spells","spellshop","kit","fishing","chapter","beacons"])
 	match tab_value:
 		"gear": show_gear()
 		"stats": show_stats()
@@ -843,8 +844,10 @@ func _draw() -> void:
 	var scale_value = 4.0
 	draw_rect(Rect2(origin-Vector2(6,6),Vector2(map.size*scale_value+12,map.size*scale_value+31)),Color("0b1b28dd"))
 	for cell in map.floors:
+		if not game.atlas.known(cell):continue
 		draw_rect(Rect2(origin+Vector2(cell)*scale_value,Vector2.ONE*3),Color("7b9793"))
-	draw_circle(origin+Vector2(map.exit)*scale_value+Vector2.ONE*2,3,Color("e5c97d"))
+	if game.atlas.known(map.exit):draw_circle(origin+Vector2(map.exit)*scale_value+Vector2.ONE*2,3,Color("e5c97d"))
+	draw_circle(origin+Vector2(map.start)*scale_value+Vector2.ONE*2,3,Color("a6e0c5"))
 	var player=origin+game.player_position()/game.TILE*scale_value
 	var direction=game.facing.angle()+PI/2
 	draw_circle(player,5,Color("0b1b28"))
@@ -1055,7 +1058,26 @@ func text_in(parent:Node,value:String,font_size:int=14,color:Color=Color("b8ccc0
 	var result=label(parent,value,font_size,color);result.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART;result.size_flags_horizontal=Control.SIZE_EXPAND_FILL
 	return result
 
+func show_dungeon_map() -> void:
+	game.atlas.observe(true)
+	paragraph(game.castle.title() if game.castle.active() else "Dungeon · floor %d" % game.hero.dungeon.floor,17,Color("e4d2a1"))
+	var landscape=get_viewport_rect().size.x>get_viewport_rect().size.y
+	var row=HBoxContainer.new() if landscape else VBoxContainer.new();content.add_child(row)
+	map_widget=preload("res://scripts/dungeon_map.gd").new();map_widget.game=game;map_widget.size_flags_vertical=Control.SIZE_SHRINK_BEGIN;map_widget.custom_minimum_size=Vector2(140,260 if landscape else 330);row.add_child(map_widget)
+	var details=VBoxContainer.new();details.custom_minimum_size.x=180 if landscape else 0;details.size_flags_horizontal=Control.SIZE_EXPAND_FILL;row.add_child(details)
+	map_detail=text_in(details,game.atlas.describe("entrance"),14,Color("e5d4a8"))
+	map_widget.destination_selected.connect(func(id):map_detail.text=game.atlas.describe(id))
+	action(details,"World map",func():dungeon_world_view=true;show_character("map"))
+	action(details,"Resume exploration",func():dungeon_world_view=false;resume())
+	for id in game.atlas.destinations():
+		var chosen=id
+		action(details,"Route · "+game.atlas.destinations()[id].name,func():map_widget.selected=chosen;map_detail.text=game.atlas.describe(chosen);map_widget.queue_redraw())
+	paragraph("Dark areas are unexplored. Nearby visible floor tiles are recorded as you walk. Green: entrance · Gold: stairs · Purple: discovered objects. Select a marker or a room button for a route. The entrance route remains available even when continuing an older save.",12)
+	paragraph("Map memory stays with this expedition. Backtracking and closing the game keep it; leaving ends the run. Classic endless dungeons retain the most recent eight floors. The map never moves your character.",12)
+
 func show_map() -> void:
+	if game.hero.dungeon!=null and not dungeon_world_view:show_dungeon_map();return
+	if game.hero.dungeon!=null:action(content,"Current dungeon floor",func():dungeon_world_view=false;show_character("map"))
 	if not game.hero.exploration.target.is_empty(): map_selection=game.hero.exploration.target
 	var landscape=get_viewport_rect().size.x>get_viewport_rect().size.y
 	var layout_box=HBoxContainer.new() if landscape else VBoxContainer.new();content.add_child(layout_box)

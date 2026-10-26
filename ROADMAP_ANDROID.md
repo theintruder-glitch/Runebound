@@ -1,6 +1,13 @@
 # Android-first completion roadmap
 
-Current source: **0.29.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.30.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+
+## Dungeon Atlas milestone
+
+- [x] Explored-floor atlas and minimap, actual-position/facing marker, discovered castle/cave rooms and objects, optional gold routes and always-available entrance routing.
+- [x] Native Map/world-view toggle, portrait/landscape layout, save/reload/checkpoint/backtracking continuity and bounded eight-floor retention.
+- [x] Old-run support and optional survey repair without rejecting character saves.
+- [ ] Physical phone map readability, touch selection and long-session playtest; native Windows input/driver verification.
 
 ## Waykeeper Beacons milestone
 

@@ -8,6 +8,8 @@ Preserve Godot/GDScript, Android package and signing identity, legacy saves, cla
 - scripts/castle.gd: preserved Thornwatch dungeon and common floor/backtracking API.
 - scripts/regional_castles.gd: three independently authored castle plans, real lock/pathfinding changes, rune puzzles/shortcuts, retained progress, checkpoints, hazards, bosses and rewards.
 - scripts/realm_props.gd: one shared environment atlas.
+- scripts/dungeon_atlas.gd and dungeon_map.gd: visible-floor survey, discovered destinations, safe route previews and native floor-map UI with per-run persistence.
+- tests/test_dungeon_atlas.gd: paths, touch selection, position/facing projection, saves, backtracking, old/corrupt optional surveys and bounded endless retention.
 - scripts/beacons.gd: four distinct roadside shrines, rune sequences, guarded encounters, regional relics, saved exploration journal and crowd-safe activation.
 - tests/test_beacons.gd: real mobile interaction, routes, partial saves, wrong sequence reset, budget/recycling, encounter isolation/retries, protected rewards and journal.
 - scripts/side_caves.gd: two enterable side expeditions with independent layouts, mechanisms, protected treasure, warnings, guardians and safe run recovery. Branch trails live in realm_catalog.gd; Camp/map tracking uses the same coordinates.
