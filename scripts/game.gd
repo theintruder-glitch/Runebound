@@ -824,6 +824,7 @@ func check_floor_clear() -> bool:
 		elif expedition.enabled() and hero.dungeon.floor>=5:
 			hero.needs.ruins=true
 			notify("EXPEDITION COMPLETE · Use the gold stairs to return home.",5)
+		elif castle.caves.active():notify("EXPEDITION CLEARED · Search the optional vault or take the gold stairs outside.",5)
 		elif castle.active():notify("CASTLE LEVEL CLEARED · Explore the optional rooms or take the gold stairs.",5)
 		else: notify("FLOOR CLEARED · Find the gold staircase to descend.",5)
 		save_game()
@@ -918,7 +919,7 @@ func update_interaction() -> void:
 			label_value = "STAIRS · PREVIOUS CASTLE LEVEL" if castle.active() and hero.dungeon.floor>1 else "LEAVE DUNGEON"
 		elif player_position().distance_to(cell_center(dungeon_map.exit))<38:
 			label_value = ("RETURN HOME · EXPEDITION COMPLETE" if (chapter.story_run() and hero.dungeon.floor>=3) or (expedition.enabled() and hero.dungeon.floor>=5) else "DESCEND · FLOOR %d" % (hero.dungeon.floor+1)) if floor_clear() else "STAIRS LOCKED"
-			if castle.active() and floor_clear():label_value="RETURN OUTSIDE · KEEP RECLAIMED" if hero.dungeon.floor==3 else "STAIRS · NEXT CASTLE LEVEL"
+			if castle.active() and floor_clear():label_value="RETURN OUTSIDE · EXPEDITION CLEARED" if castle.caves.active() else "RETURN OUTSIDE · KEEP RECLAIMED" if hero.dungeon.floor==3 else "STAIRS · NEXT CASTLE LEVEL"
 	if hero.dungeon==null:
 		var door=survival.near("Door",65)
 		if not door.is_empty(): label_value="CLOSE DOOR" if door.open else "OPEN DOOR"
@@ -1117,6 +1118,7 @@ func update_enemy_attack(enemy:Dictionary,dt:float) -> void:
 			enemy.strike_radius=110.0 if enemy.thorn_pattern%2==0 else 55.0
 			if enemy.thorn_pattern%2==0:enemy.strike=enemy.pos
 		if enemy.has("realm_boss"):castle.regional.prepare_attack(enemy)
+		if enemy.get("cave_boss",false):castle.caves.prepare_attack(enemy)
 		enemy["windup_max"]=enemy.windup
 		enemy.aggro=maxf(enemy.aggro,2)
 

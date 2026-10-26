@@ -1,3 +1,7 @@
+## v0.28.0 phone checks still needed
+
+Install over the existing app without clearing data. Track each new side expedition from Camp/Quests. Follow the branch trail in and out, use joystick and D-Pad in both orientations, open the mechanism, dodge hazards and both guardian patterns, collect treasure, leave and revisit. Save/close/continue mid-expedition; verify run progress. Check paused defeat recovery and survival needs. Record FPS/heat/battery on the actual phone and native Windows input/audio separately.
+
 # 0.27 custom controls device playtest
 
 On Motorola Edge 2025, install over the existing app without clearing data. Verify

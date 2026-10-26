@@ -67,7 +67,7 @@ func run():
   check(fit,"Equipment grid has no horizontal overflow "+str(dims))
   hud.show_character("map");await process_frame;await process_frame
   var map=hud.map_widget
-  check(map.markers.size()==11 and ["forest","caves","swamp","snow","home","trader","ruins","keep"].all(func(id):return map.markers.has(id)),"Map draws all eight named region, camp, ruins and castle markers "+str(dims))
+  check(map.markers.size()==13 and ["forest","caves","swamp","snow","home","trader","ruins","keep","frostspire","blackmire","stormbreak","frost-cave","highland-mine"].all(func(id):return map.markers.has(id)),"Map draws all thirteen region, camp, castle and side-expedition markers "+str(dims))
   check(hud.scroll.get_global_rect().encloses(map.get_global_rect()),"Whole map fits the visible menu area "+str(dims))
   var touch=InputEventScreenTouch.new();touch.index=9;touch.pressed=true
   touch.position=map.global_position+map.markers.snow

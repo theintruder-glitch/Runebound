@@ -1,13 +1,14 @@
 extends RefCounted
 const Data=preload("res://scripts/data.gd")
 const FLOORS=["Gatehouse & Great Hall","Prisons & Forgotten Library","Throne of the Briar King"]
+var caves=preload("res://scripts/side_caves.gd").new()
 var regional=preload("res://scripts/regional_castles.gd").new()
 var game:
  set(value):
-  game=value;regional.game=value
+  game=value;regional.game=value;caves.game=value
 var trap_clock=0.0
-func active() -> bool:return not game.hero.is_empty() and game.hero.dungeon!=null and game.hero.dungeon.get("castle","") in ["thornwatch","frostspire","blackmire","stormbreak"]
-func title() -> String:return regional.title() if regional.active() else "Thornwatch Keep · "+FLOORS[game.hero.dungeon.floor-1]
+func active() -> bool:return not game.hero.is_empty() and game.hero.dungeon!=null and game.hero.dungeon.get("castle","") in ["thornwatch","frostspire","blackmire","stormbreak","frost-cave","highland-mine"]
+func title() -> String:return caves.title() if caves.active() else regional.title() if regional.active() else "Thornwatch Keep · "+FLOORS[game.hero.dungeon.floor-1]
 func enter_region(id:String) -> bool:return regional.enter(id)
 func retreat() -> bool:
  if not active():return false
@@ -21,6 +22,7 @@ func enter() -> bool:
  game.hero.dungeon={"floor":1,"seed":735931,"run":str(Time.get_ticks_usec()),"cleared":[],"rewarded":false,"returnX":game.hero.x,"returnY":game.hero.y,"story":false,"castle":"thornwatch"}
  game.hero.journey.dungeon_entered=true;game.build_floor(true);game.save_game();game.notify("THORNWATCH KEEP · Find the armory key and light the library seal. Entrance stairs lead outside; upper landings allow backtracking.",8);return true
 func rooms(f:int) -> Array:
+ if caves.active():return caves.rooms(f)
  if regional.active():return regional.rooms(f)
  if f==1:return [[Rect2i(12,24,9,6),"Gatehouse"],[Rect2i(10,12,13,10),"Great Hall"],[Rect2i(2,14,6,8),"Armory"],[Rect2i(24,12,6,9),"Rune Library"],[Rect2i(12,2,9,7),"Upper Stairs"],[Rect2i(2,2,6,6),"Hidden Vault"]]
  if f==2:return [[Rect2i(12,24,9,6),"Lower Landing"],[Rect2i(3,18,7,9),"Prison Cells"],[Rect2i(22,19,8,8),"Buried Archive"],[Rect2i(3,4,8,9),"Knight's Crypt"],[Rect2i(21,3,9,10),"Reliquary"],[Rect2i(12,2,8,7),"Throne Stairs"]]
@@ -31,6 +33,7 @@ func carve(grid:Array,r:Rect2i) -> void:
 func hall(grid:Array,a:Vector2i,b:Vector2i) -> void:
  carve(grid,Rect2i(mini(a.x,b.x)-1,a.y-1,absi(a.x-b.x)+3,3));carve(grid,Rect2i(b.x-1,mini(a.y,b.y)-1,3,absi(a.y-b.y)+3))
 func layout() -> Dictionary:
+ if caves.active():return caves.layout()
  if regional.active():return regional.layout()
  var f=game.hero.dungeon.floor;var grid=[]
  for y in range(32):
@@ -52,6 +55,7 @@ func layout() -> Dictionary:
    if grid[y][x]:floors.append(Vector2i(x,y))
  return {"grid":grid,"size":32,"floors":floors,"start":Vector2i(16,27),"exit":Vector2i(16,4)}
 func setup() -> void:
+ if caves.active():caves.setup();return
  if regional.active():regional.setup();return
  trap_clock=0;var f=game.hero.dungeon.floor
  var places=[Vector2i(16,20),Vector2i(5,19),Vector2i(27,18),Vector2i(16,6)] if f==1 else [Vector2i(6,22),Vector2i(25,23),Vector2i(6,8),Vector2i(25,7)] if f==2 else [Vector2i(11,18),Vector2i(22,18),Vector2i(16,5)]
@@ -66,12 +70,14 @@ func setup() -> void:
  if f==1 and not has("kill-vault"):
   var e=game.create_enemy(game.cell_center(Vector2i(5,5)),maxi(3,game.hero.level),"guardian");e.named="Vault Sentinel";e["castle_optional"]=true;e["castle_index"]="vault";e.dungeon_id="1:vault";game.enemies.append(e)
 func defeated(e:Dictionary) -> void:
+ if caves.active():caves.defeated(e);return
  if regional.active():regional.defeated(e);return
  if not active() or not e.has("castle_index"):return
  game.hero.opened[token("kill-"+str(e.castle_index))]=true
  if e.get("thornwatch_boss",false):game.hero.opened["thornwatch-cleared"]=true;game.notify("THORNWATCH RECLAIMED · Claim the legendary blade in the treasury, then return outside.",8)
 func required_clear() -> bool:return not game.enemies.any(func(e):return not e.dead and not e.get("castle_optional",false))
 func objective() -> String:
+ if caves.active():return caves.objective()
  if regional.active():return regional.objective()
  if not active():return ""
  if game.floor_clear():return "KEEP RECLAIMED · Claim the treasury blade · Gold stairs return outside" if game.hero.dungeon.floor==3 else "LEVEL CLEARED · Explore side rooms or take the gold stairs"
@@ -80,12 +86,14 @@ func objective() -> String:
  if game.hero.dungeon.floor==2:return "THORNWATCH · Bind the checkpoint near the entrance · Explore crypts and archives"
  return "THORNBOUND COLOSSUS · Dodge root strikes and the wide ground slam"
 func advance() -> bool:
+ if caves.active():return caves.advance()
  if regional.active():return regional.advance()
  if not active() or not required_clear():return false
  if game.hero.dungeon.floor==1 and (not has("key") or not has("seal")):game.notify("The upper gate needs the armory key and library seal.",4);return false
  if game.hero.dungeon.floor==3:game.leave_dungeon();return true
  game.hero.dungeon.floor+=1;game.hero.dungeon.cleared=[];game.hero.dungeon.rewarded=false;game.build_floor(true);game.save_game();return true
 func features() -> Dictionary:
+ if caves.active():return caves.features()
  if regional.active():return regional.features()
  if game.hero.dungeon.floor==1:return {"key":{"cell":Vector2i(4,17),"label":"TAKE ARMORY KEY"},"seal":{"cell":Vector2i(27,14),"label":"LIGHT LIBRARY SEAL"},"vault":{"cell":Vector2i(4,4),"label":"OPEN HIDDEN VAULT"}}
  if game.hero.dungeon.floor==2:return {"checkpoint":{"cell":Vector2i(16,26),"label":"BIND CASTLE CHECKPOINT"},"archive":{"cell":Vector2i(25,21),"label":"READ ANCIENT ARCHIVE"}}
@@ -100,6 +108,7 @@ func nearby() -> String:
 func interaction() -> String:
  var id=nearby();return features()[id].label if not id.is_empty() else ""
 func use_feature() -> bool:
+ if caves.active():return caves.use_feature()
  if regional.active():return regional.use_feature()
  var id=nearby()
  if id.is_empty():return false
@@ -121,6 +130,7 @@ func use_feature() -> bool:
  game.notify({"key":"Armory key recovered.","seal":"Library seal lit · upper gate and hidden vault passage unlocked.","checkpoint":"Checkpoint bound · defeat returns here with current run progress.","archive":"The kings chained a living guardian beneath their throne. +100 gold, +3 essence.","vault":"Secret vault · +100 gold, +3 essence.","relic":"Legendary Thornwatch Oath and Briarheart spell recovered. Assign it in Spells."}[id],6)
  game.world.refresh_scenery(true);game.save_game();return true
 func checkpoint_defeat() -> bool:
+ if caves.active():return caves.checkpoint_defeat()
  if regional.active():return regional.checkpoint_defeat()
  if not active():return false
  var loss=int(game.hero.gold*.15);game.hero.gold-=loss;game.hero.deaths+=1;game.expedition.reset_after_defeat()
@@ -128,6 +138,7 @@ func checkpoint_defeat() -> bool:
  game.hero.dungeon.cleared=[];game.hero.dungeon.rewarded=true;game.hero.hp=Data.max_hp(game.hero)*.65;game.hero.mp=Data.max_mp(game.hero)*.5
  game.build_floor(true);game.save_game();game.hud.show_pause("Castle checkpoint · %d gold lost. Keys, defeated foes and claimed treasure retained." % loss);return true
 func draw_rooms(c:CanvasItem,b:Rect2) -> void:
+ if caves.active():caves.draw_rooms(c,b);return
  if regional.active():regional.draw_rooms(c,b);return
  if not active():return
  for r in rooms(game.hero.dungeon.floor):
@@ -156,6 +167,7 @@ func draw_rooms(c:CanvasItem,b:Rect2) -> void:
   else:c.draw_circle(p,23,Color("465c56"));c.draw_arc(p,24,0,TAU,24,Color("b6bd8c"),3);c.draw_colored_polygon(PackedVector2Array([p+Vector2(0,-19),p+Vector2(12,0),p+Vector2(0,13),p+Vector2(-12,0)]),Color("a4d1a2"))
   c.draw_string(ThemeDB.fallback_font,p+Vector2(-32,28),id.to_upper(),HORIZONTAL_ALIGNMENT_LEFT,-1,11,Color("dcc998"))
 func draw_traps(c:CanvasItem) -> void:
+ if caves.active():caves.draw_traps(c);return
  if regional.active():regional.draw_traps(c);return
  if not active():return
  for cell in [Vector2i(16,15),Vector2i(16,9)]:
@@ -163,6 +175,7 @@ func draw_traps(c:CanvasItem) -> void:
   if not game.walkable(p):continue
   var warning=fposmod(trap_clock,3.2)>2.0;c.draw_circle(p,29,Color("a6c97555") if warning else Color("7c917c22"));c.draw_arc(p,29,0,TAU,18,Color("c8d39a") if warning else Color("61736b"),2)
 func tick(dt:float) -> void:
+ if caves.active():caves.tick(dt);return
  if regional.active():regional.tick(dt);return
  if not active() or not game.playing or dt<=0:return
  var before=floori(trap_clock/3.2);trap_clock+=dt

@@ -1,3 +1,22 @@
+# 0.28.0 Hidden Depths verification
+
+Incremental update from v0.27.1. Two former outdoor cache sites now have enterable, single-floor side expeditions: Glacier Hollow and Oathstone Mine, with ten named chambers total. Existing castles, classic/story dungeons, character progression, building, survival, custom controls and the menu-position fix remain included.
+
+- Full source: **40 suite runs / 2,989 checks passed** with pinned Godot 4.5.1.
+- Final targeted world, side-expedition, map and movement checks: **5 suite runs / 628 checks passed**.
+- Actual signed Android APK resources: **22 suites / 1,941 checks passed**.
+- Actual Windows PCK resources under Linux Godot: **22 suites / 1,733 checks passed**.
+- New side-expedition suite: **213 checks** across portrait and landscape. Covers old-cache entry, both-way full-radius branch trails, all room paths, real locked/open collision, clue/mechanism interactions, distinct plans, JSON migration, retained defeated foes, paused defeat recovery, two boss warnings/phase change, hazard warning/dodge/pause, full-stack retry, exact rewards, one-time treasure across repeated runs, Camp tracking and exact entrance/gold returns.
+- Updated existing presentation suite expects and verifies all **13 map markers**, retaining touch selection and tracking checks.
+- Eight native Godot/OpenGL Compatibility captures generated with Mesa software rendering, mobile HUD and disposable preferences: both cave interiors/vaults, portrait and landscape. Reviewed for terrain contrast, identifiable ice/mining props, visible controls and viewport placement. No GPU/physical-phone frame rate is inferred from this renderer.
+- Final APK certificate, ZIP integrity, ARM64 package/version and 16 KiB alignment checks passed. Package remains `app.runebound.godot`, version code **38**, name **0.28.0-hidden-depths**. Certificate SHA-256 remains `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`. Legacy save directory and controls settings path are unchanged. No private signing files are included in source or Git.
+
+Only the current expedition floor and four authored enemies load. Cached room drawing reuses existing props; two 48×48 baked wall cells add approximately 18 KiB raw RGBA to the shared terrain palette. Branch corridors use bounding checks before segment-distance work. The existing ambient enemy budgets, graphics quality and weather settings remain.
+
+Physical Motorola installation-over-old, touch comfort/rotation, visual preference, encounter balance, sustained RAM/FPS/heat/battery, audio and native Windows executable/driver validation remain pending. This is a tested development update, not a commercial-readiness or device-performance certification. GitHub CI status is separate from these local results.
+
+## Earlier releases
+
 # 0.27.1 Menu position fix
 
 Same-page menu actions retain their scroll offset instead of forcing the view to zero. The offset is restored after container layout, with a generation guard preventing an old refresh from moving a newly opened page. New pages still start at the top. Focused controller actions retain their replacement button without forcing the first button into view.
