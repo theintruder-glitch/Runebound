@@ -227,6 +227,7 @@ func _draw() -> void:
 			var progress=1-clampf(enemy.windup/maxf(.1,enemy.get("windup_max",enemy.windup)),0,1)
 			draw_arc(enemy.strike,enemy.strike_radius-5,-PI/2,-PI/2+TAU*progress,32,Color("ffe1aa"),3)
 			label(enemy.strike+Vector2(-5,-8),"!",24,Color("ffe1a1"))
+			game.boss_signs.draw_warning(self,enemy)
 			if enemy.has("castle_attack"):label(enemy.strike+Vector2(-55,-enemy.strike_radius-12),enemy.castle_attack,11,Color("e9d29b"))
 	if game.abilities.sanctuary>0:
 		draw_circle(game.abilities.sanctuary_at,105,Color("a6dfac22"))

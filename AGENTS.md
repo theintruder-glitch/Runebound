@@ -1,7 +1,7 @@
 # Codex instructions — VYRNSPIRE Android
 
 ## Mission
-Continue and finish the native **Android** edition of VYRNSPIRE (formerly Runebound). This repository contains the editable **Godot 4.5 GDScript** game project. The current source is **v0.30.0**, continued from the supplied **v0.15.0** baseline. Make incremental, reviewable improvements without losing any existing game content.
+Continue and finish the native **Android** edition of VYRNSPIRE (formerly Runebound). This repository contains the editable **Godot 4.5 GDScript** game project. The current source is **v0.31.0**, continued from the supplied **v0.15.0** baseline. Make incremental, reviewable improvements without losing any existing game content.
 
 Read `README.md`, `PHONE-START.txt`, `VERIFICATION.md`, `export_presets.cfg`, and `ROADMAP_ANDROID.md` before editing. Use VERIFICATION.md to distinguish local checks from pending hardware and CI validation.
 

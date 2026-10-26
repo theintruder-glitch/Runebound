@@ -1,3 +1,20 @@
+# 0.31.0 Boss Signs verification
+
+Incremental update from v0.30.0, retaining the Dungeon Atlas, beacons, four castles, caves, controls, character progression, building and survival. Boss bars now show names, health percentage and applicable faster-phase information. Group encounters show their identity and remaining enemy count. Heavy warnings reinforce the existing circle with edge marks and a center cross. Known faster-phase keepers emit one brief existing visual effect below half health, without repeated hit spam.
+
+- Full source: **43 suite runs / 3,802 checks passed**.
+- Signed APK resources: **25 suites / 2,754 checks passed**.
+- Windows PCK resources on Linux Godot: **25 suites / 2,546 checks passed**.
+- New boss presentation suite: **122 checks**, both orientations. Covers all six existing faster-phase flags, exact-half threshold, one-time effect, paused/dead/generic/distant bosses, caption bounds, actual Frost King identity and real damage-triggered presentation. Checks preserve health, strike radius, spawn count and ongoing warning position/timer. Original kingdom/control/combat suites remain included.
+- Six native Mesa/OpenGL Compatibility mobile captures reviewed: Frost King phase I, phase II and the Rootlight watcher group, portrait/landscape. Caption height was corrected after a minimum-font-height check caught one pixel of overflow. Real phone legibility and performance remain pending.
+- Android `app.runebound.godot`, code **41**, name **0.31.0-boss-signs**. Original signing certificate, legacy save path and controls preferences remain unchanged. Final signature/package/ARM64/ZIP/16 KiB alignment checks passed. Certificate SHA-256: `79a1ef0f60f3b4c6e65bd42cc422b28c7e969dd5ae54b0ddc77242f9287bab37`. No signing secrets included in Git or source.
+
+No attack timing, hit areas, movement, damage, rewards, spawn limits or save schema were changed. Generic bosses do not falsely announce faster attacks. New warnings reuse native drawing and existing bounded visual effects; no new textures, lights, actors or audio are loaded. Group captions use the active encounter rather than an unrelated nearby boss.
+
+Physical Motorola install-over-old, touch/readability, sustained FPS/heat/battery/audio and native Windows execution remain pending. Windows validation exercises its PCK using Linux Godot. GitHub CI is separate from local checks. Development update, not hardware certification.
+
+## Earlier releases
+
 # 0.30.0 Dungeon Atlas verification
 
 Incremental continuation of v0.29.0. The Map screen now opens the active dungeon floor, records visible floor tiles, marks discovered castle/cave rooms and unclaimed objects, and previews gold routes. Entrance routing remains available to help older saved runs. The outdoor world map remains accessible through a toggle. The dungeon minimap also uses explored tiles. All earlier content, controls and saves remain available.

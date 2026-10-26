@@ -1,6 +1,12 @@
 # Android-first completion roadmap
 
-Current source: **0.30.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+Current source: **0.31.0**, built incrementally from supplied **0.15.0**. The older GitHub 0.12.0 snapshot is superseded on the development branch.
+
+## Boss Signs milestone
+
+- [x] Named health/phase captions, group counts, once-per-keeper faster-phase signal and reinforced circular warning boundaries.
+- [x] Original timing, collision, damage, movement, crowd budgets and rewards preserved.
+- [ ] Physical Android readability, combat comfort and sustained performance playtest.
 
 ## Dungeon Atlas milestone
 

@@ -1,7 +1,7 @@
-VYRNSPIRE 0.30.0 — DUNGEON ATLAS / ANDROID
+VYRNSPIRE 0.31.0 — BOSS SIGNS / ANDROID
 
 1. In your current Runebound Godot app, use Pause > Export character save.
-2. Download Vyrnspire-Godot-v0.30.0.apk and install it over the existing app.
+2. Download Vyrnspire-Godot-v0.31.0.apk and install it over the existing app.
 3. Keep the app installed; do not uninstall or clear its data.
 4. Continue your character, or choose Begin a new journey if the old app data was already cleared.
 
@@ -13,7 +13,7 @@ SURVIVAL: eat, drink, sleep and keep warm. Rain/snow soak clothing, making cold 
 A roof or shelter blocks precipitation. A reachable lit fire dries clothing quickly.
 Walls block warmth and bed interaction. Classic mode has no needs drain.
 
-This update uses app.runebound.godot, version code 40 and the original prototype certificate.
+This update uses app.runebound.godot, version code 41 and the original prototype certificate.
 If Android rejects the update, keep the current app and save. Report the exact message.
 Physical installation and phone performance still need playtesting; automated engine checks are separate.
 
@@ -104,3 +104,5 @@ Inside any dungeon open Pause > World map. Select Entrance for a gold route back
 Dark areas are unexplored. The white arrow follows your actual position and facing.
 World map shows the outdoor entrance; Current dungeon floor returns to the atlas. Resume exploration closes the map.
 Walking records visible tiles. Continue/checkpoints/backtracking preserve this expedition's map; leaving ends the run.
+
+BOSS SIGNS: Watch the named health bar. PHASE II means that keeper has entered its existing faster attack phase. Circle edge marks and the center cross show the actual heavy-strike area. Move clear or dash before the warning finishes.
