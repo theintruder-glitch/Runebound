@@ -1,0 +1,21 @@
+name: Fetch CC0 preview assets
+on:
+  push:
+    branches: [codex/3d-preview-foundation]
+permissions:
+  contents: read
+jobs:
+  assets:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Download model and scene assets
+        run: |
+          mkdir -p assets
+          curl -fL https://raw.githubusercontent.com/sion-rgb/tactical-slash/main/assets/characters/player/player_swordsman.glb -o assets/hero.glb
+          curl -fL https://raw.githubusercontent.com/syuhei176/ai-game-assets/main/models/environment/tree_oak.glb -o assets/tree.glb
+          curl -fL https://raw.githubusercontent.com/syuhei176/ai-game-assets/main/models/environment/rock_large.glb -o assets/rock.glb
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cc0-prototype-assets
+          path: assets/
+          retention-days: 1
