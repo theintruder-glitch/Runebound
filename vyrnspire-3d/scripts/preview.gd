@@ -15,7 +15,7 @@ const SPEED=5.5
 const GRID=64
 const STEP=2.0
 func terrain_height(x:float,z:float) -> float:
-	return 0.9*sin(x*.075)*cos(z*.065)+0.35*sin(x*.19+z*.11)+0.6*cos(z*.045)
+	return 2.3*sin(x*.075)*cos(z*.065)+0.7*sin(x*.19+z*.11)+1.0*cos(z*.045)
 func material(c:Color,roughness:float=1.0) -> StandardMaterial3D:
 	var m=StandardMaterial3D.new();m.albedo_color=c;m.roughness=roughness;return m
 func _ready() -> void:
@@ -51,6 +51,10 @@ func make_landmarks() -> void:
 		var h=rng.randf_range(3.5,6.5);cylinder(tree,.24,h*.55,Vector3(0,h*.28,0),Color("584638"))
 		var crown=CylinderMesh.new();crown.top_radius=0;crown.bottom_radius=h*.30;crown.height=h*.66;crown.radial_segments=7
 		add_mesh(tree,crown,Vector3(0,h*.72,0),[Color("38563d"),Color("4a6a46"),Color("587451")][i%3])
+	# Decorative ridge sits beyond the playable terrain; it has no collision.
+	for i in range(7):
+		var ridge=CylinderMesh.new();ridge.top_radius=0;ridge.bottom_radius=18.0;ridge.height=32.0+(i%3)*6;ridge.radial_segments=7
+		add_mesh(self,ridge,Vector3(-78+i*26,8,-90-abs(i-3)*3),Color("71838a").darkened((i%3)*.05))
 	# A distant castle silhouette provides a destination without collision or a dungeon yet.
 	var castle=Node3D.new();castle.position=Vector3(0,terrain_height(0,-43),-43);add_child(castle)
 	box(castle,Vector3(14,6,4),Vector3(0,3,0),Color("59616b"))
