@@ -103,6 +103,16 @@ func run():
 		touch(assigned,1,false);touch(manager.registry.attack.get_global_rect().get_center(),1)
 		check(game.dash_time>0 and not game.attack_held,"Swapped dodge slot calls the same gameplay function")
 		touch(assigned,1,false);manager.release_all();manager.model.apply_preset("Classic RPG");manager.apply()
+		# A slot's display and disabled state must follow its assigned action on
+		# every HUD update, including after swapping back to a built-in preset.
+		fresh();manager.model.reassign("attack","spell_1",manager.orientation());manager.apply()
+		game.spell_cooldowns.fire=2.0;game.hud.update_hud()
+		check(manager.registry.attack.disabled and "FIRE" in manager.registry.attack.text.to_upper(),"Swapped spell slot shows its own cooldown")
+		check(not manager.registry.spell_1.disabled and manager.registry.spell_1.text=="ATTACK","Swapped attack is not disabled by the spell cooldown")
+		game.spell_cooldowns.fire=0;game.hud.update_hud()
+		check(not manager.registry.attack.disabled,"Swapped spell becomes available after cooldown")
+		manager.model.apply_preset("Classic RPG");manager.apply();game.hud.update_hud()
+		check(manager.registry.attack.text=="ATTACK" and not manager.registry.attack.disabled and "FIRE" in manager.registry.spell_1.text.to_upper(),"Restoring a preset restores labels and states")
 	# Exercise the same controls on a real loaded castle floor.
 	fresh();game.set_player_position(game.landscape.KEEP);check(game.castle.enter(),"Real castle entrance transition succeeds");game.set_physics_process(false);manager.model.data.options.movement="dpad";manager.apply();game.hud.update_hud()
 	var center=game.hud.stick.get_global_rect().get_center();touch(center+Vector2(45,0),0);game.tick(.05)

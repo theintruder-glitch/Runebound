@@ -124,14 +124,28 @@ func update_visibility() -> void:
 
 func refresh_labels() -> void:
 	if registry.is_empty(): return
+	# Render from the assigned action, not the slot's original action. Otherwise
+	# the normal HUD refresh can disable a swapped attack button for a spell's
+	# cooldown, or leave a stale label/disabled state after restoring a preset.
+	if game.desktop.enabled and not is_instance_valid(editor): return
 	for id in Layout.ASSIGNABLE:
 		var node=registry[id];var action=assignment(id)
-		if action!=id:
-			if action.begins_with("spell_") and not game.hero.is_empty():
-				var spell=game.hero.spells.slots[int(action.right(1))-1];var info=game.spellbook.BOOK[spell]
-				node.text=info.short+"\n%d MP" % info.cost;node.disabled=not game.spellbook.can_cast(spell)
-			else:
-				node.text=Layout.LABELS[action].to_upper();node.disabled=false
+		node.disabled=false
+		if action.begins_with("spell_") and not game.hero.is_empty():
+			var spell=game.hero.spells.slots[int(action.right(1))-1];var info=game.spellbook.BOOK[spell]
+			var cooldown=float(game.spell_cooldowns.get(spell,0))
+			node.text=info.short+"\n"+("%.1fs" % cooldown if cooldown>.1 else "%d MP" % info.cost)
+			node.disabled=not game.spellbook.can_cast(spell)
+		elif action=="skill" and not game.hero.is_empty():
+			var skill=game.abilities.SKILLS[game.hero.className]
+			node.text=("%.1fs" % game.abilities.cooldown) if game.abilities.cooldown>.1 else skill.name+"\n%d MP" % skill.cost
+			node.disabled=game.abilities.cooldown>.1 or game.hero.mp<skill.cost or not game.build_recipe.is_empty()
+		elif action=="dodge":
+			node.text="%.1fs" % game.dash_cooldown if game.dash_cooldown>.1 else "DASH"
+		elif action=="auto" and not game.hero.is_empty():
+			node.text="AUTO\nON" if game.hero.auto else "AUTO\nOFF"
+		else:
+			node.text={"attack":"ATTACK","inventory":"Gear","camp":"Camp","map":"Map"}.get(action,Layout.LABELS[action].to_upper())
 		if editing(): node.disabled=false
 
 func over_button(at:Vector2) -> bool:
