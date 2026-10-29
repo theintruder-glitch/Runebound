@@ -13,6 +13,7 @@ func run():
 	var game=load("res://main.tscn").instantiate();root.add_child(game)
 	for i in range(90):await physics_frame
 	check(game.player.is_on_floor(),"Player lands on the 3D terrain")
+	check(game.animator!=null and game.animator.has_animation("Idle") and game.animator.has_animation("Walking_A"),"Rigged character includes idle and walking animation")
 	check(absf(game.terrain_height(0,0)-game.terrain_height(20,10))>.1,"Terrain has varied elevation")
 	var start=game.player.global_position
 	touch_at(Vector2(100,430),1,true);drag_at(Vector2(100,370),Vector2(0,-60),1)
@@ -22,8 +23,11 @@ func run():
 	var old_yaw=game.yaw
 	for i in range(30):await physics_frame
 	check(game.player.global_position.distance_to(start)>.5,"Character walks on terrain")
+	check(game.animator.current_animation=="Walking_A","Walking uses the character animation")
 	check(absf(game.yaw-old_yaw)>.1,"Camera rotates from a look drag")
 	touch_at(Vector2(700,300),2,false);check(game.touch.move_id==1 and game.touch.direction.length()>.5,"Releasing camera leaves movement held")
 	touch_at(Vector2(100,370),1,false,true);check(game.touch.move_id==-1 and game.touch.direction==Vector2.ZERO,"Cancelled movement stops cleanly")
+	await physics_frame;await physics_frame
+	check(game.animator.current_animation=="Idle","Character returns to idle when movement stops")
 	game.touch.reset();check(game.touch.look_id==-1 and game.touch.direction==Vector2.ZERO,"Reset clears all touch ownership")
 	print("%d 3D PREVIEW CHECKS PASSED" % checks);game.queue_free();quit(0)

@@ -1,5 +1,8 @@
 extends Node3D
 const Touch=preload("res://scripts/touch_controls.gd")
+const HeroScene=preload("res://assets/hero.glb")
+const TreeScene=preload("res://assets/tree.glb")
+const RockScene=preload("res://assets/rock.glb")
 var player:CharacterBody3D
 var camera:Camera3D
 var touch:Control
@@ -7,15 +10,24 @@ var avatar:Node3D
 var yaw=0.0
 var pitch=-0.26
 var walk_phase=0.0
-var left_leg:MeshInstance3D
-var right_leg:MeshInstance3D
-var left_arm:MeshInstance3D
-var right_arm:MeshInstance3D
+var animator:AnimationPlayer
+var active_animation=""
 const SPEED=5.5
 const GRID=64
 const STEP=2.0
+func river_center(z:float) -> float: return -8.0+sin(z*.055)*9.0
 func terrain_height(x:float,z:float) -> float:
-	return 2.3*sin(x*.075)*cos(z*.065)+0.7*sin(x*.19+z*.11)+1.0*cos(z*.045)
+	var height=2.3*sin(x*.075)*cos(z*.065)+0.7*sin(x*.19+z*.11)+1.0*cos(z*.045)
+	var river_dist=absf(x-river_center(z))
+	return height-1.5*clampf((7.0-river_dist)/5.0,0.0,1.0)
+func ground_color(v:Vector3) -> Color:
+	var distance=absf(v.x-river_center(v.z))
+	if distance<3.0: return Color("3c7885")
+	if distance<5.0: return Color("827e61")
+	if v.x<0 and v.z<0: return Color("a8a15e").lerp(Color("74814d"),clampf((v.y+2)/6,0,1))
+	if v.x>0 and v.z<0: return Color("536c5a").lerp(Color("71856b"),clampf((v.y+2)/6,0,1))
+	if v.x<0: return Color("466b46").lerp(Color("71894f"),clampf((v.y+2)/6,0,1))
+	return Color("405d45").lerp(Color("72816a"),clampf((v.y+2)/6,0,1))
 func material(c:Color,roughness:float=1.0) -> StandardMaterial3D:
 	var m=StandardMaterial3D.new();m.albedo_color=c;m.roughness=roughness;return m
 func _ready() -> void:
@@ -32,7 +44,7 @@ func make_ground() -> void:
 			var x0=x*STEP-half;var z0=z*STEP-half
 			var a=Vector3(x0,terrain_height(x0,z0),z0);var b=Vector3(x0+STEP,terrain_height(x0+STEP,z0),z0);var c=Vector3(x0,terrain_height(x0,z0+STEP),z0+STEP);var d=Vector3(x0+STEP,terrain_height(x0+STEP,z0+STEP),z0+STEP)
 			for v in [a,b,c,b,d,c]:
-				var blend=clampf((v.y+1.0)/3.0,0.0,1.0);st.set_color(Color("526742").lerp(Color("9aa476"),blend));st.add_vertex(v)
+				st.set_color(ground_color(v));st.add_vertex(v)
 	st.generate_normals();var mesh=st.commit()
 	var ground=MeshInstance3D.new();ground.mesh=mesh;var mat=material(Color.WHITE);mat.vertex_color_use_as_albedo=true;ground.material_override=mat;add_child(ground)
 	var body=StaticBody3D.new();var shape=CollisionShape3D.new();shape.shape=mesh.create_trimesh_shape();body.add_child(shape);add_child(body)
@@ -44,13 +56,17 @@ func cylinder(parent:Node3D,radius:float,height:float,pos:Vector3,color:Color) -
 	var mesh=CylinderMesh.new();mesh.top_radius=radius*.7;mesh.bottom_radius=radius;mesh.height=height;mesh.radial_segments=8;return add_mesh(parent,mesh,pos,color)
 func make_landmarks() -> void:
 	var rng=RandomNumberGenerator.new();rng.seed=9012
-	for i in range(95):
+	for i in range(78):
+		var x=rng.randf_range(-56,56);var z=rng.randf_range(-56,56)
+		if Vector2(x,z).length()<8 or absf(x-river_center(z))<6 or (absf(x)<9 and z < -28): continue
+		if x<0 and z<0 and i%3!=0: continue
+		var p=Vector3(x,terrain_height(x,z),z)
+		var tree=TreeScene.instantiate();tree.position=p;tree.rotation.y=rng.randf_range(0,TAU)
+		var scale_value=rng.randf_range(1.2,2.0);tree.scale=Vector3.ONE*scale_value;add_child(tree)
+	for i in range(26):
 		var x=rng.randf_range(-55,55);var z=rng.randf_range(-55,55)
-		if Vector2(x,z).length()<8 or (absf(x)<9 and z < -28): continue
-		var p=Vector3(x,terrain_height(x,z),z);var tree=Node3D.new();tree.position=p;add_child(tree)
-		var h=rng.randf_range(3.5,6.5);cylinder(tree,.24,h*.55,Vector3(0,h*.28,0),Color("584638"))
-		var crown=CylinderMesh.new();crown.top_radius=0;crown.bottom_radius=h*.30;crown.height=h*.66;crown.radial_segments=7
-		add_mesh(tree,crown,Vector3(0,h*.72,0),[Color("38563d"),Color("4a6a46"),Color("587451")][i%3])
+		if Vector2(x,z).length()<8: continue
+		var rock=RockScene.instantiate();rock.position=Vector3(x,terrain_height(x,z),z);rock.rotation.y=rng.randf_range(0,TAU);rock.scale=Vector3.ONE*rng.randf_range(.8,2.0);add_child(rock)
 	# Decorative ridge sits beyond the playable terrain; it has no collision.
 	for i in range(7):
 		var ridge=CylinderMesh.new();ridge.top_radius=0;ridge.bottom_radius=18.0;ridge.height=32.0+(i%3)*6;ridge.radial_segments=7
@@ -66,16 +82,16 @@ func make_player() -> void:
 	player=CharacterBody3D.new();player.name="Player";add_child(player);player.position=Vector3(0,terrain_height(0,0)+2,0)
 	var collision=CollisionShape3D.new();var capsule=CapsuleShape3D.new();capsule.radius=.35;capsule.height=1.8;collision.shape=capsule;collision.position.y=.9;player.add_child(collision)
 	avatar=Node3D.new();avatar.name="Avatar";player.add_child(avatar)
-	var leather=Color("49414b");var armor=Color("72818b");var trim=Color("b99a61")
-	box(avatar,Vector3(.72,.80,.38),Vector3(0,1.14,0),armor)
-	box(avatar,Vector3(.74,.13,.42),Vector3(0,.84,0),trim)
-	box(avatar,Vector3(.64,.78,.1),Vector3(0,1.07,.25),Color("46384f"))
-	var head=SphereMesh.new();head.radius=.24;head.height=.48;head.radial_segments=12;head.rings=6;add_mesh(avatar,head,Vector3(0,1.84,0),Color("c8a68b"))
-	box(avatar,Vector3(.5,.14,.42),Vector3(0,2.02,.03),leather)
-	left_leg=box(avatar,Vector3(.25,.7,.29),Vector3(-.19,.37,0),leather);right_leg=box(avatar,Vector3(.25,.7,.29),Vector3(.19,.37,0),leather)
-	left_arm=box(avatar,Vector3(.24,.7,.25),Vector3(-.49,1.13,0),armor);right_arm=box(avatar,Vector3(.24,.7,.25),Vector3(.49,1.13,0),armor)
-	var sword=box(avatar,Vector3(.07,1.05,.12),Vector3(.52,1.02,.16),Color("d5d7c8"));sword.rotation.z=-.35
+	var hero=HeroScene.instantiate();hero.name="HeroModel";avatar.add_child(hero)
+	animator=hero.find_child("AnimationPlayer",true,false) as AnimationPlayer
+	if animator!=null:
+		for animation_name in ["Idle","Walking_A"]:
+			if animator.has_animation(animation_name): animator.get_animation(animation_name).loop_mode=Animation.LOOP_LINEAR
+		play_animation("Idle")
 	camera=Camera3D.new();camera.current=true;camera.fov=65;add_child(camera);update_camera(1.0)
+func play_animation(animation_name:String) -> void:
+	if animator!=null and animator.has_animation(animation_name) and active_animation!=animation_name:
+		animator.play(animation_name,.15);active_animation=animation_name
 func make_hud() -> void:
 	var layer=CanvasLayer.new();add_child(layer);touch=Touch.new();layer.add_child(touch)
 	var title=Label.new();title.text="VYRNSPIRE · 3D TEST AREA";title.position=Vector2(22,18);title.add_theme_font_size_override("font_size",20);touch.add_child(title)
@@ -98,6 +114,6 @@ func _physics_process(dt:float) -> void:
 	if move.length()>.05:
 		avatar.rotation.y=atan2(-move.x,-move.z);walk_phase+=dt*9
 	else: walk_phase=lerpf(walk_phase,round(walk_phase/PI)*PI,dt*8)
-	left_leg.rotation.x=sin(walk_phase)*.45;right_leg.rotation.x=-left_leg.rotation.x;left_arm.rotation.x=-left_leg.rotation.x*.7;right_arm.rotation.x=left_leg.rotation.x*.7
+	play_animation("Walking_A" if move.length()>.05 else "Idle")
 	if player.position.y < -10:player.position=Vector3(0,terrain_height(0,0)+2,0);player.velocity=Vector3.ZERO
 	update_camera(dt)
