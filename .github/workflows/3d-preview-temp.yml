@@ -44,10 +44,10 @@ jobs:
           ! grep -Eq 'SCRIPT ERROR:|(^|[[:space:]])ERROR:' vyrnspire-3d/builds/import.log
           "$GODOT" --headless --path vyrnspire-3d --script res://tests/test_preview.gd 2>&1 | tee vyrnspire-3d/builds/test.log
           ! grep -Eq 'SCRIPT ERROR:|(^|[[:space:]])ERROR:|FAIL:' vyrnspire-3d/builds/test.log
+          VYRNSPIRE_CAPTURE="$PWD/vyrnspire-3d/builds/preview.png" xvfb-run -a "$GODOT" --path vyrnspire-3d --script res://tests/capture.gd
           "$GODOT" --headless --path vyrnspire-3d --export-release Android "$PWD/vyrnspire-3d/builds/preview-unsigned.apk" 2>&1 | tee vyrnspire-3d/builds/export.log
           ! grep -Eq 'SCRIPT ERROR:|(^|[[:space:]])ERROR:' vyrnspire-3d/builds/export.log
           unzip -tqq vyrnspire-3d/builds/preview-unsigned.apk
-          VYRNSPIRE_CAPTURE="$PWD/vyrnspire-3d/builds/preview.png" xvfb-run -a "$GODOT" --path vyrnspire-3d --script res://tests/capture.gd
       - uses: actions/upload-artifact@v4
         if: always()
         with:
