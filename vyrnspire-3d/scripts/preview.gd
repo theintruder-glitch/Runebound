@@ -13,8 +13,8 @@ var walk_phase=0.0
 var animator:AnimationPlayer
 var active_animation=""
 const SPEED=5.5
-const GRID=64
-const STEP=2.0
+const GRID=96
+const STEP=1.3333333333
 func river_center(z:float) -> float: return -8.0+sin(z*.055)*9.0
 func terrain_height(x:float,z:float) -> float:
 	var height=2.3*sin(x*.075)*cos(z*.065)+0.7*sin(x*.19+z*.11)+1.0*cos(z*.045)
@@ -62,7 +62,7 @@ func make_landmarks() -> void:
 		if x<0 and z<0 and i%3!=0: continue
 		var p=Vector3(x,terrain_height(x,z),z)
 		var tree=TreeScene.instantiate();tree.position=p;tree.rotation.y=rng.randf_range(0,TAU)
-		var scale_value=rng.randf_range(1.2,2.0);tree.scale=Vector3.ONE*scale_value;add_child(tree)
+		var scale_value=rng.randf_range(2.6,4.2);tree.scale=Vector3.ONE*scale_value;add_child(tree)
 	for i in range(26):
 		var x=rng.randf_range(-55,55);var z=rng.randf_range(-55,55)
 		if Vector2(x,z).length()<8: continue
@@ -82,7 +82,7 @@ func make_player() -> void:
 	player=CharacterBody3D.new();player.name="Player";add_child(player);player.position=Vector3(0,terrain_height(0,0)+2,0)
 	var collision=CollisionShape3D.new();var capsule=CapsuleShape3D.new();capsule.radius=.35;capsule.height=1.8;collision.shape=capsule;collision.position.y=.9;player.add_child(collision)
 	avatar=Node3D.new();avatar.name="Avatar";player.add_child(avatar)
-	var hero=HeroScene.instantiate();hero.name="HeroModel";avatar.add_child(hero)
+	var hero=HeroScene.instantiate();hero.name="HeroModel";hero.rotation.y=PI;avatar.add_child(hero)
 	animator=hero.find_child("AnimationPlayer",true,false) as AnimationPlayer
 	if animator!=null:
 		for animation_name in ["Idle","Walking_A"]:
