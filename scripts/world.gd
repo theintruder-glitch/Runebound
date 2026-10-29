@@ -302,84 +302,111 @@ func draw_tree(at: Vector2) -> void:
 	draw_set_transform(Vector2.ZERO)
 
 func draw_hero(at: Vector2) -> void:
-	draw_set_transform(at)
 	var cls=game.hero.className
 	var facing=game.swing_direction if game.swing_time>0 else game.facing
 	var angle=facing.angle()
-	var bob=sin(clock*13)*4 if game.is_walking else 0.0
 	var color=Color(Data.CLASSES[cls].color)
-	if not Data.equipped(game.hero,"armor").is_empty(): color=color.lightened(.12)
-	draw_circle(Vector2(0,15),14,Color("061c1c99"))
-	# Cape silhouette and trim stay behind the body, including while moving.
-	var cape_sway=sin(clock*8)*2 if game.is_walking else 0.0
-	draw_colored_polygon(PackedVector2Array([Vector2(-9,-9),Vector2(9,-9),Vector2(15+cape_sway,15),Vector2(2+cape_sway,22),Vector2(-15+cape_sway,15)]),color.darkened(.72))
-	draw_polyline(PackedVector2Array([Vector2(-14+cape_sway,14),Vector2(2+cape_sway,20),Vector2(14+cape_sway,14)]),color.lightened(.12),1.5,true)
-	if game.abilities.stealth>0: draw_arc(Vector2.ZERO,25,0,TAU,28,Color("bda6e388"),2)
-	if cls in ["Spellblade","Arcane Archer","Reaper"]:
-		draw_arc(Vector2(0,8),19,clock*.7,clock*.7+4,22,color*.9,2)
+	var ink=Color("171d29")
+	var gold=Color("edc77d")
+	var armored=not Data.equipped(game.hero,"armor").is_empty()
+	var walk=sin(clock*11) if game.is_walking else 0.0
+	var sway=walk*2.0
+	# Larger, readable silhouette is visual only: the foot and collision anchor
+	# remain at the same world position used by gameplay and saved characters.
+	draw_set_transform(at)
+	draw_circle(Vector2(0,14),19,Color("07141db0"))
+	if game.abilities.stealth>0: draw_arc(Vector2.ZERO,27,0,TAU,28,Color("bda6e388"),2)
+	draw_set_transform(at+Vector2(0,-9),0,Vector2(1.4,1.4))
+	# A wide split cloak, framed with a high-contrast outer silhouette.
+	draw_colored_polygon(PackedVector2Array([Vector2(-13,-17),Vector2(13,-17),Vector2(21+sway,11),Vector2(12+sway,21),Vector2(0+sway,16),Vector2(-12+sway,21),Vector2(-21+sway,11)]),ink)
+	draw_colored_polygon(PackedVector2Array([Vector2(-11,-15),Vector2(11,-15),Vector2(18+sway,10),Vector2(11+sway,17),Vector2(sway,13),Vector2(-11+sway,17),Vector2(-18+sway,10)]),color.darkened(.64))
+	draw_polyline(PackedVector2Array([Vector2(-16+sway,9),Vector2(-10+sway,15),Vector2(sway,11),Vector2(10+sway,15),Vector2(16+sway,9)]),gold.darkened(.22),1.4,true)
+	# Separately animated greaves and boots give the body a clear walking pose.
 	for side in [-1,1]:
-		var foot=Vector2(side*5,15)+Vector2(facing.x,facing.y*.7)*bob*side
-		draw_line(Vector2(side*5,5),foot,Color("29383b"),6)
-		draw_rect(Rect2(foot-Vector2(3,0),Vector2(7,4)),Color("baa381"))
-		draw_line(foot+Vector2(-3,3),foot+Vector2(4,3),Color("362d29"),2)
-	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(-15,13),Vector2(0,19),Vector2(13,12),Vector2(8,-10)]),color.darkened(.55))
-	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(7,-10),Vector2(11,8),Vector2(4,13),Vector2(-10,8)]),color)
-	draw_line(Vector2(-7,-7),Vector2(-7,6),color.lightened(.25),2,true)
-	draw_line(Vector2(2,-7),Vector2(2,8),color.darkened(.3),2,true)
-	draw_colored_polygon(PackedVector2Array([Vector2(-7,-8),Vector2(0,-4),Vector2(7,-8),Vector2(6,1),Vector2(0,5),Vector2(-6,1)]),color.darkened(.18))
-	draw_polyline(PackedVector2Array([Vector2(-7,-8),Vector2(0,-4),Vector2(7,-8)]),color.lightened(.35),1.5,true)
-	draw_line(Vector2(0,-3),Vector2(0,4),color.lightened(.18),1,true)
-	draw_rect(Rect2(-10,4,20,4),Color("514437"));draw_rect(Rect2(-2,3,5,6),Color("e7c37f"))
-	draw_line(Vector2(-10,8),Vector2(10,8),Color("282723"),1)
-	draw_line(Vector2(-12,-5),Vector2(-14,6)+facing*bob*.4,Color("d6b494"),5)
-	draw_line(Vector2(12,-5),Vector2(14,6)-facing*bob*.4,Color("d6b494"),5)
-	draw_rect(Rect2(-7,-23,14,14),Color("e5c39f"))
-	draw_rect(Rect2(-8,-25,16,6),Color("403d37"))
-	if facing.y<-.3: draw_rect(Rect2(-7,-23,14,12),Color("403d37"))
-	else: draw_rect(Rect2(2 if facing.x>=0 else -5,-17,3,3),Color("17302d"))
+		var leg=Vector2(side*6,9)+Vector2(0,side*walk*3)
+		draw_line(Vector2(side*6,3),leg,ink,9,true)
+		draw_line(Vector2(side*6,3),leg,Color("596071"),6,true)
+		draw_colored_polygon(PackedVector2Array([leg+Vector2(-5,-1),leg+Vector2(4,-1),leg+Vector2(6,5),leg+Vector2(-5,5)]),ink)
+		draw_line(leg+Vector2(-4,1),leg+Vector2(4,1),Color("c5ad80"),2,true)
+	# Dark outline, shoulders, plated torso and leather belt.
+	draw_colored_polygon(PackedVector2Array([Vector2(-15,-15),Vector2(-9,-21),Vector2(9,-21),Vector2(15,-15),Vector2(12,3),Vector2(8,9),Vector2(-8,9),Vector2(-12,3)]),ink)
+	draw_colored_polygon(PackedVector2Array([Vector2(-12,-15),Vector2(-8,-18),Vector2(8,-18),Vector2(12,-15),Vector2(9,3),Vector2(6,6),Vector2(-7,6),Vector2(-9,3)]),color.darkened(.25))
+	draw_colored_polygon(PackedVector2Array([Vector2(-8,-17),Vector2(0,-13),Vector2(8,-17),Vector2(7,-5),Vector2(0,0),Vector2(-7,-5)]),color.lightened(.12 if armored else .02))
+	draw_polyline(PackedVector2Array([Vector2(-8,-17),Vector2(0,-13),Vector2(8,-17)]),gold,1.5,true)
+	draw_line(Vector2(0,-12),Vector2(0,-2),gold.darkened(.15),1,true)
+	for side in [-1,1]:
+		var elbow=Vector2(side*15,-8)+Vector2(0,side*walk)
+		draw_line(Vector2(side*11,-14),elbow,ink,8,true)
+		draw_line(Vector2(side*11,-14),elbow,color.darkened(.32),5,true)
+		draw_circle(elbow,3,Color("dcb08c"))
+		draw_colored_polygon(PackedVector2Array([Vector2(side*9,-19),Vector2(side*16,-17),Vector2(side*16,-12),Vector2(side*10,-11)]),Color("9eaab1") if cls=="Warrior" or armored else color.darkened(.08))
+	draw_rect(Rect2(-10,1,20,4),Color("44302b"))
+	draw_rect(Rect2(-2,0,4,6),gold)
+	# Shaded head with a hood/hair shape and face that changes with facing.
+	draw_circle(Vector2(0,-25),10,ink)
+	draw_circle(Vector2(0,-25),8.4,Color("d6a786"))
+	if facing.y<-.35:
+		draw_colored_polygon(PackedVector2Array([Vector2(-8,-28),Vector2(-6,-34),Vector2(5,-35),Vector2(9,-29),Vector2(7,-20),Vector2(-7,-20)]),Color("3a3030"))
+	else:
+		draw_colored_polygon(PackedVector2Array([Vector2(-9,-27),Vector2(-8,-32),Vector2(-3,-35),Vector2(5,-35),Vector2(9,-30),Vector2(6,-29),Vector2(2,-31),Vector2(-2,-28)]),Color("392e31"))
+		var eye_offset=2.0 if facing.x>.3 else -2.0 if facing.x<-.3 else 0.0
+		draw_circle(Vector2(-3+eye_offset,-25),1.2,Color("242b2d"));draw_circle(Vector2(3+eye_offset,-25),1.2,Color("242b2d"))
+		draw_line(Vector2(-2+eye_offset,-21),Vector2(2+eye_offset,-21),Color("8f5d55"),1,true)
+	# Large class-defining headwear and insignia, visible at phone scale.
 	match cls:
-		"Warrior":
-			draw_rect(Rect2(-14,-11,8,6),Color("bac6c4")); draw_rect(Rect2(6,-11,8,6),Color("bac6c4"))
-		"Mage": draw_colored_polygon(PackedVector2Array([Vector2(-14,-23),Vector2(0,-43),Vector2(13,-23)]),color)
+		"Mage":
+			draw_colored_polygon(PackedVector2Array([Vector2(-14,-31),Vector2(-5,-50),Vector2(4,-58),Vector2(7,-44),Vector2(14,-31)]),ink)
+			draw_colored_polygon(PackedVector2Array([Vector2(-11,-33),Vector2(-3,-48),Vector2(3,-54),Vector2(5,-42),Vector2(11,-33)]),color.darkened(.25))
+			draw_line(Vector2(-14,-32),Vector2(14,-32),gold,3,true)
 		"Ranger","Arcane Archer":
-			draw_arc(Vector2(0,-18),12,PI,TAU,16,color,5)
-			for i in range(3): draw_line(Vector2(-13+i*3,-2),Vector2(-14+i*3,-24),Color("d6bc83"),1)
-		"Cleric": draw_line(Vector2(0,-5),Vector2(0,7),Color("f5edd6"),3); draw_line(Vector2(-4,0),Vector2(4,0),Color("f5edd6"),3)
+			draw_arc(Vector2(0,-25),11,PI,TAU,20,color.darkened(.35),6,true)
+			draw_line(Vector2(-14,-18),Vector2(-18,-35),gold,2,true)
+			draw_line(Vector2(-11,-18),Vector2(-14,-36),gold,2,true)
 		"Rogue","Reaper":
-			draw_arc(Vector2(0,-18),12,PI,TAU,16,Color("30313e"),6)
-			if facing.y>=-.3: draw_rect(Rect2(-7,-14,14,5),Color("3e344a"))
-		"Spellblade": draw_colored_polygon(PackedVector2Array([Vector2(0,-6),Vector2(4,0),Vector2(0,6),Vector2(-4,0)]),Color("f2c7fa"))
+			draw_arc(Vector2(0,-25),11,PI,TAU,20,Color("51425b"),7,true)
+			if facing.y>=-.35: draw_rect(Rect2(-8,-23,16,4),Color("413542"))
+		"Cleric":
+			draw_line(Vector2(0,-11),Vector2(0,-3),gold,2,true);draw_line(Vector2(-3,-8),Vector2(3,-8),gold,2,true)
+		"Spellblade":
+			draw_colored_polygon(PackedVector2Array([Vector2(0,-12),Vector2(4,-8),Vector2(0,-4),Vector2(-4,-8)]),Color("f2c7fa"))
 	if not Data.equipped(game.hero,"helmet").is_empty():
-		draw_rect(Rect2(-8,-26,16,4),Color("c3cfce"));draw_line(Vector2(-8,-26),Vector2(8,-26),Color("eef4df"),1)
+		draw_colored_polygon(PackedVector2Array([Vector2(-10,-27),Vector2(-9,-34),Vector2(0,-38),Vector2(9,-34),Vector2(10,-27),Vector2(6,-29),Vector2(-6,-29)]),Color("bccbd0"))
+		draw_line(Vector2(-8,-30),Vector2(8,-30),gold,2,true)
 	if not Data.equipped(game.hero,"shield").is_empty():
-		draw_colored_polygon(PackedVector2Array([Vector2(-25,-8),Vector2(-14,-8),Vector2(-14,8),Vector2(-19,15),Vector2(-25,8)]),Color("aa9c72"))
-		draw_line(Vector2(-19,-5),Vector2(-19,10),Color("f0d79b"),1.5)
-		draw_line(Vector2(-23,1),Vector2(-15,1),Color("f0d79b"),1.5)
+		draw_colored_polygon(PackedVector2Array([Vector2(-26,-16),Vector2(-14,-19),Vector2(-11,-13),Vector2(-13,4),Vector2(-20,11),Vector2(-27,4)]),ink)
+		draw_colored_polygon(PackedVector2Array([Vector2(-24,-14),Vector2(-16,-16),Vector2(-13,-12),Vector2(-15,3),Vector2(-20,8),Vector2(-25,3)]),Color("8d7b5d"))
+		draw_line(Vector2(-20,-13),Vector2(-20,5),gold,1.5,true);draw_line(Vector2(-24,-6),Vector2(-15,-6),gold,1.5,true)
 	var weapon=Data.equipped(game.hero,"weapon")
-	var enchant=int(weapon.get("enchant",0))
+	var enchant=clampi(int(weapon.get("enchant",0)),0,4)
 	var metal=[Color("e3d6b4"),Color("ffab6b"),Color("9cddf7"),Color("c4a0f1"),Color("e999ac")][enchant]
-	var hand=Vector2(12 if facing.x>=0 else -12,0)+facing*3
+	var hand=Vector2(15 if facing.x>=0 else -15,-8)+facing*3
 	var swing=(1-game.swing_time/game.swing_duration) if game.swing_time>0 else .5
 	if game.swing_time>0 and weapon.get("kind") in ["bow","staff"]: hand-=facing*6*sin(swing*PI)
-	draw_set_transform(at+hand,angle+(-.8+swing*1.6 if game.swing_time>0 and weapon.get("kind")=="sword" else 0))
+	draw_set_transform(at+Vector2(0,-9)+hand*1.4,angle+(-.8+swing*1.6 if game.swing_time>0 and weapon.get("kind")=="sword" else 0),Vector2(1.4,1.4))
 	match weapon.get("kind","sword"):
 		"bow":
-			draw_arc(Vector2.ZERO,15,-1.2,1.2,15,metal,2)
-			draw_line(Vector2(5,-14),Vector2(5,14),metal,1)
-			if game.swing_time>0: draw_line(Vector2(-8,0),Vector2(20,0),Color("fff2c9"),2)
-		"staff": draw_line(Vector2(-12,0),Vector2(21,0),metal,3); draw_circle(Vector2(23,0),5,color.lightened(.4))
-		_: draw_line(Vector2(-5,0),Vector2(24,0),metal,4); draw_line(Vector2(0,-6),Vector2(0,6),Color("b9a078"),3)
+			draw_arc(Vector2.ZERO,17,-1.2,1.2,18,ink,4,true);draw_arc(Vector2.ZERO,17,-1.2,1.2,18,metal,2,true)
+			draw_line(Vector2(6,-16),Vector2(6,16),metal,1)
+			if game.swing_time>0: draw_line(Vector2(-8,0),Vector2(22,0),Color("fff2c9"),2)
+		"staff":
+			draw_line(Vector2(-13,0),Vector2(23,0),ink,5,true);draw_line(Vector2(-13,0),Vector2(23,0),metal,2.5,true)
+			draw_circle(Vector2(25,0),6,ink);draw_circle(Vector2(25,0),4,color.lightened(.4))
+		_:
+			draw_colored_polygon(PackedVector2Array([Vector2(1,-3),Vector2(24,-4),Vector2(33,0),Vector2(24,4),Vector2(1,3)]),ink)
+			draw_colored_polygon(PackedVector2Array([Vector2(2,-2),Vector2(24,-2),Vector2(30,0),Vector2(24,2),Vector2(2,2)]),metal)
+			draw_line(Vector2(-7,0),Vector2(3,0),Color("8a6543"),3,true);draw_line(Vector2(2,-7),Vector2(2,7),gold,3,true)
 	draw_set_transform(at)
 	if game.swing_time>0:
 		var sweep=angle-.9+swing*1.8
-		draw_arc(Vector2.ZERO,36,sweep-.65,sweep+.25,18,Color(1,.91,.74,1-swing*.6),3)
+		draw_arc(Vector2.ZERO,43,sweep-.65,sweep+.25,18,Color(1,.91,.74,1-swing*.6),3)
 	if game.cast_time>0:
 		var cast_progress=1-game.cast_time/.35
 		var glow=game.cast_color;glow.a=1-cast_progress
 		draw_arc(Vector2(0,-4),20+cast_progress*15,-PI/2,-PI/2+TAU,24,glow,2)
-		draw_circle(Vector2(14,-7),4+cast_progress*3,glow)
-	if game.dash_time>0: draw_arc(Vector2.ZERO,24,0,TAU,24,Color("a4f3cb"),2)
-	draw_colored_polygon(PackedVector2Array([Vector2(0,-47),Vector2(-4,-54),Vector2(4,-54)]),Color("a7e3b6"))
+		draw_circle(Vector2(20,-14),4+cast_progress*3,glow)
+	if game.dash_time>0: draw_arc(Vector2.ZERO,28,0,TAU,24,Color("a4f3cb"),2)
+	var marker_y=-98 if cls=="Mage" else -72
+	draw_colored_polygon(PackedVector2Array([Vector2(0,marker_y),Vector2(-4,marker_y-7),Vector2(4,marker_y-7)]),Color("a7e3b6"))
 	draw_set_transform(Vector2.ZERO)
 
 func draw_enemy(enemy: Dictionary) -> void:
