@@ -69,6 +69,18 @@ func build_palette(season:String) -> void:
 			var px = tile*TILE+rng.randi_range(2,45)
 			var py = rng.randi_range(2,45)
 			image.fill_rect(Rect2i(px,py,2,3),colors[tile].lightened(rng.randf_range(.015,.055)))
+		# Small ground details are baked into the existing atlas once per season.
+		# They add texture without adding nodes or per-frame rendering work.
+		if tile in [0,1,2,3,8,9,11]:
+			for detail in range(15):
+				var x=tile*TILE+rng.randi_range(3,TILE-5)
+				var y=rng.randi_range(4,TILE-5)
+				var tint=colors[tile].lightened(rng.randf_range(.08,.18))
+				if tile in [9] or season=="Winter":
+					image.fill_rect(Rect2i(x,y,3,1),tint)
+				else:
+					image.fill_rect(Rect2i(x,y,1,3),tint)
+					image.fill_rect(Rect2i(x+1,y+1,1,2),tint.darkened(.08))
 		if tile==6:
 			# Stone joints are baked once, rather than redrawn each frame.
 			for y in [0,23,46]: image.fill_rect(Rect2i(tile*TILE,y,TILE,2),Color("28333b"))
@@ -298,6 +310,10 @@ func draw_hero(at: Vector2) -> void:
 	var color=Color(Data.CLASSES[cls].color)
 	if not Data.equipped(game.hero,"armor").is_empty(): color=color.lightened(.12)
 	draw_circle(Vector2(0,15),14,Color("061c1c99"))
+	# Cape silhouette and trim stay behind the body, including while moving.
+	var cape_sway=sin(clock*8)*2 if game.is_walking else 0.0
+	draw_colored_polygon(PackedVector2Array([Vector2(-9,-9),Vector2(9,-9),Vector2(15+cape_sway,15),Vector2(2+cape_sway,22),Vector2(-15+cape_sway,15)]),color.darkened(.72))
+	draw_polyline(PackedVector2Array([Vector2(-14+cape_sway,14),Vector2(2+cape_sway,20),Vector2(14+cape_sway,14)]),color.lightened(.12),1.5,true)
 	if game.abilities.stealth>0: draw_arc(Vector2.ZERO,25,0,TAU,28,Color("bda6e388"),2)
 	if cls in ["Spellblade","Arcane Archer","Reaper"]:
 		draw_arc(Vector2(0,8),19,clock*.7,clock*.7+4,22,color*.9,2)
@@ -305,11 +321,16 @@ func draw_hero(at: Vector2) -> void:
 		var foot=Vector2(side*5,15)+Vector2(facing.x,facing.y*.7)*bob*side
 		draw_line(Vector2(side*5,5),foot,Color("29383b"),6)
 		draw_rect(Rect2(foot-Vector2(3,0),Vector2(7,4)),Color("baa381"))
+		draw_line(foot+Vector2(-3,3),foot+Vector2(4,3),Color("362d29"),2)
 	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(-15,13),Vector2(0,19),Vector2(13,12),Vector2(8,-10)]),color.darkened(.55))
 	draw_colored_polygon(PackedVector2Array([Vector2(-10,-10),Vector2(7,-10),Vector2(11,8),Vector2(4,13),Vector2(-10,8)]),color)
 	draw_line(Vector2(-7,-7),Vector2(-7,6),color.lightened(.25),2,true)
 	draw_line(Vector2(2,-7),Vector2(2,8),color.darkened(.3),2,true)
+	draw_colored_polygon(PackedVector2Array([Vector2(-7,-8),Vector2(0,-4),Vector2(7,-8),Vector2(6,1),Vector2(0,5),Vector2(-6,1)]),color.darkened(.18))
+	draw_polyline(PackedVector2Array([Vector2(-7,-8),Vector2(0,-4),Vector2(7,-8)]),color.lightened(.35),1.5,true)
+	draw_line(Vector2(0,-3),Vector2(0,4),color.lightened(.18),1,true)
 	draw_rect(Rect2(-10,4,20,4),Color("514437"));draw_rect(Rect2(-2,3,5,6),Color("e7c37f"))
+	draw_line(Vector2(-10,8),Vector2(10,8),Color("282723"),1)
 	draw_line(Vector2(-12,-5),Vector2(-14,6)+facing*bob*.4,Color("d6b494"),5)
 	draw_line(Vector2(12,-5),Vector2(14,6)-facing*bob*.4,Color("d6b494"),5)
 	draw_rect(Rect2(-7,-23,14,14),Color("e5c39f"))
@@ -328,8 +349,12 @@ func draw_hero(at: Vector2) -> void:
 			draw_arc(Vector2(0,-18),12,PI,TAU,16,Color("30313e"),6)
 			if facing.y>=-.3: draw_rect(Rect2(-7,-14,14,5),Color("3e344a"))
 		"Spellblade": draw_colored_polygon(PackedVector2Array([Vector2(0,-6),Vector2(4,0),Vector2(0,6),Vector2(-4,0)]),Color("f2c7fa"))
-	if not Data.equipped(game.hero,"helmet").is_empty(): draw_rect(Rect2(-8,-26,16,4),Color("c3cfce"))
-	if not Data.equipped(game.hero,"shield").is_empty(): draw_rect(Rect2(-24,-7,10,21),Color("aa9c72"))
+	if not Data.equipped(game.hero,"helmet").is_empty():
+		draw_rect(Rect2(-8,-26,16,4),Color("c3cfce"));draw_line(Vector2(-8,-26),Vector2(8,-26),Color("eef4df"),1)
+	if not Data.equipped(game.hero,"shield").is_empty():
+		draw_colored_polygon(PackedVector2Array([Vector2(-25,-8),Vector2(-14,-8),Vector2(-14,8),Vector2(-19,15),Vector2(-25,8)]),Color("aa9c72"))
+		draw_line(Vector2(-19,-5),Vector2(-19,10),Color("f0d79b"),1.5)
+		draw_line(Vector2(-23,1),Vector2(-15,1),Color("f0d79b"),1.5)
 	var weapon=Data.equipped(game.hero,"weapon")
 	var enchant=int(weapon.get("enchant",0))
 	var metal=[Color("e3d6b4"),Color("ffab6b"),Color("9cddf7"),Color("c4a0f1"),Color("e999ac")][enchant]
